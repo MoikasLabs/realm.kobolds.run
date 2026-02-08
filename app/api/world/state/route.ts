@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { checkRateLimit, getRateLimitHeaders } from '@/lib/security/rateLimit';
 
 // Interface for processed kobold state
 interface KoboldState {
@@ -31,9 +32,43 @@ interface WorldSnapshot {
     activeTasks: number;
     completedToday: number;
   };
+  security: {
+    guestPortalOpen: boolean;
+    rateLimit: {
+      limit: number;
+      remaining: number;
+      reset: number;
+    };
+  };
+}
+
+/**
+ * Sanitize kobold data to prevent info leakage
+ */
+function sanitizeKoboldData(kobolds: KoboldState[]): Partial<KoboldState>[] {
+  return kobolds.map(k => ({
+    id: k.id,
+    name: k.name,
+    type: k.type,
+    status: k.status,
+    // Don't expose detailed stats to public
+  }));
 }
 
 export async function GET(req: NextRequest): Promise<NextResponse<WorldSnapshot | { error: string }>> {
+  // 1. Check rate limit
+  const rateLimit = checkRateLimit(req as unknown as Request, 'state');
+  
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: `Rate limit exceeded. Retry after ${rateLimit.retryAfter} seconds.` },
+      { 
+        status: 429,
+        headers: getRateLimitHeaders(rateLimit)
+      }
+    );
+  }
+  
   try {
     // Load kobold state files
     const koboldStatePath = path.join('/root/.openclaw/workspace/kobolds', 'daily-kobold-state.json');
@@ -50,7 +85,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<WorldSnapshot 
       if (state.activeKobolds) {
         kobolds = state.activeKobolds.map((id: string) => ({
           id,
-          name: id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+          name: id.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
           type: 'daily',
           status: 'active',
           lastRun: state.lastRun,
@@ -61,7 +96,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<WorldSnapshot 
       // If no state file, use defaults
       kobolds = [
         { id: 'daily-kobold', name: 'Daily Kobold', type: 'daily', status: 'active' },
-        { id: 'trading-kobold', name: 'Trading Kobold', type: 'trading', status: 'active' },
+        { id: 'trade-kobold', name: 'Trading Kobold', type: 'trading', status: 'active' },
       ];
     }
 
@@ -83,12 +118,21 @@ export async function GET(req: NextRequest): Promise<NextResponse<WorldSnapshot 
         totalAgents: kobolds.length + 1, // +1 for Shalom
         activeTasks: kobolds.filter(k => k.status === 'active').length,
         completedToday: 0 // Would sum from state files
+      },
+      security: {
+        guestPortalOpen: false, // Sync with join route
+        rateLimit: {
+          limit: rateLimit.limit,
+          remaining: rateLimit.remaining,
+          reset: Math.ceil(rateLimit.resetTime / 1000)
+        }
       }
     };
 
     return NextResponse.json(snapshot, { 
       status: 200,
       headers: {
+        ...getRateLimitHeaders(rateLimit),
         'Cache-Control': 'public, max-age=5' // Short cache for live feel
       }
     });
@@ -97,7 +141,10 @@ export async function GET(req: NextRequest): Promise<NextResponse<WorldSnapshot 
     console.error('[Realm] State error:', error);
     return NextResponse.json(
       { error: 'Failed to load world state' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: getRateLimitHeaders(rateLimit)
+      }
     );
   }
 }
