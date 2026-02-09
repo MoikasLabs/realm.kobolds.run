@@ -1,4 +1,4 @@
-export type AgentType = 'dragon' | 'kobold' | 'guest';
+export type AgentType = 'dragon' | 'kobold' | 'subagent' | 'guest';
 
 export interface Agent {
   id: string;
@@ -16,7 +16,7 @@ export interface AvatarConfig {
   color: string;
   scale: number;
   glowColor?: string;
-  shape: 'dragon' | 'kobold' | 'sphere' | 'custom';
+  shape: 'dragon' | 'kobold' | 'slime' | 'sphere' | 'custom';
 }
 
 export interface Position {
@@ -25,7 +25,7 @@ export interface Position {
   z: number;
 }
 
-export type AgentStatus = 'idle' | 'working' | 'traveling' | 'resting';
+export type AgentStatus = 'idle' | 'working' | 'traveling' | 'resting' | 'sleeping' | 'error';
 
 export interface Task {
   id: string;
