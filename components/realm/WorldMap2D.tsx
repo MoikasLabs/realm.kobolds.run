@@ -36,11 +36,11 @@ export function WorldMap2D() {
   const selectedZone = useSelectedZone();
   const hoveredZone = useHoveredZone();
   
-  // Get store actions (stable selectors)
+  // Get store actions (stable selectors - only change if store action reference changes)
   const setConnectionState = useRealtimeStore((state) => state.setConnectionState);
   const updatePing = useRealtimeStore((state) => state.updatePing);
-  const updateMetrics = useRealtimeStore((state) => state.updateMetrics);
-  const updateViewport = useRealtimeStore((state) => state.updateViewport);
+  const updateMetricsAction = useRealtimeStore((state) => state.updateMetrics);
+  const updateViewportAction = useRealtimeStore((state) => state.updateViewport);
   const selectZone = useRealtimeStore((state) => state.selectZone);
   const setHoveredZone = useRealtimeStore((state) => state.setHoveredZone);
   const applyDeltaUpdate = useRealtimeStore((state) => state.applyDeltaUpdate);
@@ -68,7 +68,7 @@ export function WorldMap2D() {
   useEffect(() => { agentsRef.current = agents; }, [agents]);
   useEffect(() => { viewportRef.current = viewport; }, [viewport]);
 
-  // Coordinate conversion (memoized)
+  // Coordinate conversion (memoized, uses ref for current viewport)
   const worldToScreen = useCallback((x: number, y: number): [number, number] => {
     const v = viewportRef.current;
     const screenX = v.width / 2 + (x * v.scale) + v.offsetX;
@@ -90,7 +90,6 @@ export function WorldMap2D() {
     return x >= -margin && x <= v.width + margin && y >= -margin && y <= v.height + margin;
   }, [worldToScreen]);
 
-  // Get zone for agent
   const getAgentZone = useCallback((agent: AgentState): string | null => {
     let closestZone: string | null = null;
     let minDistance = Infinity;
@@ -176,7 +175,7 @@ export function WorldMap2D() {
     interpolatedCountRef.current = interpolatedCount;
   }, [isAgentVisible, worldToScreen, hoveredZone, getAgentZone]);
 
-  // WebSocket connection
+  // WebSocket connection - stable setup, runs once
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -186,7 +185,7 @@ export function WorldMap2D() {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
-      query: { _v: '3' }
+      query: { _v: '4' }
     });
 
     socketRef.current = socket;
@@ -222,7 +221,7 @@ export function WorldMap2D() {
       update.agents?.forEach((delta: { id: string; position?: { x: number; y: number }; }) => {
         if (delta.position) {
           const current = interpolatedPositionsRef.current.get(delta.id);
-          const existing = useRealtimeStore.getState().agents.get(delta.id);
+          const existing = agentsRef.current.get(delta.id);
           if (current) {
             current.current = { ...current.target };
             current.target = delta.position;
@@ -249,7 +248,7 @@ export function WorldMap2D() {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [setConnectionState, updatePing, updateMetrics, applyDeltaUpdate]);
+  }, []); // Empty deps - socket only set up once
 
   // ======= RENDER LOOP - 60fps OUTSIDE REACT =======
   useEffect(() => {
@@ -267,13 +266,15 @@ export function WorldMap2D() {
 
       // Throttle metrics to React (100ms)
       if (timestamp - lastMetricsPushRef.current >= METRICS_THROTTLE_MS) {
-        updateMetrics({
+        // Direct store access - no hook dependency
+        const store = useRealtimeStore.getState();
+        store.updateMetrics({
           fps: frameCountRef.current / ((timestamp - lastFpsUpdateRef.current) / 1000),
           frameTime: FRAME_TIME,
           renderTime: renderTimeRef.current,
           visibleAgents: visibleCountRef.current,
           interpolatedAgents: interpolatedCountRef.current,
-          wsLatency: metrics.wsLatency
+          wsLatency: store.wsLatency
         });
         lastMetricsPushRef.current = timestamp;
       }
@@ -283,7 +284,7 @@ export function WorldMap2D() {
 
     rafRef.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [renderAgentLayer, updateMetrics, metrics.wsLatency]);
+  }, [renderAgentLayer]); // Only depends on renderAgentLayer
 
   // Render static layers
   const renderStaticLayer = useCallback(() => {
@@ -352,32 +353,42 @@ export function WorldMap2D() {
     });
   }, [worldToScreen, hoveredZone, selectedZone]);
 
-  // Resize handler
+  // ======= RESIZE HANDLER - FIXED TO PREVENT INFINITE LOOP =======
+  // Use ref to track last dimensions - never trigger re-render from here
+  const lastSizeRef = useRef({ width: 0, height: 0 });
+  
   useEffect(() => {
     const updateCanvasSize = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       
-      // Only update if dimensions actually changed
-      if (viewport.width !== rect.width || viewport.height !== rect.height) {
-        updateViewport({ width: rect.width, height: rect.height });
+      // Use ref to check if actually changed - prevents loop
+      if (lastSizeRef.current.width !== rect.width || lastSizeRef.current.height !== rect.height) {
+        lastSizeRef.current = { width: rect.width, height: rect.height };
+        
+        // Update canvases directly
+        if (staticCanvasRef.current) {
+          staticCanvasRef.current.width = rect.width;
+          staticCanvasRef.current.height = rect.height;
+        }
+        if (agentCanvasRef.current) {
+          agentCanvasRef.current.width = rect.width;
+          agentCanvasRef.current.height = rect.height;
+        }
+        
+        // Update store (this may cause re-render, but we won't re-run this effect due to refs)
+        updateViewportAction({ width: rect.width, height: rect.height });
+        
+        // Trigger static render
+        renderStaticLayer();
       }
-
-      if (staticCanvasRef.current) {
-        staticCanvasRef.current.width = rect.width;
-        staticCanvasRef.current.height = rect.height;
-      }
-      if (agentCanvasRef.current) {
-        agentCanvasRef.current.width = rect.width;
-        agentCanvasRef.current.height = rect.height;
-      }
-      renderStaticLayer();
     };
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [viewport.width, viewport.height, updateViewport, renderStaticLayer]);
+    // NO viewport deps - we use refs to check changes
+  }, [updateViewportAction, renderStaticLayer]);
 
   // Re-render static when zones change
   useEffect(() => {
@@ -428,9 +439,9 @@ export function WorldMap2D() {
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    updateViewport({ scale: Math.max(2, Math.min(50, viewportRef.current.scale * delta)) });
+    updateViewportAction({ scale: Math.max(2, Math.min(50, viewportRef.current.scale * delta)) });
     setTimeout(() => renderStaticLayer(), 0);
-  }, [updateViewport, renderStaticLayer]);
+  }, [updateViewportAction, renderStaticLayer]);
 
   // UI memoized
   const agentList = useMemo(() => 
@@ -486,9 +497,9 @@ export function WorldMap2D() {
 
       {/* Controls */}
       <div className="absolute bottom-4 left-4 flex gap-2 z-20">
-        <button onClick={() => { updateViewport({ scale: Math.min(50, viewport.scale * 1.2) }); setTimeout(renderStaticLayer, 0); }} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm">Zoom In</button>
-        <button onClick={() => { updateViewport({ scale: Math.max(2, viewport.scale / 1.2) }); setTimeout(renderStaticLayer, 0); }} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm">Zoom Out</button>
-        <button onClick={() => { updateViewport({ offsetX: 0, offsetY: 0, scale: 8 }); setTimeout(renderStaticLayer, 0); }} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm">Reset</button>
+        <button onClick={() => { updateViewportAction({ scale: Math.min(50, viewport.scale * 1.2) }); setTimeout(renderStaticLayer, 0); }} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm">Zoom In</button>
+        <button onClick={() => { updateViewportAction({ scale: Math.max(2, viewport.scale / 1.2) }); setTimeout(renderStaticLayer, 0); }} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm">Zoom Out</button>
+        <button onClick={() => { updateViewportAction({ offsetX: 0, offsetY: 0, scale: 8 }); setTimeout(renderStaticLayer, 0); }} className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm">Reset</button>
       </div>
     </div>
   );
