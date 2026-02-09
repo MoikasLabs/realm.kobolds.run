@@ -28,7 +28,6 @@ export function WorldMap2D() {
   const staticCanvasRef = useRef<HTMLCanvasElement>(null);
   const agentCanvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const socketRef = useRef<Socket | null>(null);
   
   // Individual selectors - only re-render when these specific values change
   const agents = useAgents();
