@@ -130,6 +130,7 @@ class AgentPool {
   }
 }
 
+// Store interface
 interface RealtimeStore {
   // Agent state
   agentPool: AgentPool;
@@ -143,7 +144,7 @@ interface RealtimeStore {
   lastPing: number;
   wsLatency: number;
 
-  // Performance
+  // Performance metrics (throttled updates)
   metrics: PerformanceMetrics;
 
   // Visibility culling
@@ -263,6 +264,7 @@ export const useRealtimeStore = create<RealtimeStore>()(
       });
     },
 
+    // Throttled metrics update - prevents React Error #185
     updateMetrics: (metrics) => {
       set((state) => ({
         metrics: { ...state.metrics, ...metrics }
@@ -312,3 +314,74 @@ export const useConnectionState = () => useRealtimeStore((state) => state.isConn
 export const useSelectedZone = () => useRealtimeStore((state) => state.selectedZone);
 export const useHoveredZone = () => useRealtimeStore((state) => state.hoveredZone);
 export const useZones = () => STATIC_ZONES;
+
+// ======= NON-REACTIVE RENDER LOOP =======
+// This runs completely outside React to avoid Error #185 (infinite loop)
+
+export interface RenderLoopState {
+  rafId: number;
+  lastFrameTime: number;
+  frameCount: number;
+  lastFpsUpdate: number;
+  lastMetricsPush: number;
+  viewport: ViewportState;
+  agents: Map<string, AgentState>;
+  interpolatedPositions: Map<string, {
+    current: { x: number; y: number };
+    target: { x: number; y: number };
+    startTime: number;
+    duration: number;
+  }>;
+}
+
+// Initialize the non-reactive render state
+export function createRenderLoopState(initialViewport: ViewportState, initialAgents: Map<string, AgentState>): RenderLoopState {
+  return {
+    rafId: 0,
+    lastFrameTime: 0,
+    frameCount: 0,
+    lastFpsUpdate: performance.now(),
+    lastMetricsPush: performance.now(),
+    viewport: initialViewport,
+    agents: new Map(initialAgents),
+    interpolatedPositions: new Map()
+  };
+}
+
+// Update render state from React (call sparingly)
+export function updateRenderState(loopState: RenderLoopState, update: {
+  viewport?: ViewportState;
+  agents?: Map<string, AgentState>;
+}): void {
+  if (update.viewport) {
+    loopState.viewport = update.viewport;
+  }
+  if (update.agents) {
+    loopState.agents = new Map(update.agents);
+  }
+}
+
+// Get metrics to push to React (call at most every 100ms)
+export function getThrottledMetrics(loopState: RenderLoopState, timestamp: number, metrics: {
+  fps?: number;
+  frameTime?: number;
+  renderTime?: number;
+  visibleAgents?: number;
+  interpolatedAgents?: number;
+  wsLatency?: number;
+}): Partial<PerformanceMetrics> | null {
+  // Only push metrics every 100ms (max 10 state updates/sec instead of 60)
+  if (timestamp - loopState.lastMetricsPush < 100) {
+    return null;
+  }
+  loopState.lastMetricsPush = timestamp;
+  
+  return {
+    fps: metrics.fps ?? loopState.frameCount,
+    frameTime: metrics.frameTime ?? 0,
+    renderTime: metrics.renderTime ?? 0,
+    visibleAgents: metrics.visibleAgents ?? 0,
+    interpolatedAgents: metrics.interpolatedAgents ?? 0,
+    wsLatency: metrics.wsLatency ?? 0
+  };
+}

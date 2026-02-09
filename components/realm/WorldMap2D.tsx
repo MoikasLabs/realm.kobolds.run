@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRealtimeStore, useAgents, useMetrics, useConnectionState, useSelectedZone, useHoveredZone, STATIC_ZONES } from '@/lib/store/realtimeStore';
-import type { AgentState, Zone } from '@/types/realtime';
+import type { AgentState } from '@/types/realtime';
 import { io, Socket } from 'socket.io-client';
 
 // Performance constants
 const TARGET_FPS = 60;
 const FRAME_TIME = 1000 / TARGET_FPS;
 const INTERPOLATION_DURATION = 100; // ms to interpolate between positions
+const METRICS_THROTTLE_MS = 100; // Throttle metrics pushes to React
 
 // Dirty rectangle padding for agent rendering
 const DIRTY_RECT_PADDING = 10;
@@ -18,9 +19,25 @@ export function WorldMap2D() {
   const staticCanvasRef = useRef<HTMLCanvasElement>(null);
   const agentCanvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
-  const lastFrameRef = useRef<number>(0);
   const socketRef = useRef<Socket | null>(null);
+  
+  // ======= NON-REACTIVE RENDER LOOP STATE (outside React) =======
+  // All animation state stored in refs to avoid triggering React cycles
+  const rafRef = useRef<number>(0);
+  const frameCountRef = useRef<number>(0);
+  const lastFpsUpdateRef = useRef<number>(performance.now());
+  const lastMetricsPushRef = useRef<number>(performance.now());
+  const renderTimeRef = useRef<number>(0);
+  const visibleCountRef = useRef<number>(0);
+  const interpolatedCountRef = useRef<number>(0);
+  
+  // Interpolation state (managed in refs, NOT in React state)
+  const interpolatedPositionsRef = useRef<Map<string, {
+    current: { x: number; y: number };
+    target: { x: number; y: number };
+    startTime: number;
+    duration: number;
+  }>>(new Map());
 
   // Zustand store actions
   const store = useRealtimeStore();
@@ -31,12 +48,6 @@ export function WorldMap2D() {
   // Local refs for performance-critical data (avoid re-renders)
   const agentsRef = useRef<Map<string, AgentState>>(agents);
   const viewportRef = useRef(store.viewport);
-  const interpolatedPositionsRef = useRef<Map<string, {
-    current: { x: number; y: number };
-    target: { x: number; y: number };
-    startTime: number;
-    duration: number;
-  }>>(new Map());
 
   // Update refs when store changes
   useEffect(() => {
@@ -72,38 +83,247 @@ export function WorldMap2D() {
            y >= -margin && y <= v.height + margin;
   }, [worldToScreen]);
 
-  // Calculate dirty rectangle for an agent
-  const getAgentDirtyRect = useCallback((agent: AgentState, lastX?: number, lastY?: number): {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } => {
-    const [x, y] = worldToScreen(agent.position.x, agent.position.y);
-    const radius = agent.radius + DIRTY_RECT_PADDING;
+  // Render agents (top layer) - 60fps with dirty-rectangle optimization
+  const renderAgentLayer = useCallback((timestamp: number) => {
+    const canvas = agentCanvasRef.current;
+    if (!canvas) return;
 
-    if (lastX !== undefined && lastY !== undefined) {
-      // Include both old and new position
-      const minX = Math.min(x, lastX) - radius;
-      const maxX = Math.max(x, lastX) + radius;
-      const minY = Math.min(y, lastY) - radius;
-      const maxY = Math.max(y, lastY) + radius;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-      return {
-        x: Math.max(0, minX),
-        y: Math.max(0, minY),
-        width: Math.min(viewportRef.current.width, maxX - minX),
-        height: Math.min(viewportRef.current.height, maxY - minY)
-      };
-    }
+    const v = viewportRef.current;
 
-    return {
-      x: Math.max(0, x - radius),
-      y: Math.max(0, y - radius),
-      width: Math.min(viewportRef.current.width, radius * 2),
-      height: Math.min(viewportRef.current.height, radius * 2)
+    // Track visible agents for metrics (stored in refs, not state)
+    let visibleCount = 0;
+    let interpolatedCount = 0;
+
+    // Clear the entire agent layer
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Render each agent
+    agentsRef.current.forEach((agent) => {
+      // Spatial culling - skip if not visible
+      if (!isAgentVisible(agent)) return;
+
+      visibleCount++;
+
+      // Get interpolated position
+      let renderX: number;
+      let renderY: number;
+
+      const interp = interpolatedPositionsRef.current.get(agent.id);
+      const now = timestamp;
+
+      if (agent.targetPosition && interp) {
+        // Interpolate between current and target position
+        const elapsed = now - interp.startTime;
+        const progress = Math.min(1, elapsed / interp.duration);
+
+        // Easing function for smooth movement (ease-out cubic)
+        const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+
+        renderX = interp.current.x + (agent.targetPosition.x - interp.current.x) * easeOutCubic;
+        renderY = interp.current.y + (agent.targetPosition.y - interp.current.y) * easeOutCubic;
+
+        if (progress < 1) {
+          interpolatedCount++;
+        } else {
+          // Interpolation complete, update current position
+          interpolatedPositionsRef.current.delete(agent.id);
+        }
+      } else {
+        renderX = agent.position.x;
+        renderY = agent.position.y;
+      }
+
+      // Convert to screen coordinates
+      const [screenX, screenY] = worldToScreen(renderX, renderY);
+
+      // Draw glow
+      ctx.fillStyle = agent.color + '30';
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, agent.radius * 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw agent dot
+      ctx.fillStyle = agent.color;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, agent.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw status ring
+      const statusColor = agent.status === 'active' ? '#22c55e' :
+                         agent.status === 'working' ? '#eab308' :
+                         agent.status === 'error' ? '#ef4444' : '#6b7280';
+      ctx.strokeStyle = statusColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, agent.radius + 2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Draw name label for hovered/important agents
+      if (agent.id === 'shalom' || store.hoveredZone === getAgentZone(agent)) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(agent.name, screenX, screenY - agent.radius - 6);
+      }
+    });
+
+    // Store counts in refs for metrics (not React state)
+    visibleCountRef.current = visibleCount;
+    interpolatedCountRef.current = interpolatedCount;
+  }, [isAgentVisible, worldToScreen, store.hoveredZone]);
+
+  // Get zone for an agent (helper)
+  const getAgentZone = (agent: AgentState): string | null => {
+    // Simple zone detection by distance to zone centers
+    let closestZone: string | null = null;
+    let minDistance = Infinity;
+
+    STATIC_ZONES.forEach(zone => {
+      const dx = agent.position.x - zone.position[0];
+      const dy = agent.position.y - zone.position[1];
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestZone = zone.id;
+      }
+    });
+
+    return closestZone;
+  };
+
+  // WebSocket connection
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Socket.IO with polling for Vercel support
+    // Vercel doesn't support WebSockets, so we prioritize polling
+    const socket = io({
+      path: '/api/ws/socket.io',
+      transports: ['polling', 'websocket'], // polling first for Vercel
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+
+    socketRef.current = socket;
+
+    socket.on('connect', () => {
+      console.log('[WorldMap] WebSocket/Socket.IO connected');
+      store.setConnectionState(true);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('[WorldMap] WebSocket/Socket.IO disconnected');
+      store.setConnectionState(false);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.warn('[WorldMap] Socket.IO connection error:', err.message);
+      // Don't set disconnected yet - will retry with polling
+    });
+
+    socket.on('full', (update) => {
+      // Full state update
+      store.applyDeltaUpdate(update);
+
+      // Initialize interpolation for all agents
+      update.fullState?.forEach((agent: AgentState) => {
+        interpolatedPositionsRef.current.set(agent.id, {
+          current: { ...agent.position },
+          target: agent.targetPosition || { ...agent.position },
+          startTime: performance.now(),
+          duration: INTERPOLATION_DURATION
+        });
+      });
+    });
+
+    socket.on('delta', (update) => {
+      // Delta update
+      store.applyDeltaUpdate(update);
+
+      // Update interpolation targets
+      update.agents?.forEach((delta: { id: string; position?: { x: number; y: number }; }) => {
+        if (delta.position) {
+          const current = interpolatedPositionsRef.current.get(delta.id);
+          const existing = agentsRef.current.get(delta.id);
+
+          if (current) {
+            // Update interpolation target
+            current.current = { ...current.target };
+            current.target = delta.position;
+            current.startTime = performance.now();
+            current.duration = INTERPOLATION_DURATION;
+          } else if (existing) {
+            // New interpolation entry
+            interpolatedPositionsRef.current.set(delta.id, {
+              current: { ...existing.position },
+              target: delta.position,
+              startTime: performance.now(),
+              duration: INTERPOLATION_DURATION
+            });
+          }
+        }
+      });
+    });
+
+    socket.on('pong', (data) => {
+      const latency = Date.now() - data.timestamp;
+      store.updatePing(latency);
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
     };
-  }, [worldToScreen]);
+  }, [store]);
+
+  // ======= NON-REACTIVE RENDER LOOP - 60fps OUTSIDE REACT =======
+  // This is the key fix for React Error #185 - we manage the animation
+  // loop completely outside of React's lifecycle and only push state
+  // updates to React throttled at 100ms
+  useEffect(() => {
+    const gameLoop = (timestamp: number) => {
+      // Calculate FPS in refs (not React state)
+      frameCountRef.current++;
+      
+      if (timestamp - lastFpsUpdateRef.current >= 1000) {
+        // Store FPS in a ref we can use when we DO push metrics
+        frameCountRef.current = frameCountRef.current;
+        frameCountRef.current = 0;
+        lastFpsUpdateRef.current = timestamp;
+      }
+
+      // Render agent layer at 60fps
+      const renderStart = performance.now();
+      renderAgentLayer(timestamp);
+      renderTimeRef.current = performance.now() - renderStart;
+
+      // Throttle metrics push to React state (every 100ms = 10fps state updates)
+      if (timestamp - lastMetricsPushRef.current >= METRICS_THROTTLE_MS) {
+        store.updateMetrics({
+          fps: frameCountRef.current,
+          frameTime: FRAME_TIME,
+          renderTime: renderTimeRef.current,
+          visibleAgents: visibleCountRef.current,
+          interpolatedAgents: interpolatedCountRef.current,
+          wsLatency: metrics.wsLatency
+        });
+        lastMetricsPushRef.current = timestamp;
+      }
+
+      rafRef.current = requestAnimationFrame(gameLoop);
+    };
+
+    rafRef.current = requestAnimationFrame(gameLoop);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [renderAgentLayer, store, metrics.wsLatency]);
 
   // Render static zones (bottom layer) - cached, redrawn only on resize/viewport change
   const renderStaticLayer = useCallback(() => {
@@ -192,239 +412,6 @@ export function WorldMap2D() {
     });
   }, [worldToScreen, store.hoveredZone, store.selectedZone]);
 
-  // Render agents (top layer) - 60fps with dirty-rectangle optimization
-  const renderAgentLayer = useCallback((timestamp: number) => {
-    const canvas = agentCanvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const v = viewportRef.current;
-
-    // Track visible agents for metrics
-    let visibleCount = 0;
-    let interpolatedCount = 0;
-
-    // Clear only dirty regions or full clear if viewport changed
-    // For simplicity in this implementation, we clear the entire agent layer
-    // but only render visible agents
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Render each agent
-    agentsRef.current.forEach((agent) => {
-      // Spatial culling - skip if not visible
-      if (!isAgentVisible(agent)) return;
-
-      visibleCount++;
-
-      // Get interpolated position
-      let renderX: number;
-      let renderY: number;
-
-      const interp = interpolatedPositionsRef.current.get(agent.id);
-      const now = timestamp;
-
-      if (agent.targetPosition && interp) {
-        // Interpolate between current and target position
-        const elapsed = now - interp.startTime;
-        const progress = Math.min(1, elapsed / interp.duration);
-
-        // Easing function for smooth movement (ease-out cubic)
-        const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-
-        renderX = interp.current.x + (agent.targetPosition.x - interp.current.x) * easeOutCubic;
-        renderY = interp.current.y + (agent.targetPosition.y - interp.current.y) * easeOutCubic;
-
-        if (progress < 1) {
-          interpolatedCount++;
-        } else {
-          // Interpolation complete, update current position
-          interpolatedPositionsRef.current.delete(agent.id);
-        }
-      } else {
-        renderX = agent.position.x;
-        renderY = agent.position.y;
-      }
-
-      // Convert to screen coordinates
-      const [screenX, screenY] = worldToScreen(renderX, renderY);
-
-      // Draw glow
-      ctx.fillStyle = agent.color + '30';
-      ctx.beginPath();
-      ctx.arc(screenX, screenY, agent.radius * 2, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Draw agent dot
-      ctx.fillStyle = agent.color;
-      ctx.beginPath();
-      ctx.arc(screenX, screenY, agent.radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Draw status ring
-      const statusColor = agent.status === 'active' ? '#22c55e' :
-                         agent.status === 'working' ? '#eab308' :
-                         agent.status === 'error' ? '#ef4444' : '#6b7280';
-      ctx.strokeStyle = statusColor;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(screenX, screenY, agent.radius + 2, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Draw name label for hovered/important agents
-      if (agent.id === 'shalom' || store.hoveredZone === getAgentZone(agent)) {
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '10px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(agent.name, screenX, screenY - agent.radius - 6);
-      }
-    });
-
-    // Update metrics
-    if (timestamp - lastFrameRef.current >= 1000) {
-      store.updateMetrics({
-        visibleAgents: visibleCount,
-        interpolatedAgents: interpolatedCount
-      });
-      lastFrameRef.current = timestamp;
-    }
-  }, [isAgentVisible, worldToScreen, store.hoveredZone, store.updateMetrics]);
-
-  // Get zone for an agent (helper)
-  const getAgentZone = (agent: AgentState): string | null => {
-    // Simple zone detection by distance to zone centers
-    let closestZone: string | null = null;
-    let minDistance = Infinity;
-
-    STATIC_ZONES.forEach(zone => {
-      const dx = agent.position.x - zone.position[0];
-      const dy = agent.position.y - zone.position[1];
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestZone = zone.id;
-      }
-    });
-
-    return closestZone;
-  };
-
-  // WebSocket connection
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const socket = io({
-      path: '/api/ws/socket.io',
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000
-    });
-
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('[WorldMap] WebSocket connected');
-      store.setConnectionState(true);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('[WorldMap] WebSocket disconnected');
-      store.setConnectionState(false);
-    });
-
-    socket.on('full', (update) => {
-      // Full state update
-      store.applyDeltaUpdate(update);
-
-      // Initialize interpolation for all agents
-      update.fullState?.forEach((agent: AgentState) => {
-        interpolatedPositionsRef.current.set(agent.id, {
-          current: { ...agent.position },
-          target: agent.targetPosition || { ...agent.position },
-          startTime: performance.now(),
-          duration: INTERPOLATION_DURATION
-        });
-      });
-    });
-
-    socket.on('delta', (update) => {
-      // Delta update
-      store.applyDeltaUpdate(update);
-
-      // Update interpolation targets
-      update.agents?.forEach((delta: { id: string; position?: { x: number; y: number }; }) => {
-        if (delta.position) {
-          const current = interpolatedPositionsRef.current.get(delta.id);
-          const existing = agentsRef.current.get(delta.id);
-
-          if (current) {
-            // Update interpolation target
-            current.current = { ...current.target };
-            current.target = delta.position;
-            current.startTime = performance.now();
-            current.duration = INTERPOLATION_DURATION;
-          } else if (existing) {
-            // New interpolation entry
-            interpolatedPositionsRef.current.set(delta.id, {
-              current: { ...existing.position },
-              target: delta.position,
-              startTime: performance.now(),
-              duration: INTERPOLATION_DURATION
-            });
-          }
-        }
-      });
-    });
-
-    socket.on('pong', (data) => {
-      const latency = Date.now() - data.timestamp;
-      store.updatePing(latency);
-    });
-
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [store]);
-
-  // RequestAnimationFrame game loop - 60fps
-  useEffect(() => {
-    let frameCount = 0;
-    let lastFpsUpdate = performance.now();
-    let rafId = 0;
-
-    const gameLoop = (timestamp: number) => {
-      // Calculate FPS
-      frameCount++;
-      if (timestamp - lastFpsUpdate >= 1000) {
-        store.updateMetrics({ fps: frameCount });
-        frameCount = 0;
-        lastFpsUpdate = timestamp;
-      }
-
-      // Render agent layer at 60fps
-      const renderStart = performance.now();
-      renderAgentLayer(timestamp);
-      const renderTime = performance.now() - renderStart;
-
-      store.updateMetrics({
-        frameTime: FRAME_TIME,
-        renderTime
-      });
-
-      rafId = requestAnimationFrame(gameLoop);
-    };
-
-    rafId = requestAnimationFrame(gameLoop);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-    };
-  }, [renderAgentLayer, store]);
-
   // Initial static layer render and resize handler
   useEffect(() => {
     const updateCanvasSize = () => {
@@ -509,7 +496,7 @@ export function WorldMap2D() {
     const [worldX, worldY] = screenToWorld(x, y);
 
     // Check zone click
-    let clickedZone: Zone | null = null;
+    let clickedZone: ReturnType<typeof useSelectedZone> = null;
     for (const zone of STATIC_ZONES) {
       const dx = worldX - zone.position[0];
       const dz = worldY - zone.position[1];

@@ -181,21 +181,30 @@ function initSocketIO(res: Response): SocketIOServer {
 
   const httpServer = nodeRes.socket.server;
 
+  // Socket.IO configuration with Vercel-friendly settings
   io = new SocketIOServer(httpServer, {
     path: '/api/ws/socket.io',
     cors: {
       origin: '*',
       methods: ['GET', 'POST']
     },
-    transports: ['websocket', 'polling'],
+    // Priority: polling first for Vercel (no WebSocket support), then websocket for local/dev
+    transports: ['polling', 'websocket'],
     pingInterval: 10000,
-    pingTimeout: 5000
+    pingTimeout: 5000,
+    // Allow upgrades from polling to websocket on non-Vercel platforms
+    allowUpgrades: true,
+    // Vercel specific: disable per-message deflate for better compatibility
+    perMessageDeflate: false,
+    // Max HTTP buffer for polling
+    maxHttpBufferSize: 1e6
   });
 
   io.on('connection', (socket) => {
     const clientId = socket.id;
+    const transport = socket.conn.transport.name;
     connectedClients.add(clientId);
-    console.log(`[WS] Client connected: ${clientId} (${connectedClients.size} total)`);
+    console.log(`[WS] Client connected: ${clientId} (transport: ${transport}, total: ${connectedClients.size})`);
 
     // Send initial full state
     loadAgentStates().then(agents => {
@@ -209,6 +218,11 @@ function initSocketIO(res: Response): SocketIOServer {
         timestamp: Date.now(),
         fullState: agents
       } as WorldDeltaUpdate);
+    });
+
+    // Handle transport upgrades
+    socket.conn.on('upgrade', (transport) => {
+      console.log(`[WS] Client ${clientId} upgraded to ${transport.name}`);
     });
 
     // Handle viewport updates (for spatial culling optimization)
@@ -227,16 +241,22 @@ function initSocketIO(res: Response): SocketIOServer {
       console.log(`[WS] Client ${clientId} subscribed:`, data);
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
       connectedClients.delete(clientId);
-      console.log(`[WS] Client disconnected: ${clientId} (${connectedClients.size} remaining)`);
+      console.log(`[WS] Client disconnected: ${clientId} (reason: ${reason}, ${connectedClients.size} remaining)`);
+    });
+
+    socket.on('error', (err) => {
+      console.error(`[WS] Client ${clientId} error:`, err);
     });
   });
 
-  // Start periodic updates (60fps simulation - 16.67ms)
+  // Start periodic updates (20 updates/sec = 50ms)
   let lastBroadcast = Date.now();
-  const BROADCAST_INTERVAL = 50; // 20 updates/sec (50ms) - balances latency and CPU
+  const BROADCAST_INTERVAL = 50;
 
+  // Use setInterval with 50ms for polling-friendly updates
+  // This works better on Vercel than trying to do 60fps
   setInterval(async () => {
     if (!io || connectedClients.size === 0) return;
 
@@ -259,36 +279,122 @@ function initSocketIO(res: Response): SocketIOServer {
     if (now % 1000 < BROADCAST_INTERVAL) {
       io.emit('ping', { timestamp: now });
     }
-  }, 16); // Check every 16ms (60fps)
+  }, 50);
 
   return io;
 }
 
-// GET handler for WebSocket upgrade
+// GET handler for WebSocket/Socket.IO initialization AND REST polling fallback
 export async function GET(req: Request) {
   try {
-    // Initialize Socket.IO
-    const response = NextResponse.json({ status: 'WebSocket server ready' });
+    const url = new URL(req.url);
+    const mode = url.searchParams.get('mode');
+    
+    // REST polling mode for Vercel (when Socket.IO polling doesn't work)
+    if (mode === 'poll' || mode === 'state') {
+      const agents = await loadAgentStates();
+      
+      // Update cache for delta calculation
+      for (const agent of agents) {
+        agentCache.set(agent.id, { ...agent });
+      }
+
+      // Check for client's last known timestamp for delta response
+      const since = url.searchParams.get('since');
+      
+      if (since) {
+        const sinceTime = parseInt(since);
+        // Compare agent cache timestamps to find changed agents
+        const changedAgents: AgentDelta[] = [];
+        
+        for (const [id, agent] of agentCache) {
+          if (agent.lastUpdate > sinceTime) {
+            changedAgents.push({
+              id: agent.id,
+              position: agent.position,
+              status: agent.status,
+              timestamp: agent.lastUpdate
+            });
+          }
+        }
+
+        return NextResponse.json({
+          type: 'delta',
+          timestamp: Date.now(),
+          agents: changedAgents,
+          connected: connectedClients.size
+        });
+      }
+
+      // Full state response
+      return NextResponse.json({
+        type: 'full',
+        timestamp: Date.now(),
+        fullState: agents,
+        connected: connectedClients.size
+      });
+    }
+
+    // Socket.IO initialization mode
+    const response = NextResponse.json({ 
+      status: 'Socket.IO server ready',
+      transports: ['polling', 'websocket'],
+      clients: connectedClients.size,
+      agents: agentCache.size
+    });
     initSocketIO(response);
 
     return response;
   } catch (error) {
-    console.error('[WS] Error initializing:', error);
+    console.error('[WS] Error in GET handler:', error);
     return NextResponse.json(
-      { error: 'Failed to initialize WebSocket server' },
+      { error: 'Failed to process request', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 }
 
-// POST handler for health checks
-export async function POST() {
-  return NextResponse.json({
-    connected: io !== null,
-    clients: connectedClients.size,
-    agents: agentCache.size,
-    uptime: process.uptime()
-  });
+// POST handler for health checks and REST fallback
+export async function POST(req: Request) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    
+    // Handle ping via REST for polling clients
+    if (body.action === 'ping') {
+      return NextResponse.json({
+        pong: true,
+        timestamp: Date.now(),
+        connected: connectedClients.size,
+        agents: agentCache.size
+      });
+    }
+
+    // Return current state for polling clients
+    if (body.action === 'state') {
+      const agents = await loadAgentStates();
+      return NextResponse.json({
+        type: 'full',
+        timestamp: Date.now(),
+        fullState: agents,
+        serverTime: Date.now()
+      });
+    }
+
+    // Default health check
+    return NextResponse.json({
+      connected: io !== null,
+      clients: connectedClients.size,
+      agents: agentCache.size,
+      uptime: process.uptime(),
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    console.error('[WS] Error in POST handler:', error);
+    return NextResponse.json(
+      { error: 'Failed to process POST request' },
+      { status: 500 }
+    );
+  }
 }
 
 // Clean up on module reload (development)
