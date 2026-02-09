@@ -117,7 +117,7 @@ export function WorldUI() {
                   {agent.name}
                 </p>
                 <p className="text-xs text-gray-400 truncate">
-                  {agent.subtype === 'shalom' ? 'Overseer' : agent.subtype.toUpperCase()}
+                  {agent.subtype === 'shalom' ? 'Overseer' : (agent.subtype || agent.type || 'Agent').toUpperCase()}
                 </p>
               </div>
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${

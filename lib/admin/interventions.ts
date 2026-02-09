@@ -57,7 +57,7 @@ export class AdminInterventionSystem {
         
       case 'set-goal':
         if (param) {
-          const newGoals = [...agent.goals, param];
+          const newGoals = [...(agent.goals || []), param];
           store.updateAgentGoals(agentId, newGoals);
           
           // Add memory

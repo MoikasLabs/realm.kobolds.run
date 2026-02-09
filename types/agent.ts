@@ -25,7 +25,7 @@ export interface AvatarConfig {
   color: string;
   scale: number;
   glowColor?: string;
-  shape: 'dragon' | 'kobold' | 'slime' | 'sphere' | 'custom';
+  shape: 'dragon' | 'kobold' | 'slime' | 'sphere' | 'custom' | 'cube';
 }
 
 export interface Position {

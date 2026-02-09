@@ -134,7 +134,7 @@ export const useVillageStore = create<VillageStore>((set, get) => ({
     
     const memory: Memory = {
       id: `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: new Date(),
+      timestamp: memoryData.timestamp || new Date(),
       importance: calculateImportance(memoryData.type, memoryData.content),
       ...memoryData
     };
