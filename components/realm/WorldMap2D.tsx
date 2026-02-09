@@ -222,7 +222,7 @@ export function WorldMap2D() {
       update.agents?.forEach((delta: { id: string; position?: { x: number; y: number }; }) => {
         if (delta.position) {
           const current = interpolatedPositionsRef.current.get(delta.id);
-          const existing = agentsRef.current.get(delta.id);
+          const existing = useRealtimeStore.getState().agents.get(delta.id);
           if (current) {
             current.current = { ...current.target };
             current.target = delta.position;
