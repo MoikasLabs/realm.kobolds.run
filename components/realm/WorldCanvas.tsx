@@ -72,43 +72,61 @@ export function WorldCanvas() {
   // Convert agents Map to array for rendering
   const agentsArray = Array.from(agents.values());
 
-  // Poll kobold webhook for live updates
+  // Poll unified agent webhook for live updates
   useEffect(() => {
     const POLL_INTERVAL = 3000; // 3 seconds
     
-    async function fetchKobolds() {
+    async function fetchAgents() {
       try {
-        const response = await fetch('/api/kobold/webhook');
+        const response = await fetch('/api/agent/webhook');
         if (!response.ok) return;
         
         const data = await response.json();
         
-        // Sync kobolds from API to store
-        data.kobolds?.forEach((k: {
+        // Sync all agents from API to store
+        const agentsFromAPI = data.all || [];
+        agentsFromAPI.forEach((apiAgent: {
           id: string;
           name: string;
           type: string;
+          subtype: string;
           status: 'idle' | 'working' | 'traveling' | 'error' | 'sleeping';
           position: { x: number; y: number; z: number };
           currentTask?: { id: string; name: string; type: string; progress: number };
+          metadata?: { color?: string };
         }) => {
+          // Skip if it's Shalom (the dragon) - we handle that separately
+          if (apiAgent.id === 'shalom' || apiAgent.type === 'dragon') return;
+          
           const agent: Agent = {
-            id: k.id,
-            name: k.name,
-            type: 'kobold',
+            id: apiAgent.id,
+            name: apiAgent.name,
+            // Map API types to frontend types
+            type: apiAgent.type === 'subagent' ? 'subagent' : 
+                  apiAgent.type === 'guest' ? 'guest' : 'kobold',
             avatar: { 
-              color: k.type === 'trading' ? '#f97316' : k.type === 'deploy' ? '#3b82f6' : '#22c55e',
-              scale: 1,
+              // Use metadata color, fall back to subtype defaults
+              color: apiAgent.metadata?.color || 
+                     (apiAgent.subtype === 'cmo' ? '#ec4899' :
+                      apiAgent.subtype === 'cio' ? '#06b6d4' :
+                      apiAgent.subtype === 'cso' ? '#dc2626' :
+                      apiAgent.subtype === 'cfo' ? '#16a34a' :
+                      apiAgent.subtype === 'coo' ? '#7c3aed' :
+                      apiAgent.subtype === 'ceo' ? '#f59e0b' :
+                      apiAgent.subtype === 'trading' ? '#f97316' :
+                      apiAgent.subtype === 'deploy' ? '#3b82f6' :
+                      '#22c55e'),
+              scale: apiAgent.type === 'subagent' ? 1.2 : 1, // Sub-agents slightly bigger
               shape: 'slime'
             },
-            position: k.position,
-            status: k.status,
-            currentTask: k.currentTask ? {
-              id: k.currentTask.id,
-              name: k.currentTask.name,
-              type: k.currentTask.type as 'code' | 'trade' | 'deploy' | 'write' | 'art' | 'meeting',
-              progress: k.currentTask.progress,
-              artifact: { id: `art-${k.id}`, type: 'crystal', color: '#fbbf24', glowIntensity: 0.8 }
+            position: apiAgent.position,
+            status: apiAgent.status,
+            currentTask: apiAgent.currentTask ? {
+              id: apiAgent.currentTask.id,
+              name: apiAgent.currentTask.name,
+              type: apiAgent.currentTask.type as 'code' | 'trade' | 'deploy' | 'write' | 'art' | 'meeting',
+              progress: apiAgent.currentTask.progress,
+              artifact: { id: `art-${apiAgent.id}`, type: 'crystal', color: '#fbbf24', glowIntensity: 0.8 }
             } : undefined,
             joinedAt: new Date(),
             lastSeen: new Date()
@@ -122,10 +140,10 @@ export function WorldCanvas() {
     }
     
     // Initial fetch
-    fetchKobolds();
+    fetchAgents();
     
     // Poll periodically
-    const interval = setInterval(fetchKobolds, POLL_INTERVAL);
+    const interval = setInterval(fetchAgents, POLL_INTERVAL);
     return () => clearInterval(interval);
   }, [addAgent]);
 
@@ -214,14 +232,19 @@ function WorldUI({ agents, timeOfDay }: { agents: Agent[]; timeOfDay: number }) 
           <div key={a.id} className="flex items-center gap-2 text-xs">
             <span className={
               a.type === 'dragon' ? 'text-indigo-400' : 
-              a.type === 'kobold' ? 'text-green-400' : 'text-gray-400'
+              a.type === 'subagent' ? 'text-pink-400' :
+              a.type === 'guest' ? 'text-gray-400' :
+              'text-green-400'
             }>
-              🟦
+              {a.type === 'dragon' ? '🐉' : 
+               a.type === 'subagent' ? '👤' :
+               a.type === 'guest' ? '👋' : '🦎'}
             </span>
-            <span>{a.name}</span>
+            <span className={a.type === 'subagent' ? 'font-semibold' : ''}>{a.name}</span>
             <span className={`w-2 h-2 rounded-full ${
               a.status === 'working' ? 'bg-green-500' :
               a.status === 'traveling' ? 'bg-yellow-500' :
+              a.status === 'sleeping' ? 'bg-blue-400' :
               'bg-gray-500'
             }`} />
           </div>
