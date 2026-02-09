@@ -29,6 +29,21 @@ const keyIdToHash = new Map<string, string>();
 // Master key for system agents (load from env in production)
 const MASTER_KEY_HASH = process.env.REALM_MASTER_KEY_HASH || '';
 
+// Pre-seed the kobold-master key (generated 2026-02-09)
+const KOBOLD_MASTER_KEY = 'rlm_yVzjJZtj4HTvHdhmjmRKyDM1-Mvy-NCycuhzUGVFh48';
+const KOBOLD_MASTER_HASH = hashKey(KOBOLD_MASTER_KEY);
+const koboldMasterRecord: APIKeyRecord = {
+  keyHash: KOBOLD_MASTER_HASH,
+  keyId: 'kobold-master',
+  name: 'Kobold Master Key',
+  createdAt: new Date('2026-02-09'),
+  permissions: ['join', 'read', 'write', 'admin'],
+  useCount: 0,
+  revoked: false
+};
+apiKeys.set(KOBOLD_MASTER_HASH, koboldMasterRecord);
+keyIdToHash.set('kobold-master', KOBOLD_MASTER_HASH);
+
 /**
  * Generate a new API key
  * Returns the key (to show once) and stores the hash
