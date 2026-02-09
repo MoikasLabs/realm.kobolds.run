@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@moicad/sdk": "^0.1.14",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
@@ -29,7 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "5.9.3"
   },
   "ignoreScripts": [
     "sharp",
