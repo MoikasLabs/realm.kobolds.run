@@ -135,7 +135,7 @@ export function AgentModal() {
               )}
 
               {/* Goals */}
-              {agent.goals?.length > 0 && (
+              {(agent.goals?.length ?? 0) > 0 && (
                 <div className="bg-slate-700/50 p-3 rounded-lg">
                   <p className="text-xs text-gray-400 uppercase mb-2">Goals</p>
                   <ul className="space-y-1">
