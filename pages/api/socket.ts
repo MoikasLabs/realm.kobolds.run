@@ -1,15 +1,19 @@
 import { Server as SocketIOServer } from 'socket.io';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import type { Server as HTTPServer } from 'http';
 import type { AgentState, AgentDelta, WorldDeltaUpdate } from '@/types/realtime';
 import fs from 'fs/promises';
 import path from 'path';
 
+// Interface that extends HTTP server and adds socket.io property
+interface ServerWithIO extends HTTPServer {
+  io?: SocketIOServer;
+}
+
 // Use intersection type to add socket.server.io without conflicting with NextApiResponse.socket
 type NextApiResponseServerIO = NextApiResponse & {
   socket: {
-    server: {
-      io?: SocketIOServer;
-    };
+    server: ServerWithIO;
   };
 };
 
