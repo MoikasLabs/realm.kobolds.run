@@ -200,9 +200,9 @@ export function WorldMap2D() {
     if (typeof window === 'undefined') return;
 
     // Socket.IO with polling for Vercel support
-    // Vercel doesn't support WebSockets, so we prioritize polling
+    // Next.js Pages Router: /api/socket (no path override needed)
     const socket = io({
-      path: '/api/ws/socket.io',
+      path: '/api/socket',
       transports: ['polling', 'websocket'], // polling first for Vercel
       reconnection: true,
       reconnectionAttempts: 5,
