@@ -134,9 +134,9 @@ export const useVillageStore = create<VillageStore>((set, get) => ({
     
     const memory: Memory = {
       id: `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      ...memoryData,
       timestamp: memoryData.timestamp || new Date(),
-      importance: calculateImportance(memoryData.type, memoryData.content),
-      ...memoryData
+      importance: calculateImportance(memoryData.type, memoryData.content)
     };
     
     const newAgents = new Map(state.agents);
