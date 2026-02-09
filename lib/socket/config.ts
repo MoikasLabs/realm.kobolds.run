@@ -13,7 +13,7 @@ export const SOCKET_CONFIG = {
   path: '/api/socket',
 
   // Transport options: polling first (works everywhere), then upgrade to WebSocket
-  transports: ['polling', 'websocket'] as const,
+  transports: ['polling', 'websocket'],
 
   // Reconnection settings for reliability
   reconnection: true,
