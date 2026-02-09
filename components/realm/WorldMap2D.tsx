@@ -206,7 +206,8 @@ export function WorldMap2D() {
       transports: ['polling', 'websocket'], // polling first for Vercel
       reconnection: true,
       reconnectionAttempts: 5,
-      reconnectionDelay: 1000
+      reconnectionDelay: 1000,
+      query: { _v: '2' } // cache bust for deploys
     });
 
     socketRef.current = socket;
