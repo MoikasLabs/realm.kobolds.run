@@ -14,13 +14,12 @@ import { pathfinder } from '@/lib/village/pathfinding';
 export function VillageWorld() {
   const { agents, islands, timeOfDay } = useWorldStore();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [buildings, setBuildings] = useState<BuildingType[]>(VILLAGE_BUILDINGS);
+  const [buildings, setBuildings] = useState<BuildingType[]>(VILLAGE_BUILDINGS.map(b => ({...b, isOccupied: false, occupants: []})));
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null);
 
   // Track building occupancy
   useEffect(() => {
     const interval = setInterval(() => {
-      // Update occupancy based on agent positions
       setBuildings(prevBuildings => {
         return prevBuildings.map(building => {
           const occupants: string[] = [];
@@ -119,9 +118,7 @@ export function VillageWorld() {
         ))}
 
         {/* Paths visualization (subtle ground lines between buildings) */}
-        {buildings.length > 1 && (
-          <PathsBetweenBuildings buildings={buildings} />
-        )}
+        <PathsBetweenBuildings buildings={buildings} />
 
         {/* Agents using existing SlimeBlob */}
         {agentsArray.map((agent) => (
@@ -192,7 +189,7 @@ function PathsBetweenBuildings({ buildings }: { buildings: BuildingType[] }) {
   return <>{lines}</>;
 }
 
-// Simple UI overlay
+// UI overlay for village
 function VillageUI({ agents, buildings, timeOfDay }: { 
   agents: Agent[]; 
   buildings: BuildingType[]; 
@@ -203,6 +200,7 @@ function VillageUI({ agents, buildings, timeOfDay }: {
   
   return (
     <>
+      {/* Header */}
       <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white p-4 rounded-lg border border-white/10">
         <h1 className="text-xl font-bold mb-1 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
           🏘️ Realm Village
@@ -231,19 +229,37 @@ function VillageUI({ agents, buildings, timeOfDay }: {
         </div>
       </div>
 
+      {/* View Toggle - Switch to Map */}
+      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white p-3 rounded-lg border border-white/10">
+        <a 
+          href="/world"
+          className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg transition-colors text-sm font-medium"
+        >
+          <span>🗺️</span>
+          <span>Strategic Map</span>
+        </a>
+        <div className="mt-2 text-xs text-gray-400 text-center">
+          Top-down view
+        </div>
+      </div>
+
       {/* Building List */}
-      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white p-4 rounded-lg border border-white/10 max-h-[40vh] overflow-y-auto">
-        <h2 className="text-sm font-semibold mb-2 text-gray-300">Buildings</h2>
-        <div className="space-y-1.5 text-xs">
+      <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white p-4 rounded-lg border border-white/10 max-w-sm max-h-[30vh] overflow-y-auto">
+        <h2 className="text-sm font-semibold mb-3 text-gray-300">
+          🏗️ Buildings ({occupiedCount} active)
+        </h2>
+        <div className="space-y-1.5">
           {buildings.map(b => (
-            <div key={b.id} className="flex items-center gap-2">
+            <div key={b.id} className="flex items-center gap-2 text-xs">
               <span 
-                className="w-2 h-2 rounded-full"
+                className="w-3 h-3 rounded-sm flex-shrink-0"
                 style={{ backgroundColor: b.color }}
               />
-              <span className="flex-1">{b.name}</span>
+              <span className="flex-1 truncate">{b.name}</span>
               {b.isOccupied && (
-                <span className="text-green-400">●</span>
+                <span className="text-green-400 flex items-center gap-1">
+                  ● {b.occupants.length}
+                </span>
               )}
             </div>
           ))}
@@ -251,10 +267,11 @@ function VillageUI({ agents, buildings, timeOfDay }: {
       </div>
 
       {/* Instructions */}
-      <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white p-3 rounded-lg border border-white/10 text-xs text-gray-400">
-        <p>🖱️ <b>Click</b> buildings to see occupancy</p>
+      <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white p-3 rounded-lg border border-white/10 text-xs text-gray-400">
+        <p>🖱️ <b>Click</b> buildings to see details</p>
         <p>🖱️ <b>Drag</b> to rotate camera</p>
         <p>📜 <b>Scroll</b> to zoom</p>
+        <p className="mt-1 text-indigo-400">🏘️ 3D immersive experience</p>
       </div>
     </>
   );
