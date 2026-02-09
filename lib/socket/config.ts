@@ -1,3 +1,5 @@
+import type { ManagerOptions, SocketOptions } from 'socket.io-client';
+
 /**
  * Socket.IO Configuration for Vercel Pages Router
  * 
@@ -8,7 +10,7 @@
  * - reconnection: enabled with backoff for better reliability
  */
 
-export const SOCKET_CONFIG = {
+export const SOCKET_CONFIG: Partial<ManagerOptions & SocketOptions> = {
   // Path to Socket.IO server endpoint (must match both client and server)
   path: '/api/socket',
 
@@ -31,9 +33,7 @@ export const SOCKET_CONFIG = {
   // Vercel serverless functions require polling as fallback
   upgrade: true, // Allow polling->WS upgrade
   rememberUpgrade: true, // Remember successful upgrades
-} as const;
-
-export type SocketConfig = typeof SOCKET_CONFIG;
+};
 
 /**
  * Socket.IO event names used throughout the app
