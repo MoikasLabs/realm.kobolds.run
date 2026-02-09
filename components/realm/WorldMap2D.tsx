@@ -12,7 +12,9 @@ import {
   useRealtimeStore
 } from '@/lib/store/realtimeStore';
 import type { AgentState } from '@/types/realtime';
-import { io, Socket } from 'socket.io-client';
+import { useSocket } from '@/hooks/useSocket';
+import { useAgentUpdates } from '@/hooks/useAgentUpdates';
+
 
 // Performance constants
 const TARGET_FPS = 60;
@@ -175,80 +177,18 @@ export function WorldMap2D() {
     interpolatedCountRef.current = interpolatedCount;
   }, [isAgentVisible, worldToScreen, hoveredZone, getAgentZone]);
 
-  // WebSocket connection - stable setup, runs once
+  // Socket.IO connection using reusable hook
+  const { socket, isConnected: socketConnected } = useSocket({
+    // No custom callbacks – we will handle events via useAgentUpdates hook
+  });
+
+  // Sync store connection state with socket hook
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    setConnectionState(socketConnected);
+  }, [socketConnected]);
 
-    const socket = io({
-      path: '/api/socket',
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      query: { _v: '4' }
-    });
-
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('[WorldMap] Socket.IO connected');
-      setConnectionState(true);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('[WorldMap] Socket.IO disconnected');
-      setConnectionState(false);
-    });
-
-    socket.on('connect_error', (err) => {
-      console.warn('[WorldMap] Socket.IO error:', err.message);
-    });
-
-    socket.on('full', (update) => {
-      applyDeltaUpdate(update);
-      update.fullState?.forEach((agent: AgentState) => {
-        interpolatedPositionsRef.current.set(agent.id, {
-          current: { ...agent.position },
-          target: agent.targetPosition || { ...agent.position },
-          startTime: performance.now(),
-          duration: INTERPOLATION_DURATION
-        });
-      });
-    });
-
-    socket.on('delta', (update) => {
-      applyDeltaUpdate(update);
-      update.agents?.forEach((delta: { id: string; position?: { x: number; y: number }; }) => {
-        if (delta.position) {
-          const current = interpolatedPositionsRef.current.get(delta.id);
-          const existing = agentsRef.current.get(delta.id);
-          if (current) {
-            current.current = { ...current.target };
-            current.target = delta.position;
-            current.startTime = performance.now();
-            current.duration = INTERPOLATION_DURATION;
-          } else if (existing) {
-            interpolatedPositionsRef.current.set(delta.id, {
-              current: { ...existing.position },
-              target: delta.position,
-              startTime: performance.now(),
-              duration: INTERPOLATION_DURATION
-            });
-          }
-        }
-      });
-    });
-
-    socket.on('pong', (data) => {
-      const latency = Date.now() - data.timestamp;
-      updatePing(latency);
-    });
-
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, []); // Empty deps - socket only set up once
+  // Subscribe to Socket.IO events and update store
+  useAgentUpdates({ socket, isConnected: socketConnected });
 
   // ======= RENDER LOOP - 60fps OUTSIDE REACT =======
   useEffect(() => {
@@ -436,10 +376,12 @@ export function WorldMap2D() {
     selectZone(null);
   }, [screenToWorld, selectZone]);
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
+  // Wheel handler with passive:false to avoid warnings
+  const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     updateViewportAction({ scale: Math.max(2, Math.min(50, viewportRef.current.scale * delta)) });
+    // Defer static re‑render to next tick
     setTimeout(() => renderStaticLayer(), 0);
   }, [updateViewportAction, renderStaticLayer]);
 
