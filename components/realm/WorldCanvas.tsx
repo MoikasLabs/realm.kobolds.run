@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Cloud, Sky } from '@react-three/drei';
-import { DragonAvatar } from '../agents/DragonAvatar';
-import { KoboldAvatar } from '../agents/KoboldAvatar';
+import { SlimeBlob } from '../agents/SlimeBlob';
 import { WorldPlane } from './WorldPlane';
 import { useWorldStore } from '@/lib/world/store';
 import { Agent, AgentType } from '@/types/agent';
@@ -120,16 +119,10 @@ export function WorldCanvas() {
         {/* World Ground Plane with Zone Markers */}
         <WorldPlane islands={islands} />
 
-        {/* Agents */}
-        {agentsArray.map((agent) => {
-          if (agent.type === 'dragon') {
-            return <DragonAvatar key={agent.id} agent={agent} isLocal />;
-          }
-          if (agent.type === 'kobold') {
-            return <KoboldAvatar key={agent.id} agent={agent} />;
-          }
-          return null;
-        })}
+        {/* Slime Blob Agents */}
+        {agentsArray.map((agent) => (
+          <SlimeBlob key={agent.id} agent={agent} isLocal={agent.type === 'dragon'} />
+        ))}
 
         {/* Controls */}
         <OrbitControls
@@ -166,7 +159,7 @@ function WorldUI({ agents, timeOfDay }: { agents: Agent[]; timeOfDay: number }) 
               a.type === 'dragon' ? 'text-indigo-400' : 
               a.type === 'kobold' ? 'text-green-400' : 'text-gray-400'
             }>
-              {a.type === 'dragon' ? '🐉' : a.type === 'kobold' ? '🦎' : '👤'}
+              🟦
             </span>
             <span>{a.name}</span>
             <span className={`w-2 h-2 rounded-full ${
