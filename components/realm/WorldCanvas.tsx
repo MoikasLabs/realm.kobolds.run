@@ -40,7 +40,7 @@ export function WorldCanvas() {
           name: 'Daily Kobold',
           type: 'kobold',
           avatar: { color: '#22c55e', scale: 1, shape: 'slime' },
-          position: { x: -25, y: 0.8, z: 12 },
+          position: { x: -35, y: 0.8, z: 15 }, // In Warrens zone
           status: 'working',
           currentTask: {
             id: 'task-1',
@@ -57,8 +57,15 @@ export function WorldCanvas() {
           name: 'Trading Kobold',
           type: 'kobold',
           avatar: { color: '#f97316', scale: 1, shape: 'slime' },
-          position: { x: 20, y: 0.8, z: -8 },
-          status: 'traveling',
+          position: { x: 35, y: 0.8, z: -15 }, // In Forge zone
+          status: 'working',
+          currentTask: {
+            id: 'task-2',
+            name: 'Analyzing trades',
+            type: 'trade',
+            progress: 40,
+            artifact: { id: 'art-2', type: 'coin', color: '#fbbf24', glowIntensity: 1 }
+          },
           joinedAt: new Date(),
           lastSeen: new Date()
         }
