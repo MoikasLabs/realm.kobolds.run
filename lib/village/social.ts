@@ -144,8 +144,7 @@ export class SocialSystem {
     store.addChatBubble(sender.id, message);
     
     // Update memory
-    sender.memories.push({
-      id: `mem_${Date.now()}`,
+    store.addAgentMemory(sender.id, {
       timestamp: new Date(),
       type: 'conversation',
       content: `Said to ${recipient.name}: "${message}"`,
