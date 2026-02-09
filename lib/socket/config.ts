@@ -14,8 +14,8 @@ export const SOCKET_CONFIG: Partial<ManagerOptions & SocketOptions> = {
   // Path to Socket.IO server endpoint (must match both client and server)
   path: '/api/socket',
 
-  // Transport options: polling first (works everywhere), then upgrade to WebSocket
-  transports: ['polling', 'websocket'],
+  // Vercel serverless ONLY supports polling (WebSocket upgrade is unreliable)
+  transports: ['polling'],
 
   // Reconnection settings for reliability
   reconnection: true,
@@ -28,11 +28,6 @@ export const SOCKET_CONFIG: Partial<ManagerOptions & SocketOptions> = {
 
   // Query parameters (can be used for versioning, auth, etc.)
   query: { _v: '4' },
-
-  // Vercel-specific settings
-  // Vercel serverless functions require polling as fallback
-  upgrade: true, // Allow polling->WS upgrade
-  rememberUpgrade: true, // Remember successful upgrades
 };
 
 /**

@@ -86,8 +86,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponseServerI
       io = new SocketIOServer(res.socket.server, {
         path: '/api/socket',
         cors: { origin: '*', methods: ['GET', 'POST'] },
-        transports: ['polling', 'websocket'],
-        addTrailingSlash: false
+        transports: ['polling'], // Vercel only supports polling reliably
+        allowEIO3: true, // Support Engine.IO v3 clients if needed
       });
       
       res.socket.server.io = io;
@@ -101,5 +101,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponseServerI
     }
   }
 
+  // For Socket.IO requests, don't end the response - let Socket.IO handle it
+  // The connection stays open for polling
+  if (req.url?.startsWith('/api/socket')) {
+    // Socket.IO will handle the response
+    return;
+  }
+  
   res.end();
 }
