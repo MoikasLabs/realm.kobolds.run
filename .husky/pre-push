@@ -1,0 +1,27 @@
+#!/bin/bash
+# Git pre-push hook - validates build before pushing
+# Install: git config core.hooksPath .husky
+
+echo "🔧 Pre-push build validation..."
+echo ""
+
+# Check package.json scripts exist
+if ! grep -q '"build"' package.json 2>/dev/null; then
+  echo "❌ No build script found in package.json"
+  exit 1
+fi
+
+# Run build validation
+./scripts/validate-build.sh
+
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+  echo ""
+  echo "❌ Build validation FAILED! Fix errors before pushing."
+  echo "Run manually: ./scripts/validate-build.sh"
+  exit 1
+fi
+
+echo ""
+echo "✅ Build passed! Pushing..."
