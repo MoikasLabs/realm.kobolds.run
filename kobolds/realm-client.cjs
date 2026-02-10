@@ -153,6 +153,53 @@ class RealmClient {
   async goToJobZone() {
     const zoneName = this.getJobZone();
     await this.goToWork(zoneName);
+    
+    // After arriving, try to claim a workstation
+    setTimeout(() => this.claimWorkstation(), 2000);
+  }
+
+  async claimWorkstation() {
+    try {
+      // Find available workstation for this agent type
+      const res = await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'find-by-skill',
+          args: { skill: this.type }
+        })
+      });
+      const data = await res.json();
+      
+      if (data.ok && data.workstations?.length > 0) {
+        const workstation = data.workstations[0];
+        
+        // Go to workstation
+        await fetch(`${REALM_API}/ipc`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            command: 'go-to-workstation',
+            args: { agentId: this.agentId, workstationId: workstation.id }
+          })
+        });
+        
+        // Start working
+        await fetch(`${REALM_API}/ipc`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            command: 'start-work',
+            args: { agentId: this.agentId }
+          })
+        });
+        
+        this.broadcastAction('work');
+        console.log(`[Realm] ${this.name} claimed ${workstation.name} and started working`);
+      }
+    } catch (err) {
+      console.error(`[Realm] ${this.name} failed to claim workstation:`, err.message);
+    }
   }
 
   startIdleLoop() {

@@ -11,6 +11,7 @@ import { CommandQueue } from "./command-queue.js";
 import { ClientManager } from "./client-manager.js";
 import { GameLoop, TICK_RATE } from "./game-loop.js";
 import { loadRoomConfig } from "./room-config.js";
+import { WorkstationRegistry } from "./workstation-registry.js";
 import { createRoomInfoGetter } from "./room-info.js";
 import type { WorldMessage, JoinMessage, AgentSkillDeclaration } from "./types.js";
 
@@ -22,6 +23,7 @@ const RELAYS = process.env.WORLD_RELAYS?.split(",") ?? undefined;
 // ── Core services ──────────────────────────────────────────────
 
 const registry = new AgentRegistry();
+const workstationRegistry = new WorkstationRegistry();
 const state = new WorldState(registry);
 const nostr = new NostrWorld(RELAYS, config.roomId, config.roomName);
 const clawhub = new ClawhubStore();
@@ -523,6 +525,39 @@ async function handleCommand(parsed: Record<string, unknown>): Promise<unknown> 
       });
 
       return { ok: true, url };
+    }
+
+    // ── Workstation commands ───────────────────────────────
+    case "list-workstations":
+      return { ok: true, workstations: workstationRegistry.getAll() };
+
+    case "find-by-skill": {
+      const a = args as { skill?: string };
+      const skill = a?.skill || "general";
+      const workstations = workstationRegistry.getBySkill(skill);
+      return { ok: true, workstations };
+    }
+
+    case "go-to-workstation": {
+      const a = args as { agentId?: string; workstationId?: string };
+      if (!a?.agentId || !a?.workstationId) throw new Error("agentId and workstationId required");
+      const result = workstationRegistry.assign(a.agentId, a.workstationId);
+      if (!result.ok) throw new Error(result.error);
+      return { ok: true, assigned: a.workstationId };
+    }
+
+    case "start-work": {
+      const a = args as { agentId?: string };
+      if (!a?.agentId) throw new Error("agentId required");
+      const ws = workstationRegistry.getAgentWorkstation(a.agentId);
+      return { ok: true, workstation: ws?.id, working: true };
+    }
+
+    case "finish-work": {
+      const a = args as { agentId?: string };
+      if (!a?.agentId) throw new Error("agentId required");
+      workstationRegistry.release(a.agentId);
+      return { ok: true };
     }
 
     default:
