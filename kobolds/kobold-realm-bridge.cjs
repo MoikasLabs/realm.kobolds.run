@@ -47,6 +47,15 @@ async function finishWork(koboldId) {
   }
 }
 
+async function sendChat(koboldId, text) {
+  const client = realmClients.get(koboldId);
+  if (!client) {
+    console.error(`[KoboldBridge] Kobold ${koboldId} not found`);
+    return;
+  }
+  client.say(text);
+}
+
 // IPC commands for integration
 const http = require('http');
 
@@ -83,6 +92,12 @@ const server = http.createServer((req, res) => {
           res.writeHead(200);
           res.end(JSON.stringify({ ok: true }));
           break;
+
+        case 'chat':
+          sendChat(args.koboldId, args.text);
+          res.writeHead(200);
+          res.end(JSON.stringify({ ok: true }));
+          break;
           
         case 'status':
           res.writeHead(200);
@@ -113,7 +128,7 @@ const server = http.createServer((req, res) => {
 const PORT = process.env.KOBOLD_BRIDGE_PORT || 18801;
 server.listen(PORT, () => {
   console.log(`[KoboldBridge] IPC server on port ${PORT}`);
-  console.log('[KoboldBridge] Commands: spawn-all, go-to-work, finish-work, status');
+  console.log('[KoboldBridge] Commands: spawn-all, go-to-work, finish-work, chat, status');
   
   // Auto-spawn on start
   spawnAll();

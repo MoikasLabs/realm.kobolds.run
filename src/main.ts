@@ -1,5 +1,4 @@
 import { createScene } from "./scene/room.js";
-import { createDragon } from "./scene/dragon.js";
 import { DragonManager } from "./scene/dragon-manager.js";
 import { EffectsManager } from "./scene/effects.js";
 import { createBuildings } from "./scene/buildings.js";
@@ -33,10 +32,6 @@ const allObstacles = [...obstacles, ...buildingObstacles];
 
 const dragonManager = new DragonManager(scene, allObstacles);
 // Test dragon to verify rendering
-const testDragon = createDragon("dragon", "#9333ea");
-testDragon.position.set(0, 0, 0);
-testDragon.userData.agentId = "test-dragon";
-scene.add(testDragon);
 const effects = new EffectsManager(scene, camera);
 const buildingPanel = setupBuildingPanel(serverParam);
 const roomInfoBar = setupRoomInfoBar();
