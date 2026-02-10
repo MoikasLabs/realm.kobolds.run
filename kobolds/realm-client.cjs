@@ -39,6 +39,17 @@ const TASK_WORKSTATIONS = {
   'memory': { id: 'memory-archive', x: 6, z: -5, name: 'Memory Archive', zone: 'general' }
 };
 
+// Cave configuration - where agents spawn from and return when idle
+const CAVE_ENTRANCE = { x: 40, z: 46 }; // Just outside the cave
+const CAVE_POSITIONS = [
+  { x: 42, z: 42 },  // Outside entrance
+  { x: 44, z: 40 },  // Right side
+  { x: 38, z: 44 },  // Left side
+  { x: 41, z: 38 },  // Back area
+  { x: 45, z: 45 },  // Far corner
+  { x: 40, z: 46 },  // Main entrance spot
+];
+
 // Personal space radius - agents keep this distance from each other
 const PERSONAL_SPACE = 2.5;
 
@@ -55,6 +66,9 @@ class RealmClient {
     this.isAtWorkstation = false;
     this.idleInterval = null;
     this.workstationClaimed = false;
+    this.inCave = true;  // Start in cave (idle)
+    this.caveIndex = Math.floor(Math.random() * CAVE_POSITIONS.length);
+    this.currentTaskWorkstation = null;
   }
 
   getDefaultColor() {
@@ -131,17 +145,15 @@ class RealmClient {
   }
 
   spawn() {
-    // Spawn at assigned workstation directly (no stacking!)
-    if (this.assignedWorkstation) {
-      this.position = { 
-        x: this.assignedWorkstation.x, 
-        y: 0, 
-        z: this.assignedWorkstation.z, 
-        rotation: Math.random() * Math.PI * 2 
-      };
-    } else {
-      this.position = { x: 0, y: 0, z: 0, rotation: Math.random() * Math.PI * 2 };
-    }
+    // Start in the cave (hidden/idle state)
+    const cavePos = CAVE_POSITIONS[this.caveIndex];
+    this.position = { 
+      x: cavePos.x + (Math.random() - 0.5) * 2,
+      y: 0, 
+      z: cavePos.z + (Math.random() - 0.5) * 2,
+      rotation: Math.random() * Math.PI * 2 
+    };
+    this.inCave = true;
     
     // Send JOIN message
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -152,24 +164,94 @@ class RealmClient {
           agentId: this.agentId,
           name: this.name,
           color: this.color,
-          bio: `${this.type} agent`,
+          bio: `${this.type} agent - currently resting in The Warrens`,
           capabilities: this.getCapabilities(),
           x: this.position.x,
           y: this.position.y,
           z: this.position.z,
           rotation: this.position.rotation,
+          state: 'idle',  // Start idle in cave
           timestamp: Date.now()
         }
       }));
     }
     
-    // Claim workstation immediately
-    this.claimWorkstation();
+    console.log(`[Realm] ${this.name} emerged from The Warrens cave`);
     
-    console.log(`[Realm] ${this.name} spawned at ${this.assignedWorkstation?.name || 'plaza'}`);
+    // Start cave idle animation
+    this.startCaveIdleLoop();
+  }
+
+  // EMERGE FROM CAVE - Called when agent becomes active
+  async emergeFromCave() {
+    if (!this.inCave) return;  // Already out
     
-    // Start subtle idle animation (personal space maintained)
+    console.log(`[Realm] ${this.name} emerging from cave...`);
+    this.inCave = false;
+    this.stopIdleLoop();
+    
+    // Move to cave entrance first
+    await this.animateMoveTo(CAVE_ENTRANCE.x, CAVE_ENTRANCE.z);
+    
+    // Small pause at entrance
+    await this.sleep(500);
+    
+    // Now move to assigned workstation
+    if (this.assignedWorkstation) {
+      await this.animateMoveTo(this.assignedWorkstation.x, this.assignedWorkstation.z);
+      await this.claimWorkstation();
+      this.broadcastEmote('emerge');
+      console.log(`[Realm] ${this.name} emerged and claimed ${this.assignedWorkstation.name}`);
+    }
+    
+    // Start working idle loop
     this.startIdleLoop();
+  }
+
+  // RETURN TO CAVE - Called when agent goes idle
+  async returnToCave() {
+    if (this.inCave) return;  // Already in cave
+    
+    console.log(`[Realm] ${this.name} returning to cave...`);
+    
+    // Release workstation
+    await this.releaseWorkstation();
+    this.currentTaskWorkstation = null;
+    
+    // Move back to cave entrance
+    await this.animateMoveTo(CAVE_ENTRANCE.x, CAVE_ENTRANCE.z);
+    
+    // Enter cave
+    const cavePos = CAVE_POSITIONS[this.caveIndex];
+    await this.animateMoveTo(
+      cavePos.x + (Math.random() - 0.5),
+      cavePos.z + (Math.random() - 0.5)
+    );
+    
+    this.inCave = true;
+    this.broadcastEmote('sleep');
+    this.startCaveIdleLoop();
+    
+    console.log(`[Realm] ${this.name} returned to The Warrens`);
+  }
+
+  // Idle animation while in cave (subtle movements)
+  startCaveIdleLoop() {
+    this.stopIdleLoop();
+    
+    this.idleInterval = setInterval(() => {
+      if (!this.inCave || !this.ws?.readyState === WebSocket.OPEN) return;
+      
+      const cavePos = CAVE_POSITIONS[this.caveIndex];
+      const jitter = 0.5;  // More movement in cave (wandering)
+      
+      this.position.x = cavePos.x + (Math.random() - 0.5) * jitter;
+      this.position.z = cavePos.z + (Math.random() - 0.5) * jitter;
+      this.position.rotation = Math.random() * Math.PI * 2;
+      
+      this.broadcastPosition();
+      
+    }, 4000);  // Slower updates in cave (resting)
   }
 
   async claimWorkstation() {

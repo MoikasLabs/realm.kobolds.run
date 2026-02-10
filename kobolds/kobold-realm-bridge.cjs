@@ -135,6 +135,47 @@ const server = http.createServer((req, res) => {
             tasks: TASK_WORKSTATIONS 
           }));
           break;
+          
+        case 'emerge':
+          // Agent emerges from cave to start working
+          { const client = realmClients.get(args.koboldId);
+            if (!client) {
+              res.writeHead(404);
+              res.end(JSON.stringify({ ok: false, error: `Kobold ${args.koboldId} not found` }));
+              break;
+            }
+            await client.emergeFromCave();
+            res.writeHead(200);
+            res.end(JSON.stringify({ ok: true, message: `${args.koboldId} emerging from cave` }));
+          }
+          break;
+          
+        case 'return-to-cave':
+          // Agent returns to cave to rest
+          { const client = realmClients.get(args.koboldId);
+            if (!client) {
+              res.writeHead(404);
+              res.end(JSON.stringify({ ok: false, error: `Kobold ${args.koboldId} not found` }));
+              break;
+            }
+            await client.returnToCave();
+            res.writeHead(200);
+            res.end(JSON.stringify({ ok: true, message: `${args.koboldId} returned to cave` }));
+          }
+          break;
+          
+        case 'cave-status':
+          // Check who is in/out of cave
+          res.writeHead(200);
+          res.end(JSON.stringify({
+            ok: true,
+            agents: Array.from(realmClients.entries()).map(([id, client]) => ({
+              id,
+              name: client.name,
+              inCave: client.inCave,
+              position: client.position
+            }))
+          }));
           break;
           
         case 'status':

@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { createJobZoneBuildings } from "./job-buildings.js";
 import { createVisualWorkstations } from "./workstations-visual.js";
+import { createCaveEntrance } from "./cave-entrance.js";
 
 export interface TorchData {
   light: THREE.PointLight;
@@ -829,7 +830,8 @@ export function createScene() {
   // Add job zone buildings and workstations
   const jobBuildings = createJobZoneBuildings(scene);
   const workstationVisuals = createVisualWorkstations(scene);
-  obstacles.push(...jobBuildings.obstacles, ...workstationVisuals.obstacles);
+  const caveEntrance = createCaveEntrance(scene);
+  obstacles.push(...jobBuildings.obstacles, ...workstationVisuals.obstacles, ...caveEntrance.obstacles);
 
-  return { scene, camera, renderer, labelRenderer, controls, clock, obstacles, torches, crystals };
+  return { scene, camera, renderer, labelRenderer, controls, clock, obstacles, torches, crystals, caveEntrance };
 }
