@@ -264,7 +264,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
 // ── WebSocket bridge ───────────────────────────────────────────
 
-new WSBridge(server, clientManager, {
+new WSBridge(server, clientManager, commandQueue, {
   getProfiles: () => {
     // Only return profiles of agents currently in the world (with positions)
     const activeIds = state.getActiveAgentIds();

@@ -6,8 +6,10 @@ import type {
   WSClientMessage,
   AgentProfile,
   RoomInfoMessage,
+  WorldMessage,
 } from "./types.js";
 import type { ClientManager } from "./client-manager.js";
+import type { CommandQueue } from "./command-queue.js";
 
 /**
  * WebSocket bridge for browser clients.
@@ -17,10 +19,12 @@ import type { ClientManager } from "./client-manager.js";
  *   - Connection lifecycle (add/remove from ClientManager)
  *   - Client-initiated requests (profiles, viewport updates, room info)
  *   - Sending the initial snapshot on connect
+ *   - Forwarding world messages (join, position, action, chat) to game loop
  */
 export class WSBridge {
   private wss: WebSocketServer;
   private clientManager: ClientManager;
+  private commandQueue: CommandQueue;
   private getProfiles: () => AgentProfile[];
   private getProfile: (id: string) => AgentProfile | undefined;
   private getRoomInfo: (() => RoomInfoMessage) | null;
@@ -28,6 +32,7 @@ export class WSBridge {
   constructor(
     server: Server,
     clientManager: ClientManager,
+    commandQueue: CommandQueue,
     opts: {
       getProfiles: () => AgentProfile[];
       getProfile: (id: string) => AgentProfile | undefined;
@@ -35,6 +40,7 @@ export class WSBridge {
     }
   ) {
     this.clientManager = clientManager;
+    this.commandQueue = commandQueue;
     this.getProfiles = opts.getProfiles;
     this.getProfile = opts.getProfile;
     this.getRoomInfo = opts.getRoomInfo ?? null;
@@ -129,6 +135,14 @@ export class WSBridge {
       case "requestRoomInfo":
         if (this.getRoomInfo) {
           this.send(ws, { type: "roomInfo", info: this.getRoomInfo() });
+        }
+        break;
+
+      case "world":
+        // Forward world messages (join, position, action, chat, etc.) to game loop
+        if ("message" in msg) {
+          const worldMsg = (msg as unknown as { message: WorldMessage }).message;
+          this.commandQueue.enqueue(worldMsg);
         }
         break;
     }

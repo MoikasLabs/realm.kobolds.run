@@ -128,7 +128,8 @@ export type WSClientMessage =
   | { type: "requestProfile"; agentId: string }
   | { type: "viewport"; x: number; z: number }
   | { type: "follow"; agentId: string }
-  | { type: "requestRoomInfo" };
+  | { type: "requestRoomInfo" }
+  | { type: "world"; message: WorldMessage }
 
 // ── Combined agent state for snapshot ──────────────────────────
 
