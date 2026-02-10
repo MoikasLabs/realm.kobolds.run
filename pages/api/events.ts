@@ -2,12 +2,13 @@
  * Server-Sent Events (SSE) API Endpoint for Realm
  * 
  * Replaces Socket.IO for serverless compatibility.
- * Reads agent states from Redis for real-time task-based positioning.
+ * Provides deterministic zone-to-zone patrol system for agents.
  * 
  * Features:
- * - Full state push on connection from Redis
- * - Task-based agent movement (moving toward task zones)
- * - Idle agents return to home zones
+ * - Full state push on connection with deterministic positions
+ * - Zone-to-zone patrol routes (Shalom patrols all zones, kobolds patrol their areas)
+ * - Constant speed travel between connected zones
+ * - Dwell time at zones (idle/pausing animation)
  * - Periodic ping to keep connection alive
  * - Clean SSE format: data: {...}\n\n
  */
@@ -28,6 +29,26 @@ const ZONE_CENTERS: Record<string, [number, number]> = {
   'plaza': [0, 40],
   'home': [0, 0],
 };
+
+// Zone graph - defines connections and dwell times
+const ZONE_GRAPH: Record<string, { connections: string[]; dwellTime: number }> = {
+  'plaza': { connections: ['warrens', 'forge'], dwellTime: 5000 },
+  'warrens': { connections: ['plaza', 'forge'], dwellTime: 3000 },
+  'forge': { connections: ['plaza', 'warrens'], dwellTime: 4000 },
+  'home': { connections: ['plaza'], dwellTime: 2000 },
+};
+
+// Agent patrol routes - each zone includes travel time + dwell time
+const AGENT_ROUTES: Record<string, string[]> = {
+  'shalom': ['plaza', 'warrens', 'plaza', 'forge', 'plaza'], // full patrol circuit
+  'daily-kobold': ['warrens', 'plaza', 'warrens'], // home patrol
+  'trade-kobold': ['forge', 'plaza', 'forge'], // forge patrol
+};
+
+// Travel speed: units per second
+const TRAVEL_SPEED = 10; // units/sec
+// Dwell ratio: what % of segment is spent dwelling at zone (vs traveling)
+const DWELL_RATIO = 0.3;
 
 // Agent visual configuration (static per agent)
 const AGENT_VISUALS: Record<string, Omit<AgentState, 'id' | 'status' | 'position' | 'targetPosition' | 'lastUpdate'>> = {
@@ -51,203 +72,170 @@ const AGENT_VISUALS: Record<string, Omit<AgentState, 'id' | 'status' | 'position
   },
 };
 
-// Movement configuration
-const MOVEMENT_SPEED = {
-  working: 2,   // Moving toward task
-  returning: 1, // Returning home
-  idle: 0.3,    // Small idle movement
-};
-
 // Maximum distance before teleport (for resync)
 const MAX_DISTANCE = 80;
 
 /**
- * Calculate agent position based on task state
+ * Calculate distance between two zones (straight line)
+ */
+function getZoneDistance(zoneA: string, zoneB: string): number {
+  const [ax, ay] = ZONE_CENTERS[zoneA] || ZONE_CENTERS['home'];
+  const [bx, by] = ZONE_CENTERS[zoneB] || ZONE_CENTERS['home'];
+  const dx = bx - ax;
+  const dy = by - ay;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/**
+ * Calculate segment duration for traveling between two zones
+ * Includes travel time + dwell time at destination
+ * 
+ * Formula: time = distance / speed + dwellTime
+ */
+function getSegmentDuration(fromZone: string, toZone: string): number {
+  const distance = getZoneDistance(fromZone, toZone);
+  const travelTime = (distance / TRAVEL_SPEED) * 1000; // ms
+  const dwellTime = ZONE_GRAPH[toZone]?.dwellTime || 3000;
+  return travelTime + dwellTime;
+}
+
+/**
+ * Calculate agent position based on zone-to-zone travel (deterministic)
  * 
  * Rules:
- * - If working with task zone → move toward zone center at speed 2
- * - If idle → return to home zone at speed 1
- * - Add small natural movement for visual interest
+ * - Follow predefined patrol route
+ * - Travel in straight line between zones at constant speed
+ * - Dwell at zones for configured time
+ * - Continuous movement, no jumps on reconnect
  */
-async function calculateAgentPosition(
-  agentId: string,
-  state: Awaited<ReturnType<typeof getAllAgentStates>>[number],
-  deltaTime: number // seconds since last update
-): Promise<{ x: number; y: number; targetX: number; targetY: number }> {
-  // Get saved position or use default
-  const savedPosition = await getAgentPosition(agentId);
+function calculateZoneTravel(agentId: string, timestamp: number): {
+  x: number;
+  y: number;
+  targetX: number;
+  targetY: number;
+  status: 'traveling' | 'idle';
+  currentZone: string;
+  nextZone: string;
+} {
+  const route = AGENT_ROUTES[agentId] || ['plaza', 'home', 'plaza'];
   
-  // Determine target zone
-  const isWorking = state.status === 'working' && state.location?.zone;
-  const targetZone = (isWorking ? state.location?.zone : state.homeZone) || 'home';
-  const [targetX, targetY] = ZONE_CENTERS[targetZone] || ZONE_CENTERS['home'];
+  // Calculate total patrol cycle duration
+  let totalCycleTime = 0;
+  const segmentDurations: number[] = [];
   
-  // Determine speed
-  const speed = isWorking ? MOVEMENT_SPEED.working : MOVEMENT_SPEED.returning;
+  for (let i = 0; i < route.length; i++) {
+    const fromZone = route[i];
+    const toZone = route[(i + 1) % route.length];
+    const duration = getSegmentDuration(fromZone, toZone);
+    segmentDurations.push(duration);
+    totalCycleTime += duration;
+  }
   
-  // Start from saved position or generate based on agent
-  let currentX: number;
-  let currentY: number;
+  // Determine current position in patrol cycle
+  const cyclePosition = timestamp % totalCycleTime;
   
-  if (savedPosition) {
-    currentX = savedPosition.x;
-    currentY = savedPosition.y;
+  // Find current segment
+  let accumulatedTime = 0;
+  let currentSegmentIndex = 0;
+  
+  for (let i = 0; i < segmentDurations.length; i++) {
+    if (cyclePosition < accumulatedTime + segmentDurations[i]) {
+      currentSegmentIndex = i;
+      break;
+    }
+    accumulatedTime += segmentDurations[i];
+  }
+  
+  const currentZone = route[currentSegmentIndex];
+  const nextZone = route[(currentSegmentIndex + 1) % route.length];
+  const segmentDuration = segmentDurations[currentSegmentIndex];
+  const segmentProgress = cyclePosition - accumulatedTime;
+  
+  const [currentX, currentY] = ZONE_CENTERS[currentZone];
+  const [nextX, nextY] = ZONE_CENTERS[nextZone];
+  
+  // Travel time portion of segment
+  const distance = getZoneDistance(currentZone, nextZone);
+  const travelTime = (distance / TRAVEL_SPEED) * 1000;
+  
+  // Calculate progress: 0-1 during travel, then dwell at destination
+  let progress: number;
+  let status: 'traveling' | 'idle';
+  
+  if (segmentProgress < travelTime) {
+    // Currently traveling
+    progress = segmentProgress / travelTime;
+    status = 'traveling';
   } else {
-    // Generate deterministic starting position based on agentId hash
-    const hash = agentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const angle = (hash % 360) * (Math.PI / 180);
-    const distance = 15 + (hash % 20);
-    currentX = targetX + Math.cos(angle) * distance;
-    currentY = targetY + Math.sin(angle) * distance;
+    // Currently dwelling at destination
+    progress = 1;
+    status = 'idle';
   }
   
-  // Calculate distance to target
-  const dx = targetX - currentX;
-  const dy = targetY - currentY;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  
-  // If far from target, move toward it
-  if (distance > 5) {
-    const moveDistance = Math.min(distance, speed * deltaTime * 2);
-    const moveRatio = moveDistance / distance;
-    currentX += dx * moveRatio;
-    currentY += dy * moveRatio;
-  }
-  
-  // Add small natural movement (perlin-like noise simulation)
-  const time = Date.now() / 1000;
-  const noiseX = Math.sin(time * 0.5 + agentId.length) * 2;
-  const noiseY = Math.cos(time * 0.3 + agentId.length) * 2;
-  
-  currentX += noiseX * deltaTime;
-  currentY += noiseY * deltaTime;
-  
-  // Clamp to reasonable world bounds
-  currentX = Math.max(-80, Math.min(80, currentX));
-  currentY = Math.max(-50, Math.min(60, currentY));
-  
-  // Save calculated position for next frame
-  await saveAgentPosition(agentId, { x: currentX, y: currentY });
-  
-  // Calculate look-ahead target position for smooth interpolation
-  const lookAheadX = targetX;
-  const lookAheadY = targetY;
+  // Linear interpolation between zones
+  const x = currentX + (nextX - currentX) * progress;
+  const y = currentY + (nextY - currentY) * progress;
   
   return {
-    x: currentX,
-    y: currentY,
-    targetX: lookAheadX,
-    targetY: lookAheadY,
+    x,
+    y,
+    targetX: nextX,
+    targetY: nextY,
+    status,
+    currentZone,
+    nextZone,
   };
 }
 
 /**
- * Generate full agent states from Redis data
+ * Generate full agent states using zone-to-zone patrol system
+ * 
+ * Deterministic based on timestamp - same timestamp = same position
+ * This ensures smooth movement with no jumps on reconnect
  */
 async function generateAgentStates(): Promise<AgentState[]> {
   const timestamp = Date.now();
   
-  // If Redis is not available, return fallback states
-  if (!isRedisAvailable()) {
-    console.warn('[SSE] Redis not available - using fallback positions');
-    return generateFallbackStates(timestamp);
+  // Generate states for all configured agents using patrol system
+  const agentStates: AgentState[] = [];
+  
+  for (const [agentId, visuals] of Object.entries(AGENT_VISUALS)) {
+    // Calculate position based on zone patrol route
+    const travel = calculateZoneTravel(agentId, timestamp);
+    
+    agentStates.push({
+      id: agentId,
+      name: visuals.name,
+      type: visuals.type,
+      status: travel.status,
+      position: { x: travel.x, y: travel.y },
+      targetPosition: { x: travel.targetX, y: travel.targetY },
+      color: visuals.color,
+      radius: visuals.radius,
+      lastUpdate: timestamp,
+    });
   }
   
-  try {
-    const redisStates = await getAllAgentStates();
-    
-    // If no agents in Redis yet, return fallback
-    if (redisStates.length === 0) {
-      console.log('[SSE] No agents in Redis yet - using fallback');
-      return generateFallbackStates(timestamp);
-    }
-    
-    // Calculate positions for each agent
-    const agentStates: AgentState[] = [];
-    
-    for (const redisState of redisStates) {
-      const visuals = AGENT_VISUALS[redisState.agentId] || {
-        name: redisState.agentId,
-        type: 'custom' as const,
-        color: '#888888',
-        radius: 4,
-      };
-      
-      // Calculate position based on task
-      const position = await calculateAgentPosition(redisState.agentId, redisState, 0.1);
-      
-      agentStates.push({
-        id: redisState.agentId,
-        name: visuals.name,
-        type: visuals.type,
-        status: redisState.status,
-        position: { x: position.x, y: position.y },
-        targetPosition: { x: position.targetX, y: position.targetY },
-        color: visuals.color,
-        radius: visuals.radius,
-        lastUpdate: timestamp,
-      });
-    }
-    
-    // Add any missing default agents
-    for (const [agentId, visuals] of Object.entries(AGENT_VISUALS)) {
-      if (!redisStates.find(s => s.agentId === agentId)) {
-        const position = await calculateAgentPosition(
-          agentId,
-          {
-            agentId,
-            name: visuals.name,
-            type: visuals.type,
-            status: 'idle',
-            homeZone: 'plaza',
-            lastUpdate: timestamp,
-          },
-          0.1
-        );
-        
-        agentStates.push({
-          id: agentId,
-          name: visuals.name,
-          type: visuals.type,
-          status: 'idle',
-          position: { x: position.x, y: position.y },
-          targetPosition: { x: position.targetX, y: position.targetY },
-          color: visuals.color,
-          radius: visuals.radius,
-          lastUpdate: timestamp,
-        });
-      }
-    }
-    
-    return agentStates;
-  } catch (err) {
-    console.error('[SSE] Error generating agent states from Redis:', err);
-    return generateFallbackStates(timestamp);
-  }
+  return agentStates;
 }
 
 /**
- * Fallback state generator (used when Redis is unavailable or on first boot)
+ * Fallback state generator (uses same patrol system)
+ * 
+ * This is now redundant since generateAgentStates handles all cases,
+ * but kept for API compatibility. Uses deterministic patrol routes.
  */
 function generateFallbackStates(timestamp: number): AgentState[] {
-  const time = timestamp / 1000;
-  
   return Object.entries(AGENT_VISUALS).map(([agentId, visuals]) => {
-    // Generate deterministic idle positions
-    const hash = agentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const baseX = (hash % 60) - 30;
-    const baseY = (hash % 40) - 20;
-    
-    const x = baseX + Math.sin(time * 0.3 + hash) * 5;
-    const y = baseY + Math.cos(time * 0.2 + hash) * 5;
+    const travel = calculateZoneTravel(agentId, timestamp);
     
     return {
       id: agentId,
       name: visuals.name,
       type: visuals.type,
-      status: 'idle',
-      position: { x, y },
-      targetPosition: { x: baseX, y: baseY },
+      status: travel.status,
+      position: { x: travel.x, y: travel.y },
+      targetPosition: { x: travel.targetX, y: travel.targetY },
       color: visuals.color,
       radius: visuals.radius,
       lastUpdate: timestamp,
