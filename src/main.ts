@@ -1,5 +1,5 @@
 import { createScene } from "./scene/room.js";
-import { LobsterManager } from "./scene/lobster-manager.js";
+import { DragonManager } from "./scene/dragon-manager.js";
 import { EffectsManager } from "./scene/effects.js";
 import { createBuildings } from "./scene/buildings.js";
 import { WSClient } from "./net/ws-client.js";
@@ -30,7 +30,7 @@ const { scene, camera, renderer, labelRenderer, controls, clock, obstacles } = c
 const { buildings, obstacles: buildingObstacles } = createBuildings(scene);
 const allObstacles = [...obstacles, ...buildingObstacles];
 
-const lobsterManager = new LobsterManager(scene, allObstacles);
+const lobsterManager = new DragonManager(scene, allObstacles);
 const effects = new EffectsManager(scene, camera);
 const buildingPanel = setupBuildingPanel(serverParam);
 const roomInfoBar = setupRoomInfoBar();

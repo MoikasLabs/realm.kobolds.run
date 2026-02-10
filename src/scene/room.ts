@@ -321,11 +321,11 @@ export function createScene() {
 
   // ── Ambient & Hemispheric Light ───────────────────────────
   // Brighter ambient light to illuminate the scene
-  const ambientLight = new THREE.AmbientLight(0x5a6588, 0.6);
+  const ambientLight = new THREE.AmbientLight(0x8b92a0, 1.2);
   scene.add(ambientLight);
   
   // Hemisphere light for subtle ground/sky differentiation
-  const hemiLight = new THREE.HemisphereLight(0x8b92a0, 0x2a2a4e, 0.7);
+  const hemiLight = new THREE.HemisphereLight(0xaabbdd, 0x3d3d5c, 1.0);
   hemiLight.position.set(0, 50, 0);
   scene.add(hemiLight);
 
