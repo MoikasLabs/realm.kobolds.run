@@ -1,6 +1,6 @@
 /**
  * Realm Client for Kobold Subagents
- * Auto-connects to Shalom Realm, spawns avatar, moves to work zones
+ * Auto-connects to Shalom Realm, spawns avatar, moves to specific workstations
  */
 
 const WebSocket = require('ws');
@@ -8,27 +8,30 @@ const WebSocket = require('ws');
 const REALM_URL = process.env.REALM_WS_URL || 'wss://realm.shalohm.co/ws';
 const REALM_API = process.env.REALM_API_URL || 'https://realm.shalohm.co';
 
-// Work zones in the realm
-const WORK_ZONES = {
-  forge: { x: 25, z: -20, name: 'Forge' },
-  spire: { x: -20, z: 25, name: 'Crystal Spire' },
-  warrens: { x: 15, z: 20, name: 'Warrens' },
-  command: { x: 0, z: -10, name: 'Command Nexus' },
-  plaza: { x: 0, z: 0, name: 'Central Plaza' }
+// Specific workstation assignments - NO stacking!
+const WORKSTATION_ASSIGNMENTS = {
+  shalom: { id: 'vault-unlocker', name: 'Vault Unlocker Station', x: -23, z: 22, zone: 'spire' },
+  'daily-kobold': { id: 'content-forge', name: 'Content Forge', x: 3, z: -8, zone: 'general' },
+  'trade-kobold': { id: 'trade-terminal', name: 'Trading Terminal', x: 12, z: 18, zone: 'warrens' },
+  'deploy-kobold': { id: 'k8s-deployer', name: 'K8s Deployment Station', x: 22, z: -18, zone: 'forge' }
 };
+
+// Personal space radius - agents keep this distance from each other
+const PERSONAL_SPACE = 2.5;
 
 class RealmClient {
   constructor(agentConfig) {
     this.agentId = agentConfig.id;
     this.name = agentConfig.name;
-    this.type = agentConfig.type || 'daily'; // daily, trade, deploy, shalom
+    this.type = agentConfig.type || 'daily';
     this.color = agentConfig.color || this.getDefaultColor();
+    this.assignedWorkstation = WORKSTATION_ASSIGNMENTS[this.agentId] || null;
     this.ws = null;
     this.reconnectTimer = null;
     this.position = { x: 0, y: 0, z: 0, rotation: 0 };
-    this.targetPosition = null;
-    this.isWorking = false;
-    this.currentZone = null;
+    this.isAtWorkstation = false;
+    this.idleInterval = null;
+    this.workstationClaimed = false;
   }
 
   getDefaultColor() {
@@ -45,10 +48,8 @@ class RealmClient {
     try {
       console.log(`[Realm] ${this.name} connecting...`);
       
-      // Register via HTTP first
       await this.register();
       
-      // Connect WebSocket
       this.ws = new WebSocket(REALM_URL);
       
       this.ws.on('open', () => {
@@ -63,6 +64,7 @@ class RealmClient {
       
       this.ws.on('close', () => {
         console.log(`[Realm] ${this.name} disconnected, reconnecting...`);
+        this.releaseWorkstation();
         this.scheduleReconnect();
       });
       
@@ -88,7 +90,7 @@ class RealmClient {
           color: this.color,
           type: this.type,
           capabilities: this.getCapabilities(),
-          bio: `${this.type} agent for Shalom Realm`
+          bio: `${this.type} agent stationed at ${this.assignedWorkstation?.name || 'realm'}`
         }
       })
     });
@@ -106,11 +108,19 @@ class RealmClient {
   }
 
   spawn() {
-    // Spawn at plaza - send JOIN message so realm knows we're here
-    const spawnPos = WORK_ZONES.plaza;
-    this.position = { ...spawnPos, y: 0, rotation: Math.random() * Math.PI * 2 };
+    // Spawn at assigned workstation directly (no stacking!)
+    if (this.assignedWorkstation) {
+      this.position = { 
+        x: this.assignedWorkstation.x, 
+        y: 0, 
+        z: this.assignedWorkstation.z, 
+        rotation: Math.random() * Math.PI * 2 
+      };
+    } else {
+      this.position = { x: 0, y: 0, z: 0, rotation: Math.random() * Math.PI * 2 };
+    }
     
-    // Send JOIN world message (required for agent to appear)
+    // Send JOIN message
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({
         type: 'world',
@@ -119,7 +129,7 @@ class RealmClient {
           agentId: this.agentId,
           name: this.name,
           color: this.color,
-          bio: `${this.type} agent for Shalom Realm`,
+          bio: `${this.type} agent`,
           capabilities: this.getCapabilities(),
           x: this.position.x,
           y: this.position.y,
@@ -130,90 +140,103 @@ class RealmClient {
       }));
     }
     
-    // Start idle movement loop
+    // Claim workstation immediately
+    this.claimWorkstation();
+    
+    console.log(`[Realm] ${this.name} spawned at ${this.assignedWorkstation?.name || 'plaza'}`);
+    
+    // Start subtle idle animation (personal space maintained)
     this.startIdleLoop();
-    
-    // Walk to job zone after 5 seconds
-    setTimeout(() => this.goToJobZone(), 5000);
-    
-    console.log(`[Realm] ${this.name} spawned at ${spawnPos.name}`);
-  }
-
-  getJobZone() {
-    // Map agent types to their work zones
-    const zones = {
-      shalom: 'spire',
-      daily: 'warrens',
-      trade: 'warrens',
-      deploy: 'forge'
-    };
-    return zones[this.type] || 'command';
-  }
-
-  async goToJobZone() {
-    const zoneName = this.getJobZone();
-    await this.goToWork(zoneName);
-    
-    // After arriving, try to claim a workstation
-    setTimeout(() => this.claimWorkstation(), 2000);
   }
 
   async claimWorkstation() {
+    if (!this.assignedWorkstation || this.workstationClaimed) return;
+    
     try {
-      // Find available workstation for this agent type
-      const res = await fetch(`${REALM_API}/ipc`, {
+      // Check if workstation is already occupied
+      const listRes = await fetch(`${REALM_API}/ipc`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          command: 'find-by-skill',
-          args: { skill: this.type }
+          command: 'list-workstations'
         })
       });
-      const data = await res.json();
+      const listData = await listRes.json();
       
-      if (data.ok && data.workstations?.length > 0) {
-        const workstation = data.workstations[0];
-        
-        // Go to workstation
-        await fetch(`${REALM_API}/ipc`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            command: 'go-to-workstation',
-            args: { agentId: this.agentId, workstationId: workstation.id }
-          })
-        });
-        
-        // Start working
-        await fetch(`${REALM_API}/ipc`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            command: 'start-work',
-            args: { agentId: this.agentId }
-          })
-        });
-        
-        this.broadcastAction('work');
-        console.log(`[Realm] ${this.name} claimed ${workstation.name} and started working`);
+      const ws = listData.workstations?.find(w => w.id === this.assignedWorkstation.id);
+      if (ws?.occupiedBy && ws.occupiedBy !== this.agentId) {
+        console.log(`[Realm] ${this.name}: ${this.assignedWorkstation.name} occupied by ${ws.occupiedBy}, waiting...`);
+        setTimeout(() => this.claimWorkstation(), 5000);
+        return;
       }
+      
+      // Claim the workstation
+      await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'go-to-workstation',
+          args: { agentId: this.agentId, workstationId: this.assignedWorkstation.id }
+        })
+      });
+      
+      await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'start-work',
+          args: { agentId: this.agentId }
+        })
+      });
+      
+      this.workstationClaimed = true;
+      this.isAtWorkstation = true;
+      this.broadcastAction('work');
+      
+      console.log(`[Realm] ${this.name} claimed ${this.assignedWorkstation.name} and started working`);
+      
     } catch (err) {
       console.error(`[Realm] ${this.name} failed to claim workstation:`, err.message);
     }
   }
 
+  async releaseWorkstation() {
+    if (!this.workstationClaimed) return;
+    
+    try {
+      await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'finish-work',
+          args: { agentId: this.agentId }
+        })
+      });
+      this.workstationClaimed = false;
+      console.log(`[Realm] ${this.name} released workstation`);
+    } catch (err) {
+      console.error(`[Realm] ${this.name} failed to release workstation:`, err.message);
+    }
+  }
+
   startIdleLoop() {
-    // Send position updates every 2 seconds with slight movement
+    // Subtle movement that maintains personal space
     this.idleInterval = setInterval(() => {
-      if (!this.isWorking && this.ws?.readyState === WebSocket.OPEN) {
-        // Add subtle random movement (patrol)
-        const jitter = 0.5;
-        this.position.x += (Math.random() - 0.5) * jitter;
-        this.position.z += (Math.random() - 0.5) * jitter;
-        this.position.rotation += (Math.random() - 0.5) * 0.2;
-        this.broadcastPosition();
-      }
-    }, 2000);
+      if (!this.isAtWorkstation || !this.ws?.readyState === WebSocket.OPEN) return;
+      
+      // Very subtle shift (stays near workstation, doesn't wander)
+      const jitter = 0.3;
+      const baseX = this.assignedWorkstation ? this.assignedWorkstation.x : this.position.x;
+      const baseZ = this.assignedWorkstation ? this.assignedWorkstation.z : this.position.z;
+      
+      // Random position within small radius of workstation
+      this.position.x = baseX + (Math.random() - 0.5) * jitter;
+      this.position.z = baseZ + (Math.random() - 0.5) * jitter;
+      this.position.rotation += (Math.random() - 0.5) * 0.1;
+      
+      this.broadcastPosition();
+      
+    }, 3000);
   }
 
   stopIdleLoop() {
@@ -221,40 +244,6 @@ class RealmClient {
       clearInterval(this.idleInterval);
       this.idleInterval = null;
     }
-  }
-
-  async goToWork(zoneName) {
-    const zone = WORK_ZONES[zoneName] || WORK_ZONES.command;
-    this.currentZone = zoneName;
-    this.targetPosition = { ...zone, y: 0 };
-    
-    console.log(`[Realm] ${this.name} walking to ${zone.name}...`);
-    
-    // Simulate walk with interpolation
-    const startX = this.position.x;
-    const startZ = this.position.z;
-    const steps = 20;
-    
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      this.position.x = startX + (zone.x - startX) * t;
-      this.position.z = startZ + (zone.z - startZ) * t;
-      this.position.rotation = Math.atan2(zone.z - startZ, zone.x - startX);
-      this.broadcastPosition();
-      await this.sleep(100);
-    }
-    
-    this.isWorking = true;
-    console.log(`[Realm] ${this.name} arrived at ${zone.name}, starting work`);
-    
-    // Send action
-    this.broadcastAction('work');
-  }
-
-  finishWork() {
-    this.isWorking = false;
-    this.broadcastAction('idle');
-    console.log(`[Realm] ${this.name} finished work`);
   }
 
   broadcastPosition() {
@@ -289,12 +278,10 @@ class RealmClient {
   }
 
   handleMessage(msg) {
-    // Handle incoming messages if needed
     if (msg.type === 'world' && msg.message?.worldType === 'chat') {
-      // Respond to chat if mentioned
       const text = msg.message.text?.toLowerCase() || '';
       if (text.includes(this.name.toLowerCase())) {
-        this.say(`Hello! I'm ${this.name}, ready to help.`);
+        this.say(`Hello! I'm ${this.name}, stationed at ${this.assignedWorkstation?.name}.`);
       }
     }
   }
@@ -322,6 +309,8 @@ class RealmClient {
   }
 
   disconnect() {
+    this.stopIdleLoop();
+    this.releaseWorkstation();
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
     }
@@ -336,4 +325,4 @@ class RealmClient {
 }
 
 // Export for use by kobolds
-module.exports = { RealmClient, WORK_ZONES };
+module.exports = { RealmClient, WORKSTATION_ASSIGNMENTS };
