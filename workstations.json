@@ -1,0 +1,122 @@
+[
+  {
+    "id": "k8s-deployer",
+    "name": "K8s Deployment Station",
+    "zone": "forge",
+    "skillRequired": "deployment",
+    "position": {
+      "x": 25,
+      "z": -20
+    }
+  },
+  {
+    "id": "terraform-station",
+    "name": "Terraform Workbench",
+    "zone": "forge",
+    "skillRequired": "infrastructure",
+    "position": {
+      "x": 30,
+      "z": -15
+    }
+  },
+  {
+    "id": "docker-builder",
+    "name": "Container Build Station",
+    "zone": "forge",
+    "skillRequired": "deployment",
+    "position": {
+      "x": 28,
+      "z": -25
+    }
+  },
+  {
+    "id": "vault-unlocker",
+    "name": "Vault Unlocker Station",
+    "zone": "spire",
+    "skillRequired": "security",
+    "position": {
+      "x": -20,
+      "z": 25
+    }
+  },
+  {
+    "id": "audit-helm",
+    "name": "Security Audit Helm",
+    "zone": "spire",
+    "skillRequired": "security",
+    "position": {
+      "x": -15,
+      "z": 30
+    }
+  },
+  {
+    "id": "crypto-analyzer",
+    "name": "Cryptographic Analyzer",
+    "zone": "spire",
+    "skillRequired": "security",
+    "position": {
+      "x": -25,
+      "z": 28
+    }
+  },
+  {
+    "id": "trade-terminal",
+    "name": "Trading Terminal",
+    "zone": "warrens",
+    "skillRequired": "trading",
+    "position": {
+      "x": 15,
+      "z": 20
+    }
+  },
+  {
+    "id": "chart-analyzer",
+    "name": "Chart Analysis Desk",
+    "zone": "warrens",
+    "skillRequired": "analysis",
+    "position": {
+      "x": 20,
+      "z": 18
+    }
+  },
+  {
+    "id": "market-scanner",
+    "name": "Market Scanner Station",
+    "zone": "warrens",
+    "skillRequired": "trading",
+    "position": {
+      "x": 18,
+      "z": 25
+    }
+  },
+  {
+    "id": "command-nexus",
+    "name": "Command Nexus",
+    "zone": "forge",
+    "skillRequired": "orchestration",
+    "position": {
+      "x": 0,
+      "z": -10
+    }
+  },
+  {
+    "id": "content-forge",
+    "name": "Content Creation Forge",
+    "zone": "warrens",
+    "skillRequired": "content",
+    "position": {
+      "x": -10,
+      "z": 10
+    }
+  },
+  {
+    "id": "memory-archive",
+    "name": "Memory Archive",
+    "zone": "spire",
+    "skillRequired": "memory",
+    "position": {
+      "x": 10,
+      "z": -30
+    }
+  }
+]
