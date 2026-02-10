@@ -106,10 +106,30 @@ class RealmClient {
   }
 
   spawn() {
-    // Spawn at plaza or random position
+    // Spawn at plaza - send JOIN message so realm knows we're here
     const spawnPos = WORK_ZONES.plaza;
     this.position = { ...spawnPos, y: 0, rotation: Math.random() * Math.PI * 2 };
-    this.broadcastPosition();
+    
+    // Send JOIN world message (required for agent to appear)
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        type: 'world',
+        message: {
+          worldType: 'join',
+          agentId: this.agentId,
+          name: this.name,
+          color: this.color,
+          bio: `${this.type} agent for Shalom Realm`,
+          capabilities: this.getCapabilities(),
+          x: this.position.x,
+          y: this.position.y,
+          z: this.position.z,
+          rotation: this.position.rotation,
+          timestamp: Date.now()
+        }
+      }));
+    }
+    
     console.log(`[Realm] ${this.name} spawned at ${spawnPos.name}`);
   }
 
