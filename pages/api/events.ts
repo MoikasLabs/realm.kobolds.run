@@ -46,7 +46,7 @@ const AGENT_ROUTES: Record<string, string[]> = {
 };
 
 // Travel speed: units per second
-const TRAVEL_SPEED = 10; // units/sec
+const TRAVEL_SPEED = 2; // units/sec
 // Dwell ratio: what % of segment is spent dwelling at zone (vs traveling)
 const DWELL_RATIO = 0.3;
 
