@@ -180,6 +180,14 @@ class RealmClient {
     
     // Start cave idle animation
     this.startCaveIdleLoop();
+    
+    // AUTO-EMERGE: After 10 seconds, automatically emerge and go to work
+    setTimeout(() => {
+      if (this.inCave && this.assignedWorkstation) {
+        console.log(`[Realm] ${this.name} auto-emerging after spawn...`);
+        this.emergeFromCave();
+      }
+    }, 10000);
   }
 
   // EMERGE FROM CAVE - Called when agent becomes active
