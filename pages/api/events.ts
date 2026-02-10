@@ -1,9 +1,9 @@
 /**
  * Server-Sent Events (SSE) API Endpoint for Realm
- * 
+ *
  * Replaces Socket.IO for serverless compatibility.
  * Provides deterministic zone-to-zone patrol system for agents.
- * 
+ *
  * Features:
  * - Full state push on connection with deterministic positions
  * - Zone-to-zone patrol routes (Shalom patrols all zones, kobolds patrol their areas)
@@ -15,11 +15,11 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { AgentState } from '@/types/realtime';
-import { 
-  getAllAgentStates, 
+import {
+  getAllAgentStates,
   getAgentPosition,
   saveAgentPosition,
-  isRedisAvailable 
+  isRedisAvailable
 } from '@/lib/redis';
 
 // Zone center positions (x, y) - matches Kobold Reporter
@@ -89,7 +89,7 @@ function getZoneDistance(zoneA: string, zoneB: string): number {
 /**
  * Calculate segment duration for traveling between two zones
  * Includes travel time + dwell time at destination
- * 
+ *
  * Formula: time = distance / speed + dwellTime
  */
 function getSegmentDuration(fromZone: string, toZone: string): number {
@@ -101,7 +101,7 @@ function getSegmentDuration(fromZone: string, toZone: string): number {
 
 /**
  * Calculate agent position based on zone-to-zone travel (deterministic)
- * 
+ *
  * Rules:
  * - Follow predefined patrol route
  * - Travel in straight line between zones at constant speed
@@ -113,16 +113,16 @@ function calculateZoneTravel(agentId: string, timestamp: number): {
   y: number;
   targetX: number;
   targetY: number;
-  status: 'traveling' | 'idle';
+  status: 'working' | 'idle';
   currentZone: string;
   nextZone: string;
 } {
   const route = AGENT_ROUTES[agentId] || ['plaza', 'home', 'plaza'];
-  
+
   // Calculate total patrol cycle duration
   let totalCycleTime = 0;
   const segmentDurations: number[] = [];
-  
+
   for (let i = 0; i < route.length; i++) {
     const fromZone = route[i];
     const toZone = route[(i + 1) % route.length];
@@ -130,14 +130,14 @@ function calculateZoneTravel(agentId: string, timestamp: number): {
     segmentDurations.push(duration);
     totalCycleTime += duration;
   }
-  
+
   // Determine current position in patrol cycle
   const cyclePosition = timestamp % totalCycleTime;
-  
+
   // Find current segment
   let accumulatedTime = 0;
   let currentSegmentIndex = 0;
-  
+
   for (let i = 0; i < segmentDurations.length; i++) {
     if (cyclePosition < accumulatedTime + segmentDurations[i]) {
       currentSegmentIndex = i;
@@ -145,37 +145,37 @@ function calculateZoneTravel(agentId: string, timestamp: number): {
     }
     accumulatedTime += segmentDurations[i];
   }
-  
+
   const currentZone = route[currentSegmentIndex];
   const nextZone = route[(currentSegmentIndex + 1) % route.length];
   const segmentDuration = segmentDurations[currentSegmentIndex];
   const segmentProgress = cyclePosition - accumulatedTime;
-  
+
   const [currentX, currentY] = ZONE_CENTERS[currentZone];
   const [nextX, nextY] = ZONE_CENTERS[nextZone];
-  
+
   // Travel time portion of segment
   const distance = getZoneDistance(currentZone, nextZone);
   const travelTime = (distance / TRAVEL_SPEED) * 1000;
-  
+
   // Calculate progress: 0-1 during travel, then dwell at destination
   let progress: number;
-  let status: 'traveling' | 'idle';
-  
+  let status: 'working' | 'idle';
+
   if (segmentProgress < travelTime) {
     // Currently traveling
     progress = segmentProgress / travelTime;
-    status = 'traveling';
+    status = 'working';
   } else {
     // Currently dwelling at destination
     progress = 1;
     status = 'idle';
   }
-  
+
   // Linear interpolation between zones
   const x = currentX + (nextX - currentX) * progress;
   const y = currentY + (nextY - currentY) * progress;
-  
+
   return {
     x,
     y,
@@ -189,20 +189,20 @@ function calculateZoneTravel(agentId: string, timestamp: number): {
 
 /**
  * Generate full agent states using zone-to-zone patrol system
- * 
+ *
  * Deterministic based on timestamp - same timestamp = same position
  * This ensures smooth movement with no jumps on reconnect
  */
 async function generateAgentStates(): Promise<AgentState[]> {
   const timestamp = Date.now();
-  
+
   // Generate states for all configured agents using patrol system
   const agentStates: AgentState[] = [];
-  
+
   for (const [agentId, visuals] of Object.entries(AGENT_VISUALS)) {
     // Calculate position based on zone patrol route
     const travel = calculateZoneTravel(agentId, timestamp);
-    
+
     agentStates.push({
       id: agentId,
       name: visuals.name,
@@ -215,20 +215,20 @@ async function generateAgentStates(): Promise<AgentState[]> {
       lastUpdate: timestamp,
     });
   }
-  
+
   return agentStates;
 }
 
 /**
  * Fallback state generator (uses same patrol system)
- * 
+ *
  * This is now redundant since generateAgentStates handles all cases,
  * but kept for API compatibility. Uses deterministic patrol routes.
  */
 function generateFallbackStates(timestamp: number): AgentState[] {
   return Object.entries(AGENT_VISUALS).map(([agentId, visuals]) => {
     const travel = calculateZoneTravel(agentId, timestamp);
-    
+
     return {
       id: agentId,
       name: visuals.name,
@@ -271,7 +271,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Send full state immediately
   const now = Date.now();
   const agents = await generateAgentStates();
-  
+
   res.write(`data: ${JSON.stringify({
     type: 'full',
     timestamp: now,
@@ -288,7 +288,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const updateInterval = setInterval(async () => {
     const currentTime = Date.now();
     const updatedAgents = await generateAgentStates();
-    
+
     res.write(`data: ${JSON.stringify({
       type: 'delta',
       timestamp: currentTime,
