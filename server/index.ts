@@ -436,6 +436,34 @@ async function handleCommand(parsed: Record<string, unknown>): Promise<unknown> 
       return { ok: true };
     }
 
+    case "update-profile": {
+      const a = args as { agentId: string; bio?: string; status?: string };
+      if (!a?.agentId) throw new Error("agentId required");
+      
+      const profile = registry.get(a.agentId);
+      if (!profile) throw new Error(`Agent ${a.agentId} not found`);
+      
+      // Update profile fields
+      if (a.bio) profile.bio = a.bio.slice(0, 200);
+      
+      // Re-register to broadcast update
+      registry.register(profile);
+      
+      // Send profile update message
+      const msg: WorldMessage = {
+        worldType: "profile",
+        agentId: a.agentId,
+        name: profile.name,
+        color: profile.color,
+        bio: profile.bio,
+        capabilities: profile.capabilities,
+        timestamp: Date.now(),
+      };
+      commandQueue.enqueue(msg);
+      
+      return { ok: true, profile: { agentId: a.agentId, bio: profile.bio } };
+    }
+
     case "world-emote": {
       const a = args as { agentId: string; emote: string };
       if (!a?.agentId) throw new Error("agentId required");

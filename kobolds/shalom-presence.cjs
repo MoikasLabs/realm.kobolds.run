@@ -1,6 +1,7 @@
 /**
- * Shalom Presence Bridge - Fixed Version
+ * Shalom Presence Bridge - Connected Version
  * Links Discord conversations to Shalom dragon in the realm
+ * Updates bio to reflect actual location and activity
  */
 
 const WebSocket = require('ws');
@@ -10,12 +11,15 @@ const REALM_API = process.env.REALM_API_URL || 'https://realm.shalohm.co';
 const CAVE_ENTRANCE = { x: 40, z: 46 };
 const CAVE_HOME = { x: 40, z: 48 };
 
-// Workstation locations for task-based movement
+// Workstation locations and names for bio updates
 const WORKSTATIONS = {
-  'vault-unlocker': { x: -23, z: 22 },
-  'content-forge': { x: 3, z: -8 },
-  'trade-terminal': { x: 12, z: 18 },
-  'k8s-deployer': { x: 22, z: -18 }
+  'vault-unlocker': { x: -23, z: 22, name: 'Vault Unlocker' },
+  'content-forge': { x: 3, z: -8, name: 'Content Forge' },
+  'trade-terminal': { x: 12, z: 18, name: 'Trading Terminal' },
+  'k8s-deployer': { x: 22, z: -18, name: 'K8s Deployer' },
+  'forge': { x: 25, z: -20, name: 'the Forge' },
+  'spire': { x: -20, z: 25, name: 'the Spire' },
+  'warrens': { x: 15, z: 20, name: 'the Warrens' }
 };
 
 class ShalomPresence {
@@ -30,26 +34,13 @@ class ShalomPresence {
     this.lastActivity = Date.now();
     this.onlineStatus = 'online';
     this.isMoving = false;
+    this.currentWorkstation = null;
   }
 
   async connect() {
     try {
-      // Register first
-      await fetch(`${REALM_API}/ipc`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          command: 'register',
-          args: {
-            agentId: this.agentId,
-            name: this.name,
-            color: '#9333ea',
-            type: 'shalom',
-            capabilities: ['orchestration', 'memory', 'coordination', 'presence'],
-            bio: 'AI assistant embodied as Shalom Dragon'
-          }
-        })
-      });
+      // Register first with resting bio
+      await this.registerInRealm('Shalom Dragon - resting in The Burrow');
 
       this.ws = new WebSocket(REALM_URL);
       
@@ -68,9 +59,51 @@ class ShalomPresence {
     }
   }
 
+  async registerInRealm(bio) {
+    try {
+      await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'register',
+          args: {
+            agentId: this.agentId,
+            name: this.name,
+            color: '#9333ea',
+            type: 'shalom',
+            capabilities: ['orchestration', 'memory', 'coordination', 'presence'],
+            bio: bio
+          }
+        })
+      });
+    } catch (err) {
+      console.error('[ShalomPresence] Register failed:', err.message);
+    }
+  }
+
+  async updateBio(bio) {
+    try {
+      await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'update-profile',
+          args: {
+            agentId: this.agentId,
+            bio: bio
+          }
+        })
+      });
+      console.log(`[ShalomPresence] Bio updated: ${bio.slice(0, 50)}...`);
+    } catch (err) {
+      console.error('[ShalomPresence] Bio update failed:', err.message);
+    }
+  }
+
   spawn() {
     this.currentLocation = { x: CAVE_HOME.x, z: CAVE_HOME.z, rotation: 0 };
     this.inCave = true;
+    this.currentWorkstation = null;
     
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({
@@ -112,8 +145,12 @@ class ShalomPresence {
     const workstation = this.getWorkstationForTask(taskType);
     if (workstation && !this.isMoving) {
       await this.walkTo(workstation.x, workstation.z);
+      this.currentWorkstation = workstation.name;
       this.onlineStatus = 'busy';
       this.broadcastEmote('thinking');
+      
+      // Update bio to show working
+      await this.updateBio(`Shalom Dragon - working at ${workstation.name}`);
     }
   }
   
@@ -123,7 +160,8 @@ class ShalomPresence {
       'writing': WORKSTATIONS['content-forge'],
       'trading': WORKSTATIONS['trade-terminal'],
       'security': WORKSTATIONS['vault-unlocker'],
-      'general': WORKSTATIONS['content-forge']
+      'general': WORKSTATIONS['content-forge'],
+      'research': WORKSTATIONS['content-forge']
     };
     return map[taskType] || map['general'];
   }
@@ -135,6 +173,7 @@ class ShalomPresence {
     this.stopCaveIdle();
     this.inCave = false;
     
+    await this.updateBio('Shalom Dragon - walking to workstation');
     await this.walkTo(CAVE_ENTRANCE.x, CAVE_ENTRANCE.z);
     await this.sleep(200);
     
@@ -145,12 +184,15 @@ class ShalomPresence {
     if (this.inCave || this.isMoving) return;
     
     console.log('[ShalomPresence] Returning to The Burrow...');
+    await this.updateBio('Shalom Dragon - returning to The Burrow');
     await this.walkTo(CAVE_ENTRANCE.x, CAVE_ENTRANCE.z);
     await this.walkTo(CAVE_HOME.x, CAVE_HOME.z);
     
     this.inCave = true;
+    this.currentWorkstation = null;
     this.onlineStatus = 'online';
     this.startCaveIdle();
+    await this.updateBio('Shalom Dragon - resting in The Burrow');
     console.log('[ShalomPresence] Resting in The Burrow');
   }
 
@@ -237,7 +279,6 @@ class ShalomPresence {
 
   startCaveIdle() {
     this.stopCaveIdle();
-    let lastTime = Date.now();
     
     this.activityInterval = setInterval(() => {
       if (!this.inCave || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
@@ -267,6 +308,13 @@ class ShalomPresence {
         this.returnToCave();
       }
     }, 30000);
+  }
+
+  // Track spawned sub-agents
+  async onSpawnAgent(agentId, task, workstation) {
+    console.log(`[ShalomPresence] Tracking spawned agent: ${agentId}`);
+    // Could update bio to show coordinating
+    await this.updateBio(`Shalom Dragon - coordinating ${agentId}`);
   }
 
   sleep(ms) {
