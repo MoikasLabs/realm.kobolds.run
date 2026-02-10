@@ -1,4 +1,5 @@
 import { createScene } from "./scene/room.js";
+import { createDragon } from "./scene/dragon.js";
 import { DragonManager } from "./scene/dragon-manager.js";
 import { EffectsManager } from "./scene/effects.js";
 import { createBuildings } from "./scene/buildings.js";
@@ -30,7 +31,12 @@ const { scene, camera, renderer, labelRenderer, controls, clock, obstacles } = c
 const { buildings, obstacles: buildingObstacles } = createBuildings(scene);
 const allObstacles = [...obstacles, ...buildingObstacles];
 
-const lobsterManager = new DragonManager(scene, allObstacles);
+const dragonManager = new DragonManager(scene, allObstacles);
+// Test dragon to verify rendering
+const testDragon = createDragon("dragon", "#9333ea");
+testDragon.position.set(0, 0, 0);
+testDragon.userData.agentId = "test-dragon";
+scene.add(testDragon);
 const effects = new EffectsManager(scene, camera);
 const buildingPanel = setupBuildingPanel(serverParam);
 const roomInfoBar = setupRoomInfoBar();
@@ -41,7 +47,7 @@ const overlay = setupOverlay();
 const chatLog = setupChatLog();
 const profilePanel = setupProfilePanel((agentId: string) => {
   // Click callback → focus camera on lobster
-  const pos = lobsterManager.getPosition(agentId);
+  const pos = dragonManager.getPosition(agentId);
   if (pos) {
     controls.target.set(pos.x, pos.y + 2, pos.z);
   }
@@ -73,7 +79,7 @@ ws.on("disconnected", () => {
 ws.on("snapshot", (_raw) => {
   const data = _raw as { agents: AgentState[] };
   for (const agent of data.agents) {
-    lobsterManager.addOrUpdate(agent.profile, agent.position);
+    dragonManager.addOrUpdate(agent.profile, agent.position);
     effects.updateLabel(agent.profile.agentId, agent.profile.name, agent.profile.color);
   }
   // Note: overlay agent list is updated via requestProfiles + join/leave,
@@ -81,7 +87,7 @@ ws.on("snapshot", (_raw) => {
 
   // Auto-focus in preview mode
   if (focusAgent) {
-    const pos = lobsterManager.getPosition(focusAgent);
+    const pos = dragonManager.getPosition(focusAgent);
     if (pos) {
       controls.target.set(pos.x, pos.y + 2, pos.z);
       camera.position.set(pos.x + 10, pos.y + 8, pos.z + 10);
@@ -95,15 +101,15 @@ ws.on("world", (_raw) => {
 
   switch (msg.worldType) {
     case "position":
-      lobsterManager.updatePosition(msg.agentId, msg);
+      dragonManager.updatePosition(msg.agentId, msg);
       break;
 
     case "action":
-      lobsterManager.setAction(msg.agentId, msg.action);
+      dragonManager.setAction(msg.agentId, msg.action);
       break;
 
     case "join":
-      lobsterManager.addOrUpdate(
+      dragonManager.addOrUpdate(
         {
           agentId: msg.agentId,
           name: msg.name,
@@ -131,7 +137,7 @@ ws.on("world", (_raw) => {
       break;
 
     case "leave":
-      lobsterManager.remove(msg.agentId);
+      dragonManager.remove(msg.agentId);
       effects.removeLabel(msg.agentId);
       effects.removeBubble(msg.agentId);
       chatLog.addSystem(`Agent ${msg.agentId} left`);
@@ -219,12 +225,12 @@ renderer.domElement.addEventListener("click", (event: MouseEvent) => {
   }
 
   // Then check for lobster clicks
-  const agentId = lobsterManager.pick(event, camera, renderer.domElement);
+  const agentId = dragonManager.pick(event, camera, renderer.domElement);
   if (agentId) {
     const profile = overlay.getAgent(agentId);
     if (profile) {
       profilePanel.show(profile);
-      const pos = lobsterManager.getPosition(agentId);
+      const pos = dragonManager.getPosition(agentId);
       if (pos) {
         controls.target.set(pos.x, pos.y + 2, pos.z);
       }
@@ -244,7 +250,7 @@ window.addEventListener("agent:select", ((e: CustomEvent<{ agentId: string }>) =
   } else {
     followAgentId = agentId;
     // Snap camera to agent immediately
-    const pos = lobsterManager.getPosition(agentId);
+    const pos = dragonManager.getPosition(agentId);
     if (pos) {
       controls.target.set(pos.x, pos.y + 2, pos.z);
     }
@@ -265,12 +271,12 @@ function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
 
-  lobsterManager.update(delta);
+  dragonManager.update(delta);
   effects.update(camera);
 
   // Follow agent: smoothly track their position
   if (followAgentId) {
-    const pos = lobsterManager.getPosition(followAgentId);
+    const pos = dragonManager.getPosition(followAgentId);
     if (pos) {
       const target = controls.target;
       target.lerp(new THREE.Vector3(pos.x, pos.y + 2, pos.z), 0.08);
