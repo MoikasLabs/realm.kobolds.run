@@ -118,8 +118,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Build updated state
     const updatedState: AgentRedisState = {
       ...defaults,
-      ...existingState,
+      ...(existingState || {}),
       agentId,
+      name: existingState?.name || defaults.name || agentId,
       lastUpdate: timestamp || Date.now(),
     };
 

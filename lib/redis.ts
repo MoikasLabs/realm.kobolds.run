@@ -49,6 +49,8 @@ export interface AgentRedisState {
   name: string;
   type: 'trading' | 'daily' | 'deploy' | 'custom' | 'shalom';
   status: 'active' | 'paused' | 'error' | 'sleeping' | 'working' | 'idle';
+  color?: string;
+  radius?: number;
   task?: string;
   location?: {
     zone: 'warrens' | 'forge' | 'plaza' | 'home';
@@ -57,7 +59,7 @@ export interface AgentRedisState {
     x: number;
     y: number;
   };
-  homeZone: 'warrens' | 'forge' | 'plaza';
+  homeZone?: 'warrens' | 'forge' | 'plaza';
   lastUpdate: number;
 }
 
