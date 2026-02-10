@@ -25,7 +25,7 @@ import {
 } from '@/lib/redis';
 
 // Agent configuration defaults
-const AGENT_DEFAULTS: Record<string, Partial<AgentRedisState>> = {
+const AGENT_DEFAULTS: Record<string, { name: string; type: 'trading' | 'daily' | 'deploy' | 'custom' | 'shalom'; homeZone: 'warrens' | 'forge' | 'plaza'; color: string }> = {
   'shalom': {
     name: 'Shalom',
     type: 'shalom',
@@ -121,6 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(existingState || {}),
       agentId,
       name: existingState?.name || defaults.name || agentId,
+      type: existingState?.type || defaults.type || 'custom',
       lastUpdate: timestamp || Date.now(),
     };
 

@@ -79,7 +79,7 @@ async function calculateAgentPosition(
   
   // Determine target zone
   const isWorking = state.status === 'working' && state.location?.zone;
-  const targetZone = isWorking ? state.location!.zone : state.homeZone;
+  const targetZone = (isWorking ? state.location?.zone : state.homeZone) || 'home';
   const [targetX, targetY] = ZONE_CENTERS[targetZone] || ZONE_CENTERS['home'];
   
   // Determine speed
