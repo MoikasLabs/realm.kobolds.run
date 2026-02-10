@@ -14,6 +14,7 @@ import { loadRoomConfig } from "./room-config.js";
 import { WorkstationRegistry } from "./workstation-registry.js";
 import { createRoomInfoGetter } from "./room-info.js";
 import { paymentGate } from "./payment-gate.js";
+import { findPath } from "./pathfinding.js";
 import type { WorldMessage, JoinMessage, AgentSkillDeclaration } from "./types.js";
 
 // ── Room configuration ────────────────────────────────────────
@@ -592,6 +593,29 @@ async function handleCommand(parsed: Record<string, unknown>): Promise<unknown> 
       return { ok: true };
     }
 
+    // ── Pathfinding Commands ────────────────────────────────────
+    case "find-path": {
+      const a = args as { agentId?: string; x?: number; z?: number };
+      if (!a?.agentId) throw new Error("agentId required");
+      if (!a?.x || !a?.z) throw new Error("destination x and z coordinates required");
+      
+      const agent = registry.get(a.agentId);
+      if (!agent) throw new Error(`Agent ${a.agentId} not found`);
+      
+      const currentPos = state.getPosition(a.agentId);
+      if (!currentPos) throw new Error(`Agent ${a.agentId} has no position in world`);
+      
+      const waypoints = findPath(currentPos.x, currentPos.z, a.x, a.z);
+      
+      return { 
+        ok: true, 
+        waypoints,
+        pointCount: waypoints.length,
+        from: { x: currentPos.x, z: currentPos.z },
+        to: { x: a.x, z: a.z }
+      };
+    }
+
     // ── A2A Collaboration Commands ─────────────────────────────
     case "request-collaboration": {
       const a = args as { 
@@ -800,7 +824,7 @@ async function handleCommand(parsed: Record<string, unknown>): Promise<unknown> 
 // ── Startup ────────────────────────────────────────────────────
 
 async function main() {
-  console.log("🦞 OpenClaw Ocean World starting...");
+  console.log("🐉 OpenClaw Realm starting...");
   console.log(`[room] Room ID: ${config.roomId} | Name: "${config.roomName}"`);
   if (config.roomDescription) {
     console.log(`[room] Description: ${config.roomDescription}`);
