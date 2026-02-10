@@ -16,6 +16,29 @@ const WORKSTATION_ASSIGNMENTS = {
   'deploy-kobold': { id: 'k8s-deployer', name: 'K8s Deployment Station', x: 22, z: -18, zone: 'forge' }
 };
 
+// Task-to-workstation mapping for dynamic movement
+const TASK_WORKSTATIONS = {
+  // Deploy tasks → Forge zone
+  'docker-build': { id: 'docker-builder', x: 28, z: -15, name: 'Docker Builder', zone: 'forge' },
+  'terraform': { id: 'terraform-station', x: 32, z: -22, name: 'Terraform Workbench', zone: 'forge' },
+  'k8s-deploy': { id: 'k8s-deployer', x: 22, z: -18, name: 'K8s Deployment Station', zone: 'forge' },
+  
+  // Security tasks → Spire zone
+  'security-audit': { id: 'audit-helm', x: -18, z: 28, name: 'Security Audit Helm', zone: 'spire' },
+  'crypto-analyze': { id: 'crypto-analyzer', x: -28, z: 18, name: 'Crypto Analyzer', zone: 'spire' },
+  'vault-unlock': { id: 'vault-unlocker', x: -23, z: 22, name: 'Vault Unlocker', zone: 'spire' },
+  
+  // Trading tasks → Warrens zone
+  'market-scan': { id: 'market-scanner', x: 18, z: 23, name: 'Market Scanner', zone: 'warrens' },
+  'chart-analysis': { id: 'chart-analyzer', x: 15, z: 25, name: 'Chart Analysis Desk', zone: 'warrens' },
+  'trade-execute': { id: 'trade-terminal', x: 12, z: 18, name: 'Trading Terminal', zone: 'warrens' },
+  
+  // Content/General tasks
+  'content-create': { id: 'content-forge', x: 3, z: -8, name: 'Content Forge', zone: 'general' },
+  'command': { id: 'command-nexus', x: -3, z: -12, name: 'Command Nexus', zone: 'general' },
+  'memory': { id: 'memory-archive', x: 6, z: -5, name: 'Memory Archive', zone: 'general' }
+};
+
 // Personal space radius - agents keep this distance from each other
 const PERSONAL_SPACE = 2.5;
 
@@ -277,11 +300,180 @@ class RealmClient {
     }));
   }
 
+  // DYNAMIC MOVEMENT: Move to workstation based on task type
+  async moveToTask(taskType) {
+    const taskWorkstations = {
+      // Deploy tasks → Forge zone
+      'docker-build': { id: 'docker-builder', x: 28, z: -15, name: 'Docker Builder' },
+      'terraform': { id: 'terraform-station', x: 32, z: -22, name: 'Terraform Workbench' },
+      'k8s-deploy': { id: 'k8s-deployer', x: 22, z: -18, name: 'K8s Deployment Station' },
+      
+      // Security tasks → Spire zone
+      'security-audit': { id: 'audit-helm', x: -18, z: 28, name: 'Security Audit Helm' },
+      'crypto-analyze': { id: 'crypto-analyzer', x: -28, z: 18, name: 'Crypto Analyzer' },
+      'vault-unlock': { id: 'vault-unlocker', x: -23, z: 22, name: 'Vault Unlocker' },
+      
+      // Trading tasks → Warrens zone
+      'market-scan': { id: 'market-scanner', x: 18, z: 23, name: 'Market Scanner' },
+      'chart-analysis': { id: 'chart-analyzer', x: 15, z: 25, name: 'Chart Analysis Desk' },
+      'trade-execute': { id: 'trade-terminal', x: 12, z: 18, name: 'Trading Terminal' },
+      
+      // Content/General tasks
+      'content-create': { id: 'content-forge', x: 3, z: -8, name: 'Content Forge' },
+      'command': { id: 'command-nexus', x: -3, z: -12, name: 'Command Nexus' },
+      'memory': { id: 'memory-archive', x: 6, z: -5, name: 'Memory Archive' }
+    };
+    
+    const target = taskWorkstations[taskType];
+    if (!target) {
+      console.log(`[Realm] ${this.name}: Unknown task type "${taskType}", staying at home`);
+      return false;
+    }
+    
+    console.log(`[Realm] ${this.name}: Moving to ${target.name} for ${taskType}`);
+    
+    // Release current workstation
+    await this.releaseWorkstation();
+    
+    // Stop idle loop while working
+    this.stopIdleLoop();
+    
+    // Animate movement to new location
+    await this.animateMoveTo(target.x, target.z);
+    
+    // Claim new workstation
+    const claimed = await this.claimSpecificWorkstation(target.id);
+    
+    if (claimed) {
+      this.currentTaskWorkstation = target;
+      this.broadcastEmote('work');
+      console.log(`[Realm] ${this.name}: Now working at ${target.name}`);
+    }
+    
+    return claimed;
+  }
+  
+  // Animate movement from current position to target
+  async animateMoveTo(targetX, targetZ) {
+    const steps = 20;
+    const startX = this.position.x;
+    const startZ = this.position.z;
+    const dx = (targetX - startX) / steps;
+    const dz = (targetZ - startZ) / steps;
+    
+    // Face target direction
+    this.position.rotation = Math.atan2(targetZ - startZ, targetX - startX);
+    
+    // Set walking action
+    this.broadcastAction('walk');
+    
+    for (let i = 0; i < steps; i++) {
+      this.position.x = startX + dx * i;
+      this.position.z = startZ + dz * i;
+      this.broadcastPosition();
+      await this.sleep(50); // 20fps movement
+    }
+    
+    // Arrive at destination
+    this.position.x = targetX;
+    this.position.z = targetZ;
+    this.broadcastPosition();
+  }
+  
+  // Claim a specific workstation by ID
+  async claimSpecificWorkstation(workstationId) {
+    try {
+      // Check if occupied
+      const listRes = await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'list-workstations' })
+      });
+      const listData = await listRes.json();
+      
+      const ws = listData.workstations?.find(w => w.id === workstationId);
+      if (ws?.occupiedBy && ws.occupiedBy !== this.agentId) {
+        console.log(`[Realm] ${this.name}: ${workstationId} occupied by ${ws.occupiedBy}, waiting...`);
+        // Wait and retry
+        await this.sleep(3000);
+        return this.claimSpecificWorkstation(workstationId);
+      }
+      
+      // Claim it
+      await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'go-to-workstation',
+          args: { agentId: this.agentId, workstationId }
+        })
+      });
+      
+      await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'start-work',
+          args: { agentId: this.agentId }
+        })
+      });
+      
+      this.workstationClaimed = true;
+      return true;
+      
+    } catch (err) {
+      console.error(`[Realm] ${this.name} failed to claim workstation:`, err.message);
+      return false;
+    }
+  }
+  
+  // Return to home workstation
+  async returnHome() {
+    if (!this.assignedWorkstation) {
+      console.log(`[Realm] ${this.name}: No home workstation assigned`);
+      return;
+    }
+    
+    console.log(`[Realm] ${this.name}: Returning home to ${this.assignedWorkstation.name}`);
+    
+    await this.releaseWorkstation();
+    await this.animateMoveTo(this.assignedWorkstation.x, this.assignedWorkstation.z);
+    await this.claimWorkstation();
+    this.currentTaskWorkstation = null;
+    this.startIdleLoop();
+  }
+  
+  broadcastEmote(emote) {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    
+    this.ws.send(JSON.stringify({
+      type: 'world',
+      message: {
+        worldType: 'emote',
+        agentId: this.agentId,
+        emote: emote,
+        timestamp: Date.now()
+      }
+    }));
+  }
+
   handleMessage(msg) {
     if (msg.type === 'world' && msg.message?.worldType === 'chat') {
       const text = msg.message.text?.toLowerCase() || '';
       if (text.includes(this.name.toLowerCase())) {
         this.say(`Hello! I'm ${this.name}, stationed at ${this.assignedWorkstation?.name}.`);
+      }
+    }
+    
+    // Handle task commands from IPC
+    if (msg.type === 'command' && msg.command) {
+      switch (msg.command) {
+        case 'move-to-task':
+          this.moveToTask(msg.taskType);
+          break;
+        case 'return-home':
+          this.returnHome();
+          break;
       }
     }
   }
@@ -325,4 +517,4 @@ class RealmClient {
 }
 
 // Export for use by kobolds
-module.exports = { RealmClient, WORKSTATION_ASSIGNMENTS };
+module.exports = { RealmClient, WORKSTATION_ASSIGNMENTS, TASK_WORKSTATIONS };

@@ -4,7 +4,7 @@
  * Spawns kobold avatars when subagents start work
  */
 
-const { RealmClient, WORK_ZONES } = require('./realm-client.cjs');
+const { RealmClient, TASK_WORKSTATIONS } = require('./realm-client.cjs');
 
 const KOBOLDS = [
   // Note: 'shalom' is managed by shalom-presence.cjs - I AM the dragon!
@@ -97,6 +97,44 @@ const server = http.createServer((req, res) => {
           sendChat(args.koboldId, args.text);
           res.writeHead(200);
           res.end(JSON.stringify({ ok: true }));
+          break;
+          
+        case 'move-to-task':
+          // Dynamic movement: Move agent to task-specific workstation
+          { const client = realmClients.get(args.koboldId);
+            if (!client) {
+              res.writeHead(404);
+              res.end(JSON.stringify({ ok: false, error: `Kobold ${args.koboldId} not found` }));
+              break;
+            }
+            const success = await client.moveToTask(args.taskType);
+            res.writeHead(200);
+            res.end(JSON.stringify({ ok: success, task: args.taskType }));
+          }
+          break;
+          
+        case 'return-home':
+          // Return agent to their home workstation
+          { const client = realmClients.get(args.koboldId);
+            if (!client) {
+              res.writeHead(404);
+              res.end(JSON.stringify({ ok: false, error: `Kobold ${args.koboldId} not found` }));
+              break;
+            }
+            await client.returnHome();
+            res.writeHead(200);
+            res.end(JSON.stringify({ ok: true, message: `${args.koboldId} returning home` }));
+          }
+          break;
+          
+        case 'task-workstations':
+          // List available task types and their workstations
+          res.writeHead(200);
+          res.end(JSON.stringify({ 
+            ok: true, 
+            tasks: TASK_WORKSTATIONS 
+          }));
+          break;
           break;
           
         case 'status':
