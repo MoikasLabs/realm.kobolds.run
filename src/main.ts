@@ -14,7 +14,7 @@ import type { AgentProfile, AgentState, WorldMessage, RoomInfoMessage } from "..
 // ── Parse URL params ───────────────────────────────────────────
 
 const params = new URLSearchParams(window.location.search);
-const focusAgent = params.get("agent");
+const focusAgent = null; // Disable URL-based camera follow
 const serverParam = params.get("server");
 
 // ── Global server base URL (for API calls from building panels etc.) ──
