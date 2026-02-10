@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
+import { createJobZoneBuildings } from "./job-buildings.js";
+import { createVisualWorkstations } from "./workstations-visual.js";
 
 export interface TorchData {
   light: THREE.PointLight;
@@ -823,6 +825,11 @@ export function createScene() {
 
   // Expose animation via scene userData
   scene.userData.animateLights = animateLights;
+
+  // Add job zone buildings and workstations
+  const jobBuildings = createJobZoneBuildings(scene);
+  const workstationVisuals = createVisualWorkstations(scene);
+  obstacles.push(...jobBuildings.obstacles, ...workstationVisuals.obstacles);
 
   return { scene, camera, renderer, labelRenderer, controls, clock, obstacles, torches, crystals };
 }
