@@ -1,0 +1,71 @@
+═══════════════════════════════════════════════════
+  REALM AGENT TEST - Full Cognitive Loop
+═══════════════════════════════════════════════════
+
+STEP 1: Seeding observations from 3D world...
+
+  ✓ Observed: Spawned at The Burrow entrance, feeling the warmth of the un... (importance: 0.70)
+  ✓ Observed: I can see the Forge workstation nearby with its glowing oran... (importance: 0.60)
+  ✓ Observed: First time visiting the Realm - everything feels new and exc... (importance: 0.80)
+  ✓ Observed: Saw another kobold briefly at the Spire before they disappea... (importance: 0.60)
+  ✓ Observed: Checked my tools and found everything in order.... (importance: 0.30)
+
+  Cumulative importance: 3.0 / 15
+  Should reflect: false
+
+───────────────────────────────────────────────────
+STEP 2: Generating reflection...
+
+LLM generation failed: HTTP 404
+  [FALLBACK] Generating template insights...
+  Generated 4 insights:
+    1. I feel most productive when working at the Forge with my tools ready.
+    2. This is a fresh start - I should explore all the workstations to understand my options.
+    3. I noticed other agents are present - building relationships could help with complex tasks.
+    4. My enthusiasm is high right now - I should channel this energy into important projects.
+  Notion synced: true
+
+───────────────────────────────────────────────────
+STEP 3: Creating daily plan...
+
+LLM generation failed: HTTP 404
+  [FALLBACK] Generating template insights...
+  Plan created for 2026-02-11:
+
+───────────────────────────────────────────────────
+STEP 4: Running tick loop (3 cycles)...
+
+  --- Tick 1 ---
+    Action: waiting
+  --- Tick 2 ---
+    Action: waiting
+  --- Tick 3 ---
+    Action: waiting
+
+───────────────────────────────────────────────────
+STEP 5: Final status...
+
+  Agent: test-forge-kobold-1
+  Role: smith
+  Location: (48, 48)
+  Total observations in memory: 31
+  Has daily plan: true
+  Should reflect next: false
+
+  Memory Stats:
+    Total episodes: 31
+    By type: {"reflection":8,"observation":20,"plan":3}
+    Tags: environment, first_time, agent_interaction, insight, reflection, realm, routine_work, smith, planning, daily...
+
+═══════════════════════════════════════════════════
+  TEST RESULTS
+═══════════════════════════════════════════════════
+  ✓ Observations stored: 5
+  ✓ Reflections generated: 4
+  ✓ Daily plans created: 1
+  ✓ Actions executed: 3
+  ✓ Notion reflections synced
+
+  AgentMemory: FULLY FUNCTIONAL
+
+  Sample memory recall ("forge"):

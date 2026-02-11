@@ -1,0 +1,40 @@
+═══════════════════════════════════════════════════
+  REALM AGENT TEST - Full Cognitive Loop
+═══════════════════════════════════════════════════
+
+STEP 1: Seeding observations from 3D world...
+
+  ✓ Observed: Spawned at The Burrow entrance, feeling the warmth of the un... (importance: 0.70)
+  ✓ Observed: I can see the Forge workstation nearby with its glowing oran... (importance: 0.60)
+  ✓ Observed: First time visiting the Realm - everything feels new and exc... (importance: 0.80)
+  ✓ Observed: Saw another kobold briefly at the Spire before they disappea... (importance: 0.60)
+  ✓ Observed: Checked my tools and found everything in order.... (importance: 0.30)
+
+  Cumulative importance: 3.0 / 15
+  Should reflect: false
+
+───────────────────────────────────────────────────
+STEP 2: Generating reflection...
+
+LLM generation failed: HTTP 404
+  [FALLBACK] Generating template insights...
+Notion sync failed: execSync is not defined
+Notion sync failed: execSync is not defined
+Notion sync failed: execSync is not defined
+Notion sync failed: execSync is not defined
+  Generated 4 insights:
+    1. I feel most productive when working at the Forge with my tools ready.
+    2. This is a fresh start - I should explore all the workstations to understand my options.
+    3. I noticed other agents are present - building relationships could help with complex tasks.
+    4. My enthusiasm is high right now - I should channel this energy into important projects.
+  Notion synced: true
+
+───────────────────────────────────────────────────
+STEP 3: Creating daily plan...
+
+LLM generation failed: HTTP 404
+  [FALLBACK] Generating template insights...
+Test failed: ReferenceError: schedule is not defined
+    at AgentMemory.planDaily (file:///root/dev/projects/realm.shalohm.co/lib/agent-memory.js:362:48)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async runTest (file:///root/dev/projects/realm.shalohm.co/kobolds/test-agent-loop.js:148:16)
