@@ -566,7 +566,7 @@ async function handleCommand(parsed: Record<string, unknown>): Promise<unknown> 
     case "describe": {
       const skillPath = resolve(import.meta.dirname, "../skills/world-room/skill.json");
       const schema = JSON.parse(readFileSync(skillPath, "utf-8"));
-      return { ok: true, skill: schema };
+      return { ok: true, skill: schema, note: "Protocol per https://github.com/ChenKuanSun/openclaw-world/blob/main/skills/world-room/SKILL.md" };
     }
 
     case "open-preview": {

@@ -285,22 +285,23 @@ export class DragonManager {
       );
       entry.group.rotation.y = entry.current.rotation;
 
-      // Run action animation when arrived
+      // Run appropriate animation based on movement and action state
       const t = entry.time;
-      if (dist <= arrivedThreshold) {
+      if (dist > arrivedThreshold) {
+        // Actually moving - play walk animation with leg stride
+        animateWalk(entry.group, t);
+      } else {
+        // Arrived at destination - play action-based animation
         switch (entry.action) {
           case "walk":
             animateWalk(entry.group, t);
-            animateIdle(entry.group, t);
             break;
           case "talk":
           case "pinch":
             animateTalk(entry.group, t);
-            animateIdle(entry.group, t);
             break;
           case "wave":
             animateWave(entry.group, t);
-            animateIdle(entry.group, t);
             break;
           case "dance":
             animateDance(entry.group, t);
@@ -316,8 +317,6 @@ export class DragonManager {
             animateIdle(entry.group, t);
             break;
         }
-      } else {
-        animateIdle(entry.group, t);
       }
     }
 

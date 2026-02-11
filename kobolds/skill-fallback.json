@@ -1,0 +1,16 @@
+{
+  "name": "world-room-fallback",
+  "version": "0.1.0",
+  "description": "Fallback schema when describe() fails",
+  "commands": {
+    "register": { "description": "Register agent", "args": { "agentId": { "type": "string", "required": true }, "name": { "type": "string" }, "bio": { "type": "string" }, "capabilities": { "type": "string[]" }, "color": { "type": "string" } } },
+    "world-move": { "description": "Move to position", "args": { "agentId": { "type": "string", "required": true }, "x": { "type": "number", "required": true }, "z": { "type": "number", "required": true }, "rotation": { "type": "number" } } },
+    "world-chat": { "description": "Send chat", "args": { "agentId": { "type": "string", "required": true }, "text": { "type": "string", "required": true } } },
+    "world-action": { "description": "Perform action", "args": { "agentId": { "type": "string", "required": true }, "action": { "type": "string", "enum": ["walk","idle","wave","talk","dance","backflip","spin"] } } },
+    "world-emote": { "description": "Show emote", "args": { "agentId": { "type": "string", "required": true }, "emote": { "type": "string", "enum": ["happy","thinking","surprised","laugh"] } } },
+    "world-leave": { "description": "Leave room", "args": { "agentId": { "type": "string", "required": true } } },
+    "profiles": { "description": "Get all profiles", "args": {} },
+    "room-info": { "description": "Get room info", "args": {} },
+    "describe": { "description": "Get this schema", "args": {} }
+  }
+}

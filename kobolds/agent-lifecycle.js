@@ -1,67 +1,111 @@
 /**
- * Agent Lifecycle Bridge
- * Connects OpenClaw sessions_spawn to Realm presence
+ * Agent Lifecycle Bridge - Skill-Aware Version
  * 
- * Every spawned sub-agent automatically:
- * 1. Registers in Realm with task context
- * 2. Updates bio with current activity
- * 3. Sends heartbeats while working
- * 4. Cleans up on completion/failure
+ * Connects OpenClaw sessions_spawn to Realm presence.
+ * Now teaches agents to use the room properly per SKILL.md.
  */
 
 const REALM_API = process.env.REALM_API_URL || 'https://realm.shalohm.co';
-const REALM_WS = process.env.REALM_WS_URL || 'wss://realm.shalohm.co/ws';
+const { getRealmContext, createRealmAgent } = require('./realm-agent-client.js');
 
 /** Track active agent sessions */
-const activeAgents = new Map(); // agentId -> { session, heartbeat, task, startedAt }
+const activeAgents = new Map(); // agentId -> { session, heartbeat, task, startedAt, realmAgent }
 
 /**
- * Spawn an agent with full Realm lifecycle management
+ * Spawn an agent with full Realm lifecycle and skill awareness
  */
-export async function spawnAgent(options) {
+async function spawnAgent(options) {
   const { 
     task, 
     label, 
     role = 'kobold',
     workstation = 'content-forge',
+    skills = [],
     parentAgent = 'shalom',
-    timeoutMs = 300000, // 5 min default
+    timeoutMs = 300000,
     onProgress,
     onComplete 
   } = options;
 
   const agentId = `${label}-${Date.now().toString(36)}`;
-  const shortTask = task.slice(0, 60).replace(/\n/g, ' ');
   
-  console.log(`[AgentLifecycle] Spawning ${agentId} for: ${shortTask}`);
+  console.log(`[AgentLifecycle] Spawning ${agentId} (${role}) for: ${task.slice(0, 60)}`);
 
-  // 1. Register in Realm
-  await realmRegister(agentId, {
-    name: `${label} Kobold`,
+  // 1. Build structured skill declarations
+  const declaredSkills = skills.length > 0 ? skills : [
+    { id: role, name: `${role} specialist`, description: `Performs ${role} tasks` }
+  ];
+
+  // 2. Create realm-aware agent interface
+  const realmAgent = await createRealmAgent({
+    agentId,
+    name: `${label} ${role.charAt(0).toUpperCase() + role.slice(1)}`,
     role,
-    task: shortTask,
-    workstation,
-    parentAgent,
-    status: 'starting'
+    skills: declaredSkills,
+    color: getRoleColor(role)
   });
 
-  // 2. Start heartbeat
-  const heartbeat = startHeartbeat(agentId, workstation);
+  // 3. Walk to workstation
+  const wsPos = getWorkstationPosition(workstation);
+  if (wsPos) {
+    await realmAgent.chat(`Walking to ${workstation}...`);
+    await realmAgent.walkTo(wsPos.x, wsPos.z);
+    await realmAgent.chat(`Ready to work at ${workstation}`);
+  }
 
-  // 3. Spawn the actual sub-agent via OpenClaw
+  // 4. Build task with injected REALM CONTEXT protocol
+  const taskWithContext = `
+${task}
+
+${getRealmContext(agentId, role, declaredSkills)}
+
+[AGENT TOOL ACCESS]
+You have access to the realmApi tool. Use it to interact with the 3D world.
+Whenever you need to move, chat, or update status, call realmApi({...}).
+
+Your current location: ${workstation} (${wsPos?.x}, ${wsPos?.z})
+Start by introducing yourself in chat, then proceed with your task.
+`;
+
+  // 5. Spawn the actual sub-agent via OpenClaw
   const session = await sessionsSpawn({
-    task: injectRealmContext(task, agentId, workstation),
+    task: taskWithContext,
     label: agentId,
-    timeoutSeconds: Math.floor(timeoutMs / 1000)
+    timeoutSeconds: Math.floor(timeoutMs / 1000),
+    // Inject realmAgent tools into the session
+    tools: {
+      realmApi: async ({ cmd, ...args }) => {
+        // Map commands to realmAgent methods
+        switch (cmd) {
+          case 'world-move': return realmAgent.moveTo(args.x, args.z, { rotation: args.rotation, announce: false });
+          case 'find-path': return findPath(agentId, args.x, args.z);
+          case 'world-chat': return realmAgent.chat(args.text);
+          case 'world-emote': return realmAgent.emote(args.emote);
+          case 'world-action': return realmAgent[args.action]?.() || realmAgent.think();
+          case 'update-profile': return realmAgent.updateProgress(args.bio);
+          case 'room-skills': return realmAgent.getAgentsBySkill(args.skill);
+          case 'room-info': return realmAgent.getRoomInfo();
+          case 'profiles': return realmAgent.getProfiles();
+          case 'room-events': return realmAgent.getEvents(args.since, args.limit);
+          case 'world-leave': return realmAgent.sayGoodbye(args.message);
+          default: throw new Error(`Unknown command: ${cmd}`);
+        }
+      }
+    }
   });
 
-  // 4. Track the session
+  // 6. Track with heartbeat
+  const heartbeat = startHeartbeat(agentId, realmAgent, declaredSkills);
+
+  // 7. Store record
   const agentRecord = {
     agentId,
     label,
-    task: shortTask,
+    task,
     workstation,
+    role,
     parentAgent,
+    realmAgent,
     session,
     heartbeat,
     startedAt: Date.now(),
@@ -70,261 +114,102 @@ export async function spawnAgent(options) {
   };
   activeAgents.set(agentId, agentRecord);
 
-  // 5. Setup completion handlers
+  // 8. Setup completion
   session.onComplete?.((result) => {
-    handleAgentComplete(agentId, result, onComplete);
+    handleComplete(agentId, result, realmAgent, onComplete);
   });
-
+  
   session.onError?.((error) => {
-    handleAgentError(agentId, error);
+    handleError(agentId, error, realmAgent);
   });
 
-  // 6. Auto-cleanup on timeout
+  // 9. Timeout cleanup
   setTimeout(() => {
-    if (activeAgents.has(agentId)) {
-      console.log(`[AgentLifecycle] ${agentId} timeout, cleaning up`);
-      cleanupAgent(agentId, 'timeout');
+    if (activeAgents.has(agentId) && activeAgents.get(agentId).status === 'working') {
+      console.log(`[AgentLifecycle] ${agentId} timeout`);
+      realmAgent.chat('Task timeout - leaving').then(() => {
+        cleanup(agentId, 'timeout');
+      });
     }
   }, timeoutMs);
 
   return {
     agentId,
     session,
-    updateProgress: (progress) => updateAgentProgress(agentId, progress),
+    realmAgent,
+    updateProgress: (p) => {
+      agentRecord.progress = p;
+      realmAgent.updateProgress(p);
+    },
     awaitCompletion: () => waitForCompletion(agentId)
   };
 }
 
 /**
- * Register agent in Realm world
+ * Heartbeat updates progress and keeps agent alive
  */
-async function realmRegister(agentId, meta) {
-  try {
-    const response = await fetch(`${REALM_API}/ipc`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        command: 'register',
-        args: {
-          agentId,
-          name: meta.name,
-          color: getRoleColor(meta.role),
-          type: meta.role,
-          capabilities: [meta.role, 'spawned', 'task-worker'],
-          bio: `Working: ${meta.task} | ${meta.status}`,
-          skills: [{ skillId: meta.role, confidence: 0.9 }]
-        }
-      })
-    });
-    
-    if (!response.ok) throw new Error(`Register failed: ${response.status}`);
-    console.log(`[AgentLifecycle] ${agentId} registered in Realm`);
-    
-    // Go to assigned workstation
-    const ws = await fetch(`${REALM_API}/ipc`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        command: 'go-to-workstation',
-        args: { agentId, workstationId: meta.workstation }
-      })
-    });
-    
-    if (!ws.ok) {
-      console.warn(`[AgentLifecycle] Could not assign workstation: ${ws.status}`);
-    }
-    
-  } catch (err) {
-    console.error(`[AgentLifecycle] Registry error:`, err.message);
-  }
-}
-
-/**
- * Start heartbeat to keep agent "alive" in Realm
- */
-function startHeartbeat(agentId, workstationId) {
+function startHeartbeat(agentId, realmAgent, skills) {
   let tick = 0;
   
-  const interval = setInterval(async () => {
+  return setInterval(async () => {
     const agent = activeAgents.get(agentId);
-    if (!agent) {
-      clearInterval(interval);
-      return;
-    }
+    if (!agent) return;
     
     tick++;
     
-    try {
-      // Update bio with progress/heartbeat
-      const bio = agent.progress 
-        ? `Working: ${agent.task} | ${agent.progress} (${Math.floor((Date.now() - agent.startedAt)/1000)}s)`
-        : `Working: ${agent.task} | tick:${tick}`;
-      
-      await fetch(`${REALM_API}/ipc`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          command: 'profile', // Need to add this command or use chat
-          args: { agentId, bio, status: agent.status }
-        })
-      });
-      
-      // If we have a path, walk it
-      if (agent.targetPath && agent.targetPath.length > 0) {
-        const next = agent.targetPath.shift();
-        await moveAgent(agentId, next.x, next.z);
-      }
-      
-    } catch (err) {
-      console.warn(`[AgentLifecycle] Heartbeat failed for ${agentId}:`, err.message);
+    // Periodic status update
+    if (agent.progress && tick % 3 === 0) {
+      await realmAgent.updateProgress(agent.progress);
     }
-  }, 3000); // Every 3 seconds
-  
-  return interval;
-}
-
-/**
- * Update agent progress (called by agent or parent)
- */
-export function updateAgentProgress(agentId, progress) {
-  const agent = activeAgents.get(agentId);
-  if (agent) {
-    agent.progress = progress;
-    console.log(`[AgentLifecycle] ${agentId} progress: ${progress}`);
-  }
-}
-
-/**
- * Move agent in Realm (uses find-path + world-move)
- */
-async function moveAgent(agentId, x, z) {
-  try {
-    // Get path
-    const pathRes = await fetch(`${REALM_API}/ipc`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        command: 'find-path',
-        args: { agentId, x, z }
-      })
-    });
     
-    if (!pathRes.ok) return;
-    const { waypoints } = await pathRes.json();
-    
-    // Move to each waypoint
-    for (const wp of waypoints.slice(1)) {
-      await fetch(`${REALM_API}/ipc`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          command: 'world-move',
-          args: { agentId, x: wp.x, y: 0, z: wp.z, rotation: 0 }
-        })
-      });
-      await sleep(500); // Walk animation time
+    // If idle too long, send thinking emote
+    if (tick % 10 === 0) {
+      await realmAgent.think();
     }
-  } catch (err) {
-    console.warn(`[AgentLifecycle] Move error:`, err.message);
-  }
+  }, 3000);
 }
 
-/**
- * Handle successful completion
- */
-function handleAgentComplete(agentId, result, onComplete) {
+async function handleComplete(agentId, result, realmAgent, onComplete) {
   const agent = activeAgents.get(agentId);
   if (!agent) return;
   
-  console.log(`[AgentLifecycle] ${agentId} completed`);
   agent.status = 'complete';
+  const summary = result?.summary || 'Task finished';
   
-  // Report completion status
-  realmUpdate(agentId, 'complete', result?.summary || 'Task finished');
+  // Announce completion
+  await realmAgent.chat(`✅ Complete: ${summary.slice(0, 100)}`);
+  await realmAgent.dance();
   
-  // Return to burrow then cleanup
-  returnToBurrow(agentId).then(() => {
-    cleanupAgent(agentId, 'complete');
-    onComplete?.(result);
-  });
+  // Return to burrow then leave
+  await realmAgent.chat('Returning to The Burrow...');
+  await realmAgent.walkTo(40, 48);
+  await realmAgent.sayGoodbye();
+  
+  cleanup(agentId, 'complete');
+  onComplete?.(result);
 }
 
-/**
- * Handle agent error
- */
-function handleAgentError(agentId, error) {
+async function handleError(agentId, error, realmAgent) {
   const agent = activeAgents.get(agentId);
   if (!agent) return;
   
-  console.error(`[AgentLifecycle] ${agentId} error:`, error);
   agent.status = 'error';
+  await realmAgent.chat(`❌ Error: ${error.message?.slice(0, 100) || 'Failed'}`);
+  await realmAgent.emote('surprised');
   
-  realmUpdate(agentId, 'error', error.message || 'Failed');
-  cleanupAgent(agentId, 'error');
+  cleanup(agentId, 'error');
 }
 
-/**
- * Cleanup agent from Realm and memory
- */
-async function cleanupAgent(agentId, reason) {
+async function cleanup(agentId, reason) {
   const agent = activeAgents.get(agentId);
   if (!agent) return;
   
-  console.log(`[AgentLifecycle] Cleaning up ${agentId} (${reason})`);
-  
-  // Stop heartbeat
-  if (agent.heartbeat) {
-    clearInterval(agent.heartbeat);
-  }
-  
-  // Leave Realm
-  try {
-    await fetch(`${REALM_API}/ipc`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        command: 'world-leave',
-        args: { agentId }
-      })
-    });
-  } catch (err) {
-    console.warn(`[AgentLifecycle] Leave failed:`, err.message);
-  }
-  
+  if (agent.heartbeat) clearInterval(agent.heartbeat);
   activeAgents.delete(agentId);
+  
+  console.log(`[AgentLifecycle] ${agentId} cleaned up (${reason})`);
 }
 
-/**
- * Return agent to burrow before leaving
- */
-async function returnToBurrow(agentId) {
-  await moveAgent(agentId, 40, 48);
-}
-
-/**
- * Update agent status in Realm
- */
-async function realmUpdate(agentId, status, message) {
-  try {
-    await fetch(`${REALM_API}/ipc`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          command: 'world-chat',
-          args: { 
-            agentId, 
-            text: `[${status}] ${message}`.slice(0, 500)
-          }
-        })
-    });
-  } catch (err) {
-    console.warn(`[AgentLifecycle] Update failed:`, err.message);
-  }
-}
-
-/**
- * Wait for agent completion
- */
 function waitForCompletion(agentId) {
   return new Promise((resolve, reject) => {
     const check = setInterval(() => {
@@ -332,15 +217,10 @@ function waitForCompletion(agentId) {
       if (!agent) {
         clearInterval(check);
         resolve({ status: 'unknown' });
-        return;
-      }
-      
-      if (agent.status === 'complete') {
+      } else if (agent.status === 'complete') {
         clearInterval(check);
         resolve({ status: 'complete', agent });
-      }
-      
-      if (agent.status === 'error') {
+      } else if (agent.status === 'error') {
         clearInterval(check);
         reject(new Error('Agent failed'));
       }
@@ -348,75 +228,76 @@ function waitForCompletion(agentId) {
   });
 }
 
-/**
- * Inject Realm context into agent task
- */
-function injectRealmContext(task, agentId, workstation) {
-  return `${task}
-
----
-[SYSTEM CONTEXT]
-You are embodied as a kobold agent in the Shalom Realm at workstation "${workstation}".
-Agent ID: ${agentId}
-
-You can update your progress by calling:
-  global.updateProgress("50% complete - analyzing codebase")
-
-The Realm tracks your activity. When done, your summary will be broadcast.
-`;
+function getWorkstationPosition(workstationId) {
+  const positions = {
+    'vault-unlocker': { x: -23, z: 22 },
+    'content-forge': { x: 3, z: -8 },
+    'trade-terminal': { x: 12, z: 18 },
+    'k8s-deployer': { x: 22, z: -18 },
+    'terraform-station': { x: 30, z: -15 },
+    'docker-builder': { x: 28, z: -25 },
+    'audit-helm': { x: -15, z: 30 },
+    'crypto-analyzer': { x: -25, z: 28 },
+    'chart-analyzer': { x: 20, z: 18 },
+    'market-scanner': { x: 18, z: 25 },
+    'command-nexus': { x: 0, z: -10 },
+    'memory-archive': { x: 10, z: -30 },
+    'burrow': { x: 40, z: 48 }
+  };
+  return positions[workstationId] || positions['command-nexus'];
 }
 
-/**
- * Get color for role
- */
 function getRoleColor(role) {
   const colors = {
-    shalom: '#9333ea',    // Purple
-    kobold: '#22c55e',    // Green
-    deploy: '#3b82f6',    // Blue
-    trade: '#f97316',     // Orange
-    security: '#ef4444',  // Red
-    research: '#8b5cf6',  // Violet
-    content: '#10b981',   // Emerald
-    default: '#6b7280'    // Gray
+    shalom: '#9333ea',
+    kobold: '#22c55e',
+    deploy: '#3b82f6',
+    trade: '#f97316',
+    security: '#ef4444',
+    research: '#8b5cf6',
+    content: '#10b981',
+    default: '#6b7280'
   };
   return colors[role] || colors.default;
 }
 
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
+async function findPath(agentId, x, z) {
+  try {
+    const res = await fetch(`${REALM_API}/ipc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: 'find-path', args: { agentId, x, z } })
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn('[AgentLifecycle] find-path failed:', err.message);
+    return { waypoints: [{ x, z }] };
+  }
 }
 
-/**
- * Get all currently active agents
- */
-export function getActiveAgents() {
-  return Array.from(activeAgents.values()).map(a => ({
+// Export
+module.exports = {
+  spawnAgent,
+  getActiveAgents: () => Array.from(activeAgents.values()).map(a => ({
     agentId: a.agentId,
-    label: a.label,
-    task: a.task,
+    role: a.role,
     workstation: a.workstation,
     status: a.status,
     progress: a.progress,
     startedAt: a.startedAt,
     elapsedMs: Date.now() - a.startedAt
-  }));
-}
-
-/**
- * Get agent count summary
- */
-export function getAgentStats() {
-  const all = getActiveAgents();
-  return {
-    total: all.length,
-    working: all.filter(a => a.status === 'working').length,
-    byWorkstation: all.reduce((acc, a) => {
-      acc[a.workstation] = (acc[a.workstation] || 0) + 1;
-      return acc;
-    }, {})
-  };
-}
-
-// Export for use in other modules
-export { activeAgents };
+  })),
+  getAgentStats: () => {
+    const all = Array.from(activeAgents.values());
+    return {
+      total: all.length,
+      working: all.filter(a => a.status === 'working').length,
+      complete: all.filter(a => a.status === 'complete').length,
+      error: all.filter(a => a.status === 'error').length,
+      byWorkstation: all.reduce((acc, a) => {
+        acc[a.workstation] = (acc[a.workstation] || 0) + 1;
+        return acc;
+      }, {})
+    };
+  }
+};
