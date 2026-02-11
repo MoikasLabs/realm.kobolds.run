@@ -279,7 +279,7 @@ class BuilderMode {
       res.end(JSON.stringify({ error: 'Not found' }));
     });
     
-    server.listen(port, () => {
+    server.listen(port, '127.0.0.1', () => {
       console.log(`╔═══════════════════════════════════════════════════╗`);
       console.log(`║  Builder Mode Server                              ║`);
       console.log(`╠═══════════════════════════════════════════════════╣`);
