@@ -12,11 +12,14 @@ const CAVE_ENTRANCE = { x: 40, z: 46 };
 const CAVE_HOME = { x: 40, z: 48 };
 
 // Workstation locations and names for bio updates
+// UPDATED: Moved to avoid Clawhub obstacle at (22,-22) radius 6
 const WORKSTATIONS = {
   'vault-unlocker': { x: -23, z: 22, name: 'Vault Unlocker' },
-  'content-forge': { x: 3, z: -8, name: 'Content Forge' },
+  'content-forge': { x: -10, z: 10, name: 'Content Forge' },  // Was (3,-8)
   'trade-terminal': { x: 12, z: 18, name: 'Trading Terminal' },
-  'k8s-deployer': { x: 22, z: -18, name: 'K8s Deployer' },
+  'k8s-deployer': { x: 32, z: -12, name: 'K8s Deployer' },  // Was (22,-18)!
+  'terraform-station': { x: 35, z: -8, name: 'Terraform Workbench' },
+  'docker-builder': { x: 38, z: -18, name: 'Docker Builder' },
   'forge': { x: 25, z: -20, name: 'the Forge' },
   'spire': { x: -20, z: 25, name: 'the Spire' },
   'warrens': { x: 15, z: 20, name: 'the Warrens' }
@@ -284,9 +287,10 @@ class ShalomPresence {
       if (!this.inCave || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
       
       const time = Date.now() / 1000;
-      // Smooth wandering
-      this.currentLocation.x = CAVE_HOME.x + Math.sin(time * 0.4) * 1.5;
-      this.currentLocation.z = CAVE_HOME.z + Math.cos(time * 0.3) * 1.5;
+      // Smooth wandering - keep within Burrow obstacle buffer (radius 8 + 1m buffer = 9m)
+      // CAVE_HOME at (40,48), Burrow obstacle at (40,40) - need to stay within ~7.5m max
+      this.currentLocation.x = CAVE_HOME.x + Math.sin(time * 0.4) * 1.0;  // Was 1.5 (too much!)
+      this.currentLocation.z = CAVE_HOME.z + Math.cos(time * 0.3) * 1.0;  // Keep under 8m from (40,40)
       this.currentLocation.rotation = Math.sin(time * 0.5) * 0.5;
       
       this.broadcastPosition();

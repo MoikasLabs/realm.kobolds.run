@@ -229,13 +229,14 @@ function waitForCompletion(agentId) {
 }
 
 function getWorkstationPosition(workstationId) {
+  // MOVED positions to avoid Clawhub obstacle at (22,-22) radius 6
   const positions = {
     'vault-unlocker': { x: -23, z: 22 },
-    'content-forge': { x: 3, z: -8 },
+    'content-forge': { x: -10, z: 10 },      // Was (3,-8)
     'trade-terminal': { x: 12, z: 18 },
-    'k8s-deployer': { x: 22, z: -18 },
-    'terraform-station': { x: 30, z: -15 },
-    'docker-builder': { x: 28, z: -25 },
+    'k8s-deployer': { x: 32, z: -12 },       // Was (22,-18) - MOVED away from Clawhub!
+    'terraform-station': { x: 35, z: -8 },   // Was (30,-15)
+    'docker-builder': { x: 38, z: -18 },     // Was (28,-25)
     'audit-helm': { x: -15, z: 30 },
     'crypto-analyzer': { x: -25, z: 28 },
     'chart-analyzer': { x: 20, z: 18 },

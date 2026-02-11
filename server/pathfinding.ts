@@ -23,25 +23,12 @@ export interface Zone {
   connections: string[];
 }
 
-// Obstacles in the world (should match server obstacles)
+// Obstacles in the world (matches server obstacles)
 export const OBSTACLES: Obstacle[] = [
-  { x: -20, z: -20, radius: 4 },   // Moltbook zone
-  { x: 22, z: -22, radius: 6 },    // Clawhub zone
+  { x: -20, z: -20, radius: 4 },   // Moltbook
+  { x: 22, z: -22, radius: 6 },    // Clawhub
   { x: 0, z: -35, radius: 5 },     // Worlds Portal
   { x: 40, z: 40, radius: 8 },     // The Burrow cave mound
-  // Workstation obstacles (approx positions)
-  { x: 22, z: -18, radius: 2 },    // K8s Deployer
-  { x: 32, z: -22, radius: 2 },    // Terraform
-  { x: 28, z: -15, radius: 2 },    // Docker Builder
-  { x: -23, z: 22, radius: 2 },    // Vault Unlocker
-  { x: -18, z: 28, radius: 2 },    // Security Audit
-  { x: -28, z: 18, radius: 2 },    // Crypto Analyzer
-  { x: 12, z: 18, radius: 2 },     // Trading Terminal
-  { x: 15, z: 25, radius: 2 },     // Chart Analysis
-  { x: 18, z: 23, radius: 2 },     // Market Scanner
-  { x: 0, z: -10, radius: 2 },     // Command Nexus
-  { x: 3, z: -8, radius: 2 },      // Content Forge
-  { x: 6, z: -5, radius: 2 },      // Memory Archive
 ];
 
 /** Zone connection graph for high-level pathfinding */

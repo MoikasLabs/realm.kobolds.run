@@ -40,6 +40,7 @@ commandQueue.setObstacles([
   { x: -20, z: -20, radius: 4 },  // Moltbook
   { x: 22, z: -22, radius: 6 },   // Clawhub
   { x: 0, z: -35, radius: 5 },    // Worlds Portal
+  { x: 40, z: 40, radius: 8 },    // The Burrow cave mound
 ]);
 
 const gameLoop = new GameLoop(state, spatialGrid, commandQueue, clientManager, nostr);

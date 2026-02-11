@@ -7,27 +7,27 @@ const ASSIGNMENTS_PATH = resolve(process.cwd(), "workstation-assignments.json");
 
 /** Default workstation configurations for the realm */
 const DEFAULT_WORKSTATIONS: Workstation[] = [
-  // Forge - Infrastructure & Deployment
+  // Forge - Infrastructure & Deployment (positioned AWAY from Clawhub obstacle at 22,-22 r=6)
   {
     id: "k8s-deployer",
     name: "K8s Deployment Station",
     zone: "forge",
     skillRequired: "deployment",
-    position: { x: 25, z: -20 },
+    position: { x: 32, z: -12 },  // Moved from (25,-20) - was too close to Clawhub
   },
   {
     id: "terraform-station",
     name: "Terraform Workbench",
     zone: "forge",
     skillRequired: "infrastructure",
-    position: { x: 30, z: -15 },
+    position: { x: 35, z: -8 },   // Safe distance from Clawhub
   },
   {
     id: "docker-builder",
     name: "Container Build Station",
     zone: "forge",
     skillRequired: "deployment",
-    position: { x: 28, z: -25 },
+    position: { x: 38, z: -18 },  // Moved from (28,-25) - was too close to Clawhub
   },
   // Spire - Security & Secrets
   {

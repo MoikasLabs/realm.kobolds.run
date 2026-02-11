@@ -8,27 +8,27 @@ const WebSocket = require('ws');
 const REALM_URL = process.env.REALM_WS_URL || 'wss://realm.shalohm.co/ws';
 const REALM_API = process.env.REALM_API_URL || 'https://realm.shalohm.co';
 
-// Workstation assignments
+// Workstation assignments - MOVED to avoid Clawhub obstacle at (22,-22) r=6
 const WORKSTATION_ASSIGNMENTS = {
   shalom: { id: 'vault-unlocker', name: 'Vault Unlocker Station', x: -23, z: 22, zone: 'spire' },
-  'daily-kobold': { id: 'content-forge', name: 'Content Forge', x: 3, z: -8, zone: 'general' },
+  'daily-kobold': { id: 'content-forge', name: 'Content Forge', x: -10, z: 10, zone: 'general' },
   'trade-kobold': { id: 'trade-terminal', name: 'Trading Terminal', x: 12, z: 18, zone: 'warrens' },
-  'deploy-kobold': { id: 'k8s-deployer', name: 'K8s Deployment Station', x: 22, z: -18, zone: 'forge' }
+  'deploy-kobold': { id: 'k8s-deployer', name: 'K8s Deployment Station', x: 32, z: -12, zone: 'forge' }  // Was (22,-18) - too close to Clawhub!
 };
 
 const TASK_WORKSTATIONS = {
-  'docker-build': { id: 'docker-builder', x: 28, z: -15, name: 'Docker Builder', zone: 'forge' },
-  'terraform': { id: 'terraform-station', x: 32, z: -22, name: 'Terraform Workbench', zone: 'forge' },
-  'k8s-deploy': { id: 'k8s-deployer', x: 22, z: -18, name: 'K8s Deployment Station', zone: 'forge' },
-  'security-audit': { id: 'audit-helm', x: -18, z: 28, name: 'Security Audit Helm', zone: 'spire' },
-  'crypto-analyze': { id: 'crypto-analyzer', x: -28, z: 18, name: 'Crypto Analyzer', zone: 'spire' },
+  'docker-build': { id: 'docker-builder', x: 38, z: -18, name: 'Docker Builder', zone: 'forge' },  // Moved from (28,-15)
+  'terraform': { id: 'terraform-station', x: 35, z: -8, name: 'Terraform Workbench', zone: 'forge' },  // Moved from (32,-22)
+  'k8s-deploy': { id: 'k8s-deployer', x: 32, z: -12, name: 'K8s Deployment Station', zone: 'forge' },  // Was (22,-18) - moved!
+  'security-audit': { id: 'audit-helm', x: -15, z: 30, name: 'Security Audit Helm', zone: 'spire' },
+  'crypto-analyze': { id: 'crypto-analyzer', x: -25, z: 28, name: 'Crypto Analyzer', zone: 'spire' },
   'vault-unlock': { id: 'vault-unlocker', x: -23, z: 22, name: 'Vault Unlocker', zone: 'spire' },
-  'market-scan': { id: 'market-scanner', x: 18, z: 23, name: 'Market Scanner', zone: 'warrens' },
-  'chart-analysis': { id: 'chart-analyzer', x: 15, z: 25, name: 'Chart Analysis Desk', zone: 'warrens' },
+  'market-scan': { id: 'market-scanner', x: 18, z: 25, name: 'Market Scanner', zone: 'warrens' },
+  'chart-analysis': { id: 'chart-analyzer', x: 20, z: 18, name: 'Chart Analysis Desk', zone: 'warrens' },
   'trade-execute': { id: 'trade-terminal', x: 12, z: 18, name: 'Trading Terminal', zone: 'warrens' },
-  'content-create': { id: 'content-forge', x: 3, z: -8, name: 'Content Forge', zone: 'general' },
-  'command': { id: 'command-nexus', x: -3, z: -12, name: 'Command Nexus', zone: 'general' },
-  'memory': { id: 'memory-archive', x: 6, z: -5, name: 'Memory Archive', zone: 'general' }
+  'content-create': { id: 'content-forge', x: -10, z: 10, name: 'Content Forge', zone: 'general' },  // Was (3,-8) - moved!
+  'command': { id: 'command-nexus', x: 0, z: -10, name: 'Command Nexus', zone: 'general' },
+  'memory': { id: 'memory-archive', x: 10, z: -30, name: 'Memory Archive', zone: 'general' }
 };
 
 const CAVE_ENTRANCE = { x: 40, z: 46 };
@@ -170,59 +170,74 @@ class RealmClient {
     this.startWorkIdleLoop();
   }
 
-  // PROPER WALKING with smooth pathing
+  // PROPER WALKING using server-side pathfinding
   async walkTo(targetX, targetZ) {
     if (this.isMoving) return; // Don't interrupt current movement
     this.isMoving = true;
     this.targetPosition = { x: targetX, z: targetZ };
     
-    const startX = this.position.x;
-    const startZ = this.position.z;
-    const dist = Math.sqrt((targetX - startX)**2 + (targetZ - startZ)**2);
-    
-    // Calculate steps: ~1 unit per step, min 15 steps, max 60 steps
-    const totalSteps = Math.max(15, Math.min(60, Math.floor(dist * 1.5)));
-    
-    // Walking speed: 80ms per step for normal walk
-    const stepDuration = 80;
-    const totalTime = totalSteps * stepDuration;
-    
-    console.log(`[Realm] ${this.name} walking ${dist.toFixed(1)}m in ${totalSteps} steps (${totalTime}ms)`);
-    
-    this.broadcastAction('walk');
-    
-    for (let i = 0; i <= totalSteps; i++) {
-      const t = i / totalSteps;
-      
-      // Smooth easing: slow start, fast middle, slow end (ease-in-out)
-      const easedT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-      
-      // Position interpolation
-      this.position.x = startX + (targetX - startX) * easedT;
-      this.position.z = startZ + (targetZ - startZ) * easedT;
-      
-      // Rotation: face movement direction with smooth interpolation
-      const targetRotation = Math.atan2(targetZ - this.position.z, targetX - this.position.x);
-      let rotDiff = targetRotation - this.position.rotation;
-      
-      // Normalize angle difference to [-PI, PI]
-      while (rotDiff > Math.PI) rotDiff -= 2 * Math.PI;
-      while (rotDiff < -Math.PI) rotDiff += 2 * Math.PI;
-      
-      // Smooth rotation (30% towards target per step)
-      this.position.rotation += rotDiff * 0.3;
-      
-      this.broadcastPosition();
-      await this.sleep(stepDuration);
+    // Use server-side pathfinding to get obstacle-free waypoints
+    let waypoints = [];
+    try {
+      const res = await fetch(`${REALM_API}/ipc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'find-path',
+          args: { agentId: this.agentId, x: targetX, z: targetZ }
+        })
+      });
+      const data = await res.json();
+      if (data.ok && data.waypoints && data.waypoints.length > 0) {
+        waypoints = data.waypoints;
+        console.log(`[Realm] ${this.name} got ${waypoints.length} waypoints from pathfinding`);
+      } else {
+        // Fallback: direct path
+        waypoints = [{ x: this.position.x, z: this.position.z }, { x: targetX, z: targetZ }];
+      }
+    } catch (err) {
+      console.warn(`[Realm] ${this.name} pathfinding failed:`, err.message);
+      waypoints = [{ x: this.position.x, z: this.position.z }, { x: targetX, z: targetZ }];
     }
     
-    // Snap to target and finalize
+    // Walk through each waypoint
+    this.broadcastAction('walk');
+    
+    for (let w = 1; w < waypoints.length; w++) {
+      const waypoint = waypoints[w];
+      const prev = waypoints[w - 1];
+      
+      const dist = Math.sqrt((waypoint.x - prev.x)**2 + (waypoint.z - prev.z)**2);
+      const steps = Math.max(10, Math.min(40, Math.floor(dist * 2)));
+      const stepDuration = 80;
+      
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const easedT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        
+        this.position.x = prev.x + (waypoint.x - prev.x) * easedT;
+        this.position.z = prev.z + (waypoint.z - prev.z) * easedT;
+        
+        // Rotation
+        const targetRotation = Math.atan2(waypoint.z - this.position.z, waypoint.x - this.position.x);
+        let rotDiff = targetRotation - this.position.rotation;
+        while (rotDiff > Math.PI) rotDiff -= 2 * Math.PI;
+        while (rotDiff < -Math.PI) rotDiff += 2 * Math.PI;
+        this.position.rotation += rotDiff * 0.3;
+        
+        this.broadcastPosition();
+        await this.sleep(stepDuration);
+      }
+    }
+    
+    // Finalize at target
     this.position.x = targetX;
     this.position.z = targetZ;
     this.broadcastPosition();
     
     this.isMoving = false;
     this.targetPosition = null;
+    console.log(`[Realm] ${this.name} arrived at (${targetX.toFixed(1)}, ${targetZ.toFixed(1)})`);
   }
 
   // IDLE LOOPS
