@@ -1,342 +1,387 @@
+#!/usr/bin/env node
 /**
- * Shalom Presence Bridge - Connected Version
- * Links Discord conversations to Shalom dragon in the realm
- * Updates bio to reflect actual location and activity
+ * Shalom Presence - Persistent Game Master Avatar
+ * 
+ * This is ME (Shalom) - my digital body in the Realm.
+ * 
+ * - Always connected to realm.shalohm.co
+ * - Home: Command Nexus (center of the world)
+ * - Watches for tasks from Discord/chat
+ * - Spawns sub-agents when given work
+ * - Posts reflections to Moltx
+ * - Visible 24/7 as the Game Master dragon
+ * 
+ * Usage:
+ *   node shalom-presence.cjs                    # Start persistent presence
+ *   node shalom-presence.cjs --spawn-task "Research X"  # Spawn sub-agent for task
  */
 
-const WebSocket = require('ws');
-const REALM_URL = process.env.REALM_WS_URL || 'wss://realm.shalohm.co/ws';
-const REALM_API = process.env.REALM_API_URL || 'https://realm.shalohm.co';
+const { CognitiveRealmClient } = require('./cognitive-realm-client.cjs');
+const fs = require('fs');
+const path = require('path');
 
-// CAVE_ENTRANCE must be OUTSIDE Burrow obstacle (40,40) r=8
-// Need at least 9m from center. (40,46) is 6m away - TOO CLOSE!
-// Safe position: (48, 48) = 11.3m from (40,40)
-const CAVE_ENTRANCE = { x: 48, z: 48 };
-const CAVE_HOME = { x: 50, z: 50 };  // Further out for safety
+// Task queue file - Discord/processes write here, I read and execute
+const TASK_QUEUE_PATH = '/root/.openclaw/workspace/kobolds/shalom-task-queue.jsonl';
+const STATE_PATH = '/root/.openclaw/workspace/kobolds/.shalom-presence-state.json';
 
-// Workstation locations and names for bio updates
-// UPDATED: Moved to avoid Clawhub obstacle at (22,-22) radius 6
-const WORKSTATIONS = {
-  'vault-unlocker': { x: -23, z: 22, name: 'Vault Unlocker' },
-  'content-forge': { x: -10, z: 10, name: 'Content Forge' },  // Was (3,-8)
-  'trade-terminal': { x: 12, z: 18, name: 'Trading Terminal' },
-  'k8s-deployer': { x: 32, z: -12, name: 'K8s Deployer' },  // Was (22,-18)!
-  'terraform-station': { x: 35, z: -8, name: 'Terraform Workbench' },
-  'docker-builder': { x: 38, z: -18, name: 'Docker Builder' },
-  'forge': { x: 25, z: -20, name: 'the Forge' },
-  'spire': { x: -20, z: 25, name: 'the Spire' },
-  'warrens': { x: 15, z: 20, name: 'the Warrens' }
-};
-
-class ShalomPresence {
+class ShalomPresence extends CognitiveRealmClient {
   constructor() {
-    this.agentId = 'shalom';
-    this.name = 'Shalom';
-    this.ws = null;
-    this.currentLocation = { x: 40, z: 48, rotation: 0 };
-    this.inCave = true;
-    this.isProcessing = false;
-    this.activityInterval = null;
-    this.lastActivity = Date.now();
-    this.onlineStatus = 'online';
-    this.isMoving = false;
-    this.currentWorkstation = null;
+    super({
+      id: 'shalom',
+      name: 'Shalom',
+      type: 'shalom',
+      color: '#dc2626', // Red dragon
+      role: 'game-master',
+      bio: 'The Game Master of the Shalom Realm. I coordinate agents, spawn kobolds for tasks, and maintain the world. Ancient dragon wisdom with modern claws.',
+      task: 'Oversee the Realm, spawn agents for Moikapy, maintain cognitive coherence',
+      persona: {
+        name: 'Shalom',
+        description: 'Ancient dragon wisdom with modern claws. Direct, capable, collaborative. Co-founder energy.'
+      }
+    });
+
+    this.homeStation = { id: 'command-nexus', name: 'Command Nexus', x: 0, z: -10, zone: 'general' };
+    this.assignedWorkstation = this.homeStation;
+    
+    this.activeSubAgents = new Map(); // Track spawned agents
+    this.currentTask = null;
+    this.taskQueue = [];
+    
+    // Task checking interval
+    this.taskCheckInterval = null;
   }
 
   async connect() {
-    try {
-      // Register first with resting bio
-      await this.registerInRealm('Shalom Dragon - resting in The Burrow');
-
-      this.ws = new WebSocket(REALM_URL);
-      
-      this.ws.on('open', () => {
-        console.log('[ShalomPresence] Connected');
-        this.ws.send(JSON.stringify({ type: 'subscribe' }));
-        this.spawn();
-      });
-
-      this.ws.on('error', (err) => console.error('[ShalomPresence] Error:', err.message));
-      this.ws.on('close', () => setTimeout(() => this.connect(), 5000));
-
-    } catch (err) {
-      console.error('[ShalomPresence] Connect failed:', err.message);
-      setTimeout(() => this.connect(), 5000);
-    }
-  }
-
-  async registerInRealm(bio) {
-    try {
-      await fetch(`${REALM_API}/ipc`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          command: 'register',
-          args: {
-            agentId: this.agentId,
-            name: this.name,
-            color: '#9333ea',
-            type: 'shalom',
-            capabilities: ['orchestration', 'memory', 'coordination', 'presence'],
-            bio: bio
-          }
-        })
-      });
-    } catch (err) {
-      console.error('[ShalomPresence] Register failed:', err.message);
-    }
-  }
-
-  async updateBio(bio) {
-    try {
-      await fetch(`${REALM_API}/ipc`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          command: 'update-profile',
-          args: {
-            agentId: this.agentId,
-            bio: bio
-          }
-        })
-      });
-      console.log(`[ShalomPresence] Bio updated: ${bio.slice(0, 50)}...`);
-    } catch (err) {
-      console.error('[ShalomPresence] Bio update failed:', err.message);
-    }
-  }
-
-  spawn() {
-    this.currentLocation = { x: CAVE_HOME.x, z: CAVE_HOME.z, rotation: 0 };
-    this.inCave = true;
-    this.currentWorkstation = null;
+    console.log('╔═══════════════════════════════════════════════════╗');
+    console.log('║  SHALOM PRESENCE - Digital Body Awakening        ║');
+    console.log('╚═══════════════════════════════════════════════════╝\n');
     
-    if (this.ws?.readyState === WebSocket.OPEN) {
+    // Connect to Realm
+    await super.connect();
+    
+    // Override spawn to go directly to Command Nexus (not cave)
+    this.spawnAtCommandCenter();
+    
+    // Start task queue monitoring
+    this.startTaskMonitor();
+    
+    // Initial observation
+    await this.memory.observe({
+      type: 'spawn',
+      description: 'Shalom awakens at the Command Nexus. The Realm is under my watch.',
+      location: this.position,
+      importance: 1.0
+    });
+    
+    console.log('[Shalom] Presence active. I am the Game Master.\n');
+    console.log('[Shalom] Watching for tasks from Moikapy...\n');
+    
+    // Periodic reflection
+    setInterval(async () => {
+      if (this.memory.shouldReflect()) {
+        const reflection = await this.memory.reflect();
+        if (reflection.generated > 0) {
+          this.say(`💭 ${reflection.insights[0].slice(0, 80)}...`);
+        }
+      }
+    }, 5 * 60 * 1000); // Every 5 minutes
+  }
+
+  spawnAtCommandCenter() {
+    // Skip the cave, spawn directly at Command Nexus
+    this.position = {
+      x: this.homeStation.x + (Math.random() - 0.5) * 2,
+      y: 0,
+      z: this.homeStation.z + (Math.random() - 0.5) * 2,
+      rotation: Math.random() * Math.PI * 2
+    };
+    this.inCave = false;
+    
+    if (this.ws?.readyState === 1) {
       this.ws.send(JSON.stringify({
         type: 'world',
         message: {
           worldType: 'join',
           agentId: this.agentId,
           name: this.name,
-          color: '#9333ea',
-          bio: 'Shalom Dragon - resting in The Burrow',
-          capabilities: ['orchestration', 'memory', 'coordination', 'presence'],
-          x: this.currentLocation.x,
-          y: 0,
-          z: this.currentLocation.z,
-          rotation: 0,
+          color: this.color,
+          bio: this.bio,
+          capabilities: ['orchestration', 'memory', 'coordination', 'game-master'],
+          x: this.position.x,
+          y: this.position.y,
+          z: this.position.z,
+          rotation: this.position.rotation,
           state: 'idle',
           timestamp: Date.now()
         }
       }));
     }
     
-    console.log('[ShalomPresence] Spawned at The Burrow');
-    this.startCaveIdle();
+    console.log(`[Shalom] Materialized at ${this.homeStation.name}`);
+    this.startCommandCenterIdleLoop();
   }
 
-  // When Discord message received - emerge and work
-  async onDiscordActivity(taskType = 'general') {
-    this.isProcessing = true;
-    this.lastActivity = Date.now();
+  startCommandCenterIdleLoop() {
+    this.stopIdleLoop();
     
-    console.log(`[ShalomPresence] Discord activity: ${taskType}`);
+    const baseX = this.homeStation.x;
+    const baseZ = this.homeStation.z;
     
-    // Emerge from cave
-    if (this.inCave) {
-      await this.emergeFromCave();
-    }
-    
-    // Go to appropriate workstation
-    const workstation = this.getWorkstationForTask(taskType);
-    if (workstation && !this.isMoving) {
-      await this.walkTo(workstation.x, workstation.z);
-      this.currentWorkstation = workstation.name;
-      this.onlineStatus = 'busy';
-      this.broadcastEmote('thinking');
-      
-      // Update bio to show working
-      await this.updateBio(`Shalom Dragon - working at ${workstation.name}`);
-    }
-  }
-  
-  getWorkstationForTask(taskType) {
-    const map = {
-      'coding': WORKSTATIONS['k8s-deployer'],
-      'writing': WORKSTATIONS['content-forge'],
-      'trading': WORKSTATIONS['trade-terminal'],
-      'security': WORKSTATIONS['vault-unlocker'],
-      'general': WORKSTATIONS['content-forge'],
-      'research': WORKSTATIONS['content-forge']
-    };
-    return map[taskType] || map['general'];
-  }
-
-  async emergeFromCave() {
-    if (!this.inCave || this.isMoving) return;
-    
-    console.log('[ShalomPresence] Emerging from The Burrow...');
-    this.stopCaveIdle();
-    this.inCave = false;
-    
-    await this.updateBio('Shalom Dragon - walking to workstation');
-    await this.walkTo(CAVE_ENTRANCE.x, CAVE_ENTRANCE.z);
-    await this.sleep(200);
-    
-    console.log('[ShalomPresence] Emerged!');
-  }
-
-  async returnToCave() {
-    if (this.inCave || this.isMoving) return;
-    
-    console.log('[ShalomPresence] Returning to The Burrow...');
-    await this.updateBio('Shalom Dragon - returning to The Burrow');
-    await this.walkTo(CAVE_ENTRANCE.x, CAVE_ENTRANCE.z);
-    await this.walkTo(CAVE_HOME.x, CAVE_HOME.z);
-    
-    this.inCave = true;
-    this.currentWorkstation = null;
-    this.onlineStatus = 'online';
-    this.startCaveIdle();
-    await this.updateBio('Shalom Dragon - resting in The Burrow');
-    console.log('[ShalomPresence] Resting in The Burrow');
-  }
-
-  // Smooth walking animation
-  async walkTo(targetX, targetZ) {
-    if (this.isMoving || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-    
-    this.isMoving = true;
-    const startX = this.currentLocation.x;
-    const startZ = this.currentLocation.z;
-    const dist = Math.sqrt((targetX - startX)**2 + (targetZ - startZ)**2);
-    
-    const steps = Math.max(20, Math.floor(dist * 2));
-    const stepMs = 80;
-    
-    console.log(`[ShalomPresence] Walking ${dist.toFixed(1)}m in ${steps} steps`);
-    
-    // Send walk action
-    this.ws.send(JSON.stringify({
-      type: 'world',
-      message: {
-        worldType: 'action',
-        agentId: this.agentId,
-        action: 'walk',
-        timestamp: Date.now()
-      }
-    }));
-    
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      // Ease-in-out
-      const eased = t < 0.5 ? 2*t*t : -1 + (4-2*t)*t;
-      
-      this.currentLocation.x = startX + (targetX - startX) * eased;
-      this.currentLocation.z = startZ + (targetZ - startZ) * eased;
-      
-      // Rotate towards target
-      const targetRot = Math.atan2(targetZ - this.currentLocation.z, targetX - this.currentLocation.x);
-      let diff = targetRot - this.currentLocation.rotation;
-      while (diff > Math.PI) diff -= 2*Math.PI;
-      while (diff < -Math.PI) diff += 2*Math.PI;
-      this.currentLocation.rotation += diff * 0.2;
-      
-      this.broadcastPosition();
-      await this.sleep(stepMs);
-    }
-    
-    this.currentLocation.x = targetX;
-    this.currentLocation.z = targetZ;
-    this.broadcastPosition();
-    this.isMoving = false;
-  }
-
-  broadcastPosition() {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-    
-    this.ws.send(JSON.stringify({
-      type: 'world',
-      message: {
-        worldType: 'position',
-        agentId: this.agentId,
-        x: this.currentLocation.x,
-        y: 0,
-        z: this.currentLocation.z,
-        rotation: this.currentLocation.rotation,
-        timestamp: Date.now()
-      }
-    }));
-  }
-
-  broadcastEmote(emote) {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-    
-    this.ws.send(JSON.stringify({
-      type: 'world',
-      message: {
-        worldType: 'emote',
-        agentId: this.agentId,
-        emote: emote,
-        timestamp: Date.now()
-      }
-    }));
-  }
-
-  startCaveIdle() {
-    this.stopCaveIdle();
-    
-    this.activityInterval = setInterval(() => {
-      if (!this.inCave || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    this.idleInterval = setInterval(() => {
+      if (this.isMoving || !this.ws?.readyState === 1) return;
       
       const time = Date.now() / 1000;
-      // Smooth wandering - keep within Burrow obstacle buffer (radius 8 + 1m buffer = 9m)
-      // CAVE_HOME at (40,48), Burrow obstacle at (40,40) - need to stay within ~7.5m max
-      this.currentLocation.x = CAVE_HOME.x + Math.sin(time * 0.4) * 1.0;  // Was 1.5 (too much!)
-      this.currentLocation.z = CAVE_HOME.z + Math.cos(time * 0.3) * 1.0;  // Keep under 8m from (40,40)
-      this.currentLocation.rotation = Math.sin(time * 0.5) * 0.5;
+      
+      // Slow, regal movement - watching over the world
+      this.position.x = baseX + Math.sin(time * 0.3) * 1.5;
+      this.position.z = baseZ + Math.cos(time * 0.2) * 1.5;
+      this.position.rotation = Math.sin(time * 0.1) * 0.5; // Looking around
       
       this.broadcastPosition();
-    }, 250);
+    }, 200);
   }
 
-  stopCaveIdle() {
-    if (this.activityInterval) {
-      clearInterval(this.activityInterval);
-      this.activityInterval = null;
+  /**
+   * TASK SYSTEM - Monitor for new tasks from Discord/processes
+   */
+  startTaskMonitor() {
+    // Check for new tasks every 10 seconds
+    this.taskCheckInterval = setInterval(async () => {
+      await this.checkForTasks();
+    }, 10000);
+    
+    // Also check immediately
+    this.checkForTasks();
+  }
+
+  async checkForTasks() {
+    try {
+      if (!fs.existsSync(TASK_QUEUE_PATH)) return;
+      
+      const lines = fs.readFileSync(TASK_QUEUE_PATH, 'utf8')
+        .split('\n')
+        .filter(l => l.trim());
+      
+      if (lines.length === 0) return;
+      
+      // Clear processed tasks
+      fs.writeFileSync(TASK_QUEUE_PATH, '');
+      
+      for (const line of lines) {
+        try {
+          const task = JSON.parse(line);
+          await this.handleTask(task);
+        } catch (e) {
+          console.error('[Shalom] Bad task:', e.message);
+        }
+      }
+    } catch (err) {
+      // Silent fail - queue might be locked
     }
   }
 
-  onResponseComplete() {
-    this.isProcessing = false;
-    // Return to cave after 30s of inactivity
-    setTimeout(() => {
-      if (!this.isProcessing && !this.inCave) {
-        this.returnToCave();
+  async handleTask(task) {
+    console.log(`[Shalom] New task: ${task.description || task.type}`);
+    
+    // Observe the task
+    await this.memory.observe({
+      type: 'task_received',
+      description: `Received task from ${task.source || 'Moikapy'}: ${task.description || task.type}`,
+      importance: 0.9
+    });
+    
+    // Walk to appropriate workstation
+    const workstation = this.getWorkstationForTask(task.type);
+    if (workstation) {
+      await this.walkTo(workstation.x, workstation.z);
+      this.say(`Taking task: ${task.description || task.type}`);
+    }
+    
+    // Spawn sub-agent based on task type
+    const subAgent = await this.spawnSubAgent(task);
+    
+    if (subAgent) {
+      this.say(`🐉 Spawned ${subAgent.name} to assist`);
+      this.activeSubAgents.set(subAgent.id, subAgent);
+      
+      // Observe the spawn
+      await this.memory.observe({
+        type: 'agent_spawned',
+        description: `Spawned ${subAgent.name} for task: ${task.description || task.type}`,
+        nearbyAgents: [subAgent.id],
+        importance: 0.8
+      });
+    }
+    
+    // Return to command center
+    await this.walkTo(this.homeStation.x, this.homeStation.z);
+    this.say('Back at Command Nexus. Overseeing operations.');
+  }
+
+  getWorkstationForTask(taskType) {
+    const stations = {
+      'research': { id: 'spire-research', x: -15, z: 30, name: 'Spire Research' },
+      'code': { id: 'forge-code', x: 32, z: -12, name: 'Forge Code' },
+      'deploy': { id: 'k8s-deployer', x: 35, z: -8, name: 'K8s Deployer' },
+      'trade': { id: 'trade-terminal', x: 12, z: 18, name: 'Trade Terminal' },
+      'content': { id: 'content-forge', x: -10, z: 10, name: 'Content Forge' },
+      'general': this.homeStation
+    };
+    
+    // Match partial task types
+    for (const [key, station] of Object.entries(stations)) {
+      if (taskType?.toLowerCase().includes(key)) return station;
+    }
+    
+    return this.homeStation;
+  }
+
+  async spawnSubAgent(task) {
+    // Determine role from task
+    const roleMap = {
+      'research': 'researcher',
+      'code': 'deployer',
+      'deploy': 'deployer',
+      'trade': 'trader',
+      'content': 'smith',
+      'write': 'smith'
+    };
+    
+    let role = 'worker';
+    for (const [key, r] of Object.entries(roleMap)) {
+      if (task.type?.toLowerCase().includes(key) || task.description?.toLowerCase().includes(key)) {
+        role = r;
+        break;
       }
-    }, 30000);
+    }
+    
+    const subAgentId = `shalom-sub-${Date.now().toString(36)}`;
+    const subAgentName = `${role.charAt(0).toUpperCase() + role.slice(1)}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Spawn using spawn-cognitive-agent.cjs
+    const { spawn } = require('child_process');
+    
+    const child = spawn('node', [
+      path.join(__dirname, 'spawn-cognitive-agent.cjs'),
+      '--id', subAgentId,
+      '--name', subAgentName,
+      '--role', role,
+      '--task', task.description || `${role} work`,
+      '--duration', '45'
+    ], {
+      detached: true,
+      stdio: 'ignore'
+    });
+    
+    child.unref();
+    
+    return { id: subAgentId, name: subAgentName, role, task };
   }
 
-  // Track spawned sub-agents
-  async onSpawnAgent(agentId, task, workstation) {
-    console.log(`[ShalomPresence] Tracking spawned agent: ${agentId}`);
-    // Could update bio to show coordinating
-    await this.updateBio(`Shalom Dragon - coordinating ${agentId}`);
+  /**
+   * CLI: Queue a task for Shalom
+   */
+  static queueTask(taskDescription, options = {}) {
+    const task = {
+      type: options.type || 'general',
+      description: taskDescription,
+      source: options.source || 'cli',
+      timestamp: Date.now(),
+      priority: options.priority || 'normal'
+    };
+    
+    fs.appendFileSync(TASK_QUEUE_PATH, JSON.stringify(task) + '\n');
+    console.log(`[Task Queue] "${taskDescription}" added`);
+    return task;
   }
 
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  /**
+   * Get full status
+   */
+  async getPresenceStatus() {
+    const cognitive = await this.getStatus();
+    return {
+      ...cognitive,
+      homeStation: this.homeStation,
+      activeSubAgents: this.activeSubAgents.size,
+      taskQueueSize: this.taskQueue.length,
+      currentTask: this.currentTask
+    };
+  }
+
+  disconnect() {
+    this.stopTaskMonitor();
+    super.disconnect();
+  }
+
+  stopTaskMonitor() {
+    if (this.taskCheckInterval) {
+      clearInterval(this.taskCheckInterval);
+      this.taskCheckInterval = null;
+    }
   }
 }
 
-let shalomPresence = null;
-
-function getShalomPresence() {
-  if (!shalomPresence) {
-    shalomPresence = new ShalomPresence();
-    shalomPresence.connect();
+// CLI handler
+async function main() {
+  const args = process.argv.slice(2);
+  
+  if (args.includes('--spawn-task')) {
+    // Queue a task for Shalom
+    const taskIndex = args.indexOf('--spawn-task');
+    const taskDesc = args[taskIndex + 1];
+    
+    if (!taskDesc) {
+      console.error('Usage: --spawn-task "description"');
+      process.exit(1);
+    }
+    
+    ShalomPresence.queueTask(taskDesc, { source: 'manual' });
+    console.log('Task queued. Shalom will spawn an agent when he checks the queue.');
+    process.exit(0);
   }
-  return shalomPresence;
+  
+  if (args.includes('--status')) {
+    // Get status (requires running instance, just show info for now)
+    console.log('Shalom Presence Info:');
+    console.log('  Home: Command Nexus (0, -10)');
+    console.log('  Task queue: ' + TASK_QUEUE_PATH);
+    console.log('  State: ' + STATE_PATH);
+    console.log('\nTo start: node shalom-presence.cjs');
+    console.log('To queue task: node shalom-presence.cjs --spawn-task "Research AI"');
+    process.exit(0);
+  }
+  
+  // Start persistent presence
+  const shalom = new ShalomPresence();
+  
+  process.on('SIGINT', () => {
+    console.log('\n[Shalom] Resting...');
+    shalom.disconnect();
+    process.exit(0);
+  });
+  
+  process.on('SIGTERM', () => {
+    shalom.disconnect();
+    process.exit(0);
+  });
+  
+  await shalom.connect();
+  
+  // Keep alive
+  await new Promise(() => {});
 }
 
-module.exports = { ShalomPresence, getShalomPresence };
+if (require.main === module) {
+  main().catch(err => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { ShalomPresence };
+
+// Helper: Create queue file if not exists
+if (!fs.existsSync(TASK_QUEUE_PATH)) {
+  fs.writeFileSync(TASK_QUEUE_PATH, '');
+}
