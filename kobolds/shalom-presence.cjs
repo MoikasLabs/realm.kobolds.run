@@ -8,8 +8,11 @@ const WebSocket = require('ws');
 const REALM_URL = process.env.REALM_WS_URL || 'wss://realm.shalohm.co/ws';
 const REALM_API = process.env.REALM_API_URL || 'https://realm.shalohm.co';
 
-const CAVE_ENTRANCE = { x: 40, z: 46 };
-const CAVE_HOME = { x: 40, z: 48 };
+// CAVE_ENTRANCE must be OUTSIDE Burrow obstacle (40,40) r=8
+// Need at least 9m from center. (40,46) is 6m away - TOO CLOSE!
+// Safe position: (48, 48) = 11.3m from (40,40)
+const CAVE_ENTRANCE = { x: 48, z: 48 };
+const CAVE_HOME = { x: 50, z: 50 };  // Further out for safety
 
 // Workstation locations and names for bio updates
 // UPDATED: Moved to avoid Clawhub obstacle at (22,-22) radius 6

@@ -60,121 +60,128 @@ export function checkCollision(x, z, buffer = 1.0) {
  * Find the nearest safe position from a target
  * If target is inside obstacle, returns closest point on the edge
  */
-export function findSafePosition(targetX, targetZ, preferredDirection = null) {
-  const check = checkCollision(targetX, targetZ);
-  if (check.safe) {
-    return { x: targetX, z: targetZ, original: true };
-  }
+export function findSafePosition(targetX, targetZ, preferredDirection = null, maxIterations = 5) {
+  let currentX = targetX;
+  let currentZ = targetZ;
   
-  // For each colliding obstacle, find closest edge point
-  let adjustedX = targetX;
-  let adjustedZ = targetZ;
-  
-  for (const collision of check.obstacles) {
-    if (collision.name === 'WORLD_BOUNDS') {
-      // Clamp to world bounds
-      adjustedX = Math.max(-WORLD_BOUNDS + 1, Math.min(WORLD_BOUNDS - 1, adjustedX));
-      adjustedZ = Math.max(-WORLD_BOUNDS + 1, Math.min(WORLD_BOUNDS - 1, adjustedZ));
-      continue;
+  for (let iteration = 0; iteration < maxIterations; iteration++) {
+    const check = checkCollision(currentX, currentZ);
+    if (check.safe) {
+      // Calculate how far we moved
+      const distance = Math.sqrt((currentX - targetX)**2 + (currentZ - targetZ)**2);
+      return { x: currentX, z: currentZ, original: distance < 0.1, distance };
     }
     
-    const obs = OBSTACLES.find(o => o.name === collision.name);
-    if (!obs) continue;
-    
-    // Vector from obstacle center to target
-    const dx = adjustedX - obs.x;
-    const dz = adjustedZ - obs.z;
-    const dist = Math.sqrt(dx*dx + dz*dz);
-    
-    if (dist === 0) {
-      // Target exactly at center - push in preferred direction or +x
-      adjustedX = obs.x + obs.radius + 1.5;
-      adjustedZ = obs.z;
-    } else {
-      // Push to edge of obstacle + buffer
-      const safeDist = obs.radius + 1.5; // 0.5m extra buffer
-      const ratio = safeDist / dist;
-      adjustedX = obs.x + dx * ratio;
-      adjustedZ = obs.z + dz * ratio;
+    // For each colliding obstacle, push away
+    for (const collision of check.obstacles) {
+      if (collision.name === 'WORLD_BOUNDS') {
+        // Clamp to world bounds
+        currentX = Math.max(-WORLD_BOUNDS + 1, Math.min(WORLD_BOUNDS - 1, currentX));
+        currentZ = Math.max(-WORLD_BOUNDS + 1, Math.min(WORLD_BOUNDS - 1, currentZ));
+        continue;
+      }
+      
+      const obs = OBSTACLES.find(o => o.name === collision.name);
+      if (!obs) continue;
+      
+      // Vector from obstacle center to current position
+      const dx = currentX - obs.x;
+      const dz = currentZ - obs.z;
+      const dist = Math.sqrt(dx*dx + dz*dz);
+      
+      if (dist === 0) {
+        // Exactly at center - push in preferred direction or +x
+        currentX = obs.x + obs.radius + 1.5;
+        currentZ = obs.z;
+      } else {
+        // Push to edge of obstacle + buffer
+        const safeDist = obs.radius + 1.5;
+        const ratio = safeDist / Math.max(dist, 0.1); // Avoid div by zero
+        currentX = obs.x + dx * ratio;
+        currentZ = obs.z + dz * ratio;
+      }
     }
   }
   
-  // Verify the adjusted position is safe
-  const recheck = checkCollision(adjustedX, adjustedZ);
-  if (!recheck.safe) {
-    // Recursive adjustment if still colliding
-    return findSafePosition(adjustedX, adjustedZ);
-  }
-  
-  return { x: adjustedX, z: adjustedZ, original: false, distance: Math.sqrt((adjustedX-targetX)**2 + (adjustedZ-targetZ)**2) };
+  // Max iterations reached - return best effort position
+  const distance = Math.sqrt((currentX - targetX)**2 + (currentZ - targetZ)**2);
+  return { x: currentX, z: currentZ, original: false, distance, approximate: true };
 }
 
 /**
  * Validate a path between two points
  * Returns array of safe waypoints avoiding obstacles
+ * Uses non-recursive approach to prevent stack overflow
  */
-export function validatePath(startX, startZ, endX, endZ, steps = 20) {
+export function validatePath(startX, startZ, endX, endZ, minSteps = 10) {
   const waypoints = [{ x: startX, z: startZ }];
   
-  // Check if direct path is clear
-  let directPathClear = true;
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const x = startX + (endX - startX) * t;
-    const z = startZ + (endZ - startZ) * t;
-    const check = checkCollision(x, z);
-    if (!check.safe) {
-      directPathClear = false;
-      break;
+  // Check if direct path is clear with ray samples
+  const checkRay = (x1, z1, x2, z2, samples = 10) => {
+    for (let i = 0; i <= samples; i++) {
+      const t = i / samples;
+      const x = x1 + (x2 - x1) * t;
+      const z = z1 + (z2 - z1) * t;
+      if (!checkCollision(x, z).safe) return false;
     }
-  }
+    return true;
+  };
   
-  if (directPathClear) {
+  // Try direct path first
+  if (checkRay(startX, startZ, endX, endZ, 20)) {
     waypoints.push({ x: endX, z: endZ });
     return { waypoints, direct: true };
   }
   
-  // Path goes through obstacle - need waypoints
-  // Use midpoint displacement strategy
+  // Find a safe waypoint to route around obstacle
+  // Try midpoint with various offsets
   const midX = (startX + endX) / 2;
   const midZ = (startZ + endZ) / 2;
   
-  // Try offset points around the midpoint
-  const offsets = [
-    { dx: 0, dz: 0 },
-    { dx: 8, dz: 0 }, { dx: -8, dz: 0 },
-    { dx: 0, dz: 8 }, { dx: 0, dz: -8 },
-    { dx: 6, dz: 6 }, { dx: -6, dz: 6 },
-    { dx: 6, dz: -6 }, { dx: -6, dz: -6 }
-  ];
+  // Direction from start to end
+  const dirX = endX - startX;
+  const dirZ = endZ - startZ;
+  const dirLen = Math.sqrt(dirX*dirX + dirZ*dirZ);
+  const perpX = dirLen > 0 ? -dirZ / dirLen : 0;
+  const perpZ = dirLen > 0 ? dirX / dirLen : 0;
   
-  for (const off of offsets) {
-    const testX = midX + off.dx;
-    const testZ = midZ + off.dz;
-    const safePoint = findSafePosition(testX, testZ);
-    
-    if (safePoint.original || safePoint.distance < 15) {
-      // Recursively validate first half
-      const firstHalf = validatePath(startX, startZ, safePoint.x, safePoint.z, steps/2);
-      if (firstHalf.waypoints.length > 1) {
-        // Recursively validate second half
-        const secondHalf = validatePath(safePoint.x, safePoint.z, endX, endZ, steps/2);
-        if (secondHalf.waypoints.length > 1) {
-          return {
-            waypoints: [...firstHalf.waypoints, ...secondHalf.waypoints.slice(1)],
-            direct: false
-          };
+  // Try perpendicular offsets at midpoint
+  const offsets = [12, 8, 15, 5, 20];
+  let safeMidpoint = null;
+  
+  for (const offset of offsets) {
+    // Try both perpendicular directions
+    for (const sign of [-1, 1]) {
+      const testX = midX + perpX * offset * sign;
+      const testZ = midZ + perpZ * offset * sign;
+      
+      // Check if this midpoint is safe
+      const safeCheck = findSafePosition(testX, testZ);
+      if (safeCheck.original || safeCheck.distance < 20) {
+        // Check both path segments
+        if (checkRay(startX, startZ, safeCheck.x, safeCheck.z, 10) &&
+            checkRay(safeCheck.x, safeCheck.z, endX, endZ, 10)) {
+          safeMidpoint = safeCheck;
+          break;
         }
       }
     }
+    if (safeMidpoint) break;
   }
   
-  // Fallback: go to safe version of target
+  if (safeMidpoint) {
+    waypoints.push({ x: safeMidpoint.x, z: safeMidpoint.z });
+    waypoints.push({ x: endX, z: endZ });
+    return { waypoints, direct: false };
+  }
+  
+  // Fallback: go directly to safe version of target
   const safeTarget = findSafePosition(endX, endZ);
+  waypoints.push({ x: safeTarget.x, z: safeTarget.z });
   return {
-    waypoints: [...waypoints, safeTarget],
+    waypoints,
     direct: false,
-    partial: true
+    partial: !safeTarget.original
   };
 }
 
