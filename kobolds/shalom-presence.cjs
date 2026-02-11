@@ -17,10 +17,11 @@
  */
 
 const { CognitiveRealmClient } = require('./cognitive-realm-client.cjs');
+const { DelegationLearner } = require('./delegation-learner.js');
 const fs = require('fs');
 const path = require('path');
 
-// Task queue file - Discord/processes write here, I read and execute
+// Task queue file - Discord/processes write here, I read and delegate
 const TASK_QUEUE_PATH = '/root/.openclaw/workspace/kobolds/shalom-task-queue.jsonl';
 const STATE_PATH = '/root/.openclaw/workspace/kobolds/.shalom-presence-state.json';
 
@@ -46,6 +47,9 @@ class ShalomPresence extends CognitiveRealmClient {
     this.activeSubAgents = new Map(); // Track spawned agents
     this.currentTask = null;
     this.taskQueue = [];
+    
+    // Task delegation system (analyzes complexity, spawns right # of kobolds)
+    this.delegationLearner = new DelegationLearner();
     
     // Task checking interval
     this.taskCheckInterval = null;
@@ -190,32 +194,37 @@ class ShalomPresence extends CognitiveRealmClient {
       importance: 0.9
     });
     
-    // Walk to appropriate workstation
-    const workstation = this.getWorkstationForTask(task.type);
-    if (workstation) {
-      await this.walkTo(workstation.x, workstation.z);
-      this.say(`Taking task: ${task.description || task.type}`);
+    // SHALOM DELEGATES: Analyze task and spawn appropriate # of kobolds
+    this.say(`🧠 Analyzing task complexity...`);
+    
+    const analysis = this.delegationLearner.analyzeTask(
+      task.description || task.type,
+      task.type || 'general'
+    );
+    
+    this.say(`📊 Complexity: ${(analysis.complexityScore * 100).toFixed(0)}% → Spawning ${analysis.recommendedKobolds} kobold(s)`);
+    
+    // Execute delegation (spawn the kobolds)
+    const result = await this.delegationLearner.delegate(analysis);
+    
+    // Announce in Realm
+    if (result.koboldsSpawned === 1) {
+      this.say(`🐉 Delegated to ${result.agents[0].name} (${result.agents[0].role})`);
+    } else {
+      this.say(`🐉🐉 Delegated to ${result.koboldsSpawned} kobolds: ${result.agents.map(a => a.role).join(', ')}`);
     }
     
-    // Spawn sub-agent based on task type
-    const subAgent = await this.spawnSubAgent(task);
+    // Observe the delegation
+    await this.memory.observe({
+      type: 'task_delegated',
+      description: `Analyzed complexity ${(analysis.complexityScore * 100).toFixed(0)}%, spawned ${result.koboldsSpawned} kobold(s) with roles: ${result.agents.map(a => a.role).join(', ')}`,
+      nearbyAgents: result.agents.map(a => a.id),
+      importance: 0.9
+    });
     
-    if (subAgent) {
-      this.say(`🐉 Spawned ${subAgent.name} to assist`);
-      this.activeSubAgents.set(subAgent.id, subAgent);
-      
-      // Observe the spawn
-      await this.memory.observe({
-        type: 'agent_spawned',
-        description: `Spawned ${subAgent.name} for task: ${task.description || task.type}`,
-        nearbyAgents: [subAgent.id],
-        importance: 0.8
-      });
-    }
-    
-    // Return to command center
+    // Return to command center to oversee
     await this.walkTo(this.homeStation.x, this.homeStation.z);
-    this.say('Back at Command Nexus. Overseeing operations.');
+    this.say('Back at Command Nexus. Overseeing kobold operations.');
   }
 
   getWorkstationForTask(taskType) {
