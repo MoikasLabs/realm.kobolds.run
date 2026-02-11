@@ -7,93 +7,93 @@ const ASSIGNMENTS_PATH = resolve(process.cwd(), "workstation-assignments.json");
 
 /** Default workstation configurations for the realm */
 const DEFAULT_WORKSTATIONS: Workstation[] = [
-  // Forge - Infrastructure & Deployment (positioned AWAY from Clawhub obstacle at 22,-22 r=6)
+  // Forge - Infrastructure & Deployment (positioned 55-65m from center for clearance)
   {
     id: "k8s-deployer",
     name: "K8s Deployment Station",
     zone: "forge",
     skillRequired: "deployment",
-    position: { x: 32, z: -12 },  // Moved from (25,-20) - was too close to Clawhub
+    position: { x: 55, z: -30 },  // Wide clearance from center
   },
   {
     id: "terraform-station",
     name: "Terraform Workbench",
     zone: "forge",
     skillRequired: "infrastructure",
-    position: { x: 35, z: -8 },   // Safe distance from Clawhub
+    position: { x: 60, z: -40 },   // Wide clearance from center
   },
   {
     id: "docker-builder",
     name: "Container Build Station",
     zone: "forge",
     skillRequired: "deployment",
-    position: { x: 38, z: -18 },  // Moved from (28,-25) - was too close to Clawhub
+    position: { x: 65, z: -20 },  // Wide clearance from center
   },
-  // Spire - Security & Secrets
+  // Spire - Security & Secrets (positioned -40 to -60m for clearance)
   {
     id: "vault-unlocker",
     name: "Vault Unlocker Station",
     zone: "spire",
     skillRequired: "security",
-    position: { x: -20, z: 25 },
+    position: { x: -50, z: 30 },
   },
   {
     id: "audit-helm",
     name: "Security Audit Helm",
     zone: "spire",
     skillRequired: "security",
-    position: { x: -15, z: 30 },
+    position: { x: -40, z: 45 },
   },
   {
     id: "crypto-analyzer",
     name: "Cryptographic Analyzer",
     zone: "spire",
     skillRequired: "security",
-    position: { x: -25, z: 28 },
+    position: { x: -60, z: 25 },
   },
-  // Warrens - Trading & Analysis
+  // Warrens - Trading & Analysis (positioned 35-50m for clearance)
   {
     id: "trade-terminal",
     name: "Trading Terminal",
     zone: "warrens",
     skillRequired: "trading",
-    position: { x: 15, z: 20 },
+    position: { x: 50, z: 10 },
   },
   {
     id: "chart-analyzer",
     name: "Chart Analysis Desk",
     zone: "warrens",
     skillRequired: "analysis",
-    position: { x: 20, z: 18 },
+    position: { x: 45, z: -15 },
   },
   {
     id: "market-scanner",
     name: "Market Scanner Station",
     zone: "warrens",
     skillRequired: "trading",
-    position: { x: 18, z: 25 },
+    position: { x: 35, z: -5 },
   },
-  // General - Orchestration & Content
+  // General - Orchestration & Content (positioned 15-20m for clearance around Command Nexus)
   {
     id: "command-nexus",
     name: "Command Nexus",
-    zone: "forge",
+    zone: "general",
     skillRequired: "orchestration",
-    position: { x: 0, z: -10 },
+    position: { x: 0, z: -10 },  // Center - Shalom's home
   },
   {
     id: "content-forge",
     name: "Content Creation Forge",
-    zone: "warrens",
+    zone: "general",
     skillRequired: "content",
-    position: { x: -10, z: 10 },
+    position: { x: 20, z: 25 },  // Moved from -10,10 to give Command Nexus space
   },
   {
     id: "memory-archive",
     name: "Memory Archive",
-    zone: "spire",
+    zone: "general",
     skillRequired: "memory",
-    position: { x: 10, z: -30 },
+    position: { x: 15, z: -50 },  // Far from center
   },
 ];
 
