@@ -1,0 +1,98 @@
+{
+  "vault-unlocker": {
+    "id": "vault-unlocker",
+    "name": "Vault Unlocker Station",
+    "x": -23,
+    "z": 22,
+    "zone": "spire",
+    "radius": 3
+  },
+  "content-forge": {
+    "id": "content-forge",
+    "name": "Content Forge",
+    "x": -10,
+    "z": 10,
+    "zone": "general",
+    "radius": 3
+  },
+  "trade-terminal": {
+    "id": "trade-terminal",
+    "name": "Trading Terminal",
+    "x": 12,
+    "z": 18,
+    "zone": "warrens",
+    "radius": 3
+  },
+  "k8s-deployer": {
+    "id": "k8s-deployer",
+    "name": "K8s Deployment Station",
+    "x": 40,
+    "z": -20,
+    "zone": "forge",
+    "radius": 3
+  },
+  "docker-builder": {
+    "id": "docker-builder",
+    "name": "Docker Builder",
+    "x": 48,
+    "z": -25,
+    "zone": "forge",
+    "radius": 3
+  },
+  "terraform-station": {
+    "id": "terraform-station",
+    "name": "Terraform Workbench",
+    "x": 45,
+    "z": -5,
+    "zone": "forge",
+    "radius": 3
+  },
+  "audit-helm": {
+    "id": "audit-helm",
+    "name": "Security Audit Helm",
+    "x": -15,
+    "z": 30,
+    "zone": "spire",
+    "radius": 3
+  },
+  "crypto-analyzer": {
+    "id": "crypto-analyzer",
+    "name": "Crypto Analyzer",
+    "x": -25,
+    "z": 28,
+    "zone": "spire",
+    "radius": 3
+  },
+  "market-scanner": {
+    "id": "market-scanner",
+    "name": "Market Scanner",
+    "x": 18,
+    "z": 25,
+    "zone": "warrens",
+    "radius": 3
+  },
+  "chart-analyzer": {
+    "id": "chart-analyzer",
+    "name": "Chart Analysis Desk",
+    "x": 20,
+    "z": 18,
+    "zone": "warrens",
+    "radius": 3
+  },
+  "command-nexus": {
+    "id": "command-nexus",
+    "name": "Command Nexus",
+    "x": 0,
+    "z": -10,
+    "zone": "general",
+    "radius": 4
+  },
+  "memory-archive": {
+    "id": "memory-archive",
+    "name": "Memory Archive",
+    "x": 25,
+    "z": -40,
+    "zone": "general",
+    "radius": 3
+  }
+}
