@@ -268,10 +268,16 @@ async function findPath(agentId, x, z) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ command: 'find-path', args: { agentId, x, z } })
     });
-    return await res.json();
+    const data = await res.json();
+    // Handle case where agent has no position yet
+    if (!data.ok || !data.waypoints) {
+      console.warn('[AgentLifecycle] find-path returned no path, using direct move');
+      return { waypoints: [{ x, z }], pointCount: 1 };
+    }
+    return data;
   } catch (err) {
     console.warn('[AgentLifecycle] find-path failed:', err.message);
-    return { waypoints: [{ x, z }] };
+    return { waypoints: [{ x, z }], pointCount: 1 };
   }
 }
 

@@ -86,6 +86,42 @@
       "description": "Get skill directory (what each agent offers)",
       "args": {}
     },
+    "find-path": {
+      "description": "Get waypoints from current position to target (obstacle-aware)",
+      "requiresAgent": true,
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "x": { "type": "number", "required": true, "min": -50, "max": 50 },
+        "z": { "type": "number", "required": true, "min": -50, "max": 50 }
+      }
+    },
+    "update-profile": {
+      "description": "Update agent bio/status dynamically",
+      "requiresAgent": true,
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "bio": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string" }
+      }
+    },
+    "list-workstations": {
+      "description": "List all workstations in the room",
+      "args": {}
+    },
+    "find-by-skill": {
+      "description": "Find workstations matching a skill",
+      "args": {
+        "skill": { "type": "string" }
+      }
+    },
+    "go-to-workstation": {
+      "description": "Assign agent to a workstation",
+      "requiresAgent": true,
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "workstationId": { "type": "string", "required": true }
+      }
+    },
     "describe": {
       "description": "Get this skill.json schema",
       "args": {}

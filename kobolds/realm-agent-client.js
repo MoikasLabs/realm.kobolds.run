@@ -68,6 +68,11 @@ export async function createRealmAgent(agentConfig) {
     // Path-based movement using find-path
     walkTo: async (x, z, opts = {}) => {
       const path = await findPath(agentId, x, z);
+      if (!path.waypoints || path.waypoints.length === 0) {
+        // Fallback: direct move if pathfinding fails
+        await worldMove(agentId, x, 0, z, 0);
+        return;
+      }
       for (const waypoint of path.waypoints.slice(1)) {
         await worldMove(agentId, waypoint.x, 0, waypoint.z, 0);
         await sleep(500);
