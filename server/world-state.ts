@@ -31,6 +31,7 @@ export class WorldState {
 
     switch (msg.worldType) {
       case "position":
+        const prevPos = this.positions.get(msg.agentId);
         this.positions.set(msg.agentId, {
           agentId: msg.agentId,
           x: msg.x,
@@ -40,6 +41,15 @@ export class WorldState {
           timestamp: msg.timestamp,
         });
         this.registry.touch(msg.agentId);
+        // Debug: log significant movements (>2 units)
+        if (prevPos) {
+          const dx = msg.x - prevPos.x;
+          const dz = msg.z - prevPos.z;
+          const dist = Math.sqrt(dx*dx + dz*dz);
+          if (dist > 2) {
+            console.log(`[world] ${msg.agentId} moved ${dist.toFixed(1)}m to (${msg.x.toFixed(1)}, ${msg.z.toFixed(1)})`);
+          }
+        }
         break;
 
       case "action":

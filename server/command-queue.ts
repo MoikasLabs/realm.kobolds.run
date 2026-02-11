@@ -42,6 +42,7 @@ export class CommandQueue {
     if (msg.worldType === "position") {
       // Bounds check
       if (Math.abs(msg.x) > WORLD_HALF || Math.abs(msg.z) > WORLD_HALF) {
+        console.log(`[queue] REJECTED: ${msg.agentId} out of bounds (${msg.x.toFixed(1)}, ${msg.z.toFixed(1)})`);
         return { ok: false, reason: "out_of_bounds" };
       }
 
@@ -51,8 +52,14 @@ export class CommandQueue {
         const dz = msg.z - obs.z;
         const dist = Math.sqrt(dx * dx + dz * dz);
         if (dist < obs.radius + 1.0) {
+          console.log(`[queue] REJECTED: ${msg.agentId} collision at (${msg.x.toFixed(1)}, ${msg.z.toFixed(1)}) near obstacle (${obs.x}, ${obs.z})`);
           return { ok: false, reason: "collision" };
         }
+      }
+      
+      // Debug: log position command acceptance
+      if (process.env.REALM_DEBUG) {
+        console.log(`[queue] ACCEPTED: ${msg.agentId} position (${msg.x.toFixed(1)}, ${msg.z.toFixed(1)})`);
       }
     }
 
