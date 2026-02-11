@@ -320,7 +320,8 @@
     <div class="scale-indicator">Scale: 10px = 1 unit</div>
 
     <script>
-        const API_BASE = 'http://localhost:18801';
+        // Use current domain (works for both localhost and builder.shalohm.co)
+        const API_BASE = window.location.origin;
         let token = null;
         let workstations = {};
         let isConnected = false;
