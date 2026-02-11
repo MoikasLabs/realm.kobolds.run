@@ -156,6 +156,11 @@ class BuilderMode {
     }
   }
 
+  generateAuthToken() {
+    // Generate random token if none provided
+    return require('crypto').randomBytes(32).toString('hex');
+  }
+
   listLayouts() {
     try {
       const files = fs.readdirSync(LAYOUTS_DIR).filter(f => f.endsWith('.json'));
@@ -182,16 +187,57 @@ class BuilderMode {
   }
 
   // Start HTTP API server for builder mode
-  startServer(port = 18801) {
+  startServer(port = 18801, authToken = null) {
+    // Load auth token from env or generate one
+    const token = authToken || process.env.BUILDER_AUTH_TOKEN || this.generateAuthToken();
+    
+    console.log(`🔐 Auth Token: ${token.substring(0, 8)}...${token.substring(-4)}`);
+    console.log('   (Set BUILDER_AUTH_TOKEN env var to customize)\n');
+    
     const server = http.createServer((req, res) => {
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Content-Type', 'application/json');
       
+      // Auth check for write operations
+      const isWriteOperation = req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE';
+      if (isWriteOperation) {
+        const authHeader = req.headers['authorization'] || '';
+        const providedToken = authHeader.replace('Bearer ', '');
+        
+        if (providedToken !== token) {
+          res.statusCode = 401;
+          res.end(JSON.stringify({ error: 'Unauthorized - valid Bearer token required' }));
+          return;
+        }
+      }
+      
       const url = new URL(req.url, `http://localhost:${port}`);
       
-      // GET /api/workstations - list all
+      // GET /api/workstations - list all (public read)
       if (req.method === 'GET' && url.pathname === '/api/workstations') {
         res.end(JSON.stringify(this.workstations, null, 2));
+        return;
+      }
+      
+      // POST /api/login - get auth token (requires API key for initial auth)
+      if (req.method === 'POST' && url.pathname === '/api/login') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', () => {
+          try {
+            const { apiKey } = JSON.parse(body);
+            // Simple validation - in production use proper auth
+            if (apiKey === 'shalom-builder-2024') {
+              res.end(JSON.stringify({ token, expires: '24h' }));
+            } else {
+              res.statusCode = 401;
+              res.end(JSON.stringify({ error: 'Invalid API key' }));
+            }
+          } catch (e) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'Bad request' }));
+          }
+        });
         return;
       }
       
@@ -223,10 +269,19 @@ class BuilderMode {
       console.log(`║  Builder Mode API Server                          ║`);
       console.log(`╠═══════════════════════════════════════════════════╣`);
       console.log(`║  Port: ${port.toString().padEnd(39)} ║`);
+      console.log(`║  Auth: Bearer token required for write ops        ║`);
+      console.log(`╠═══════════════════════════════════════════════════╣`);
       console.log(`║  Endpoints:                                       ║`);
-      console.log(`║    GET  /api/workstations                         ║`);
-      console.log(`║    POST /api/workstations/:id/move {x, z}         ║`);
+      console.log(`║    GET  /api/workstations              (public)   ║`);
+      console.log(`║    POST /api/login {apiKey}            (get token)║`);
+      console.log(`║    POST /api/workstations/:id/move     (auth)     ║`);
+      console.log(`║    Headers: Authorization: Bearer <token>         ║`);
       console.log(`╚═══════════════════════════════════════════════════╝\n`);
+      
+      // Save token to file for reference
+      const tokenFile = path.join(LAYOUTS_DIR, '.auth-token.txt');
+      fs.writeFileSync(tokenFile, `${token}\n${new Date().toISOString()}\n`);
+      fs.chmodSync(tokenFile, 0o600); // Restrict permissions
     });
     
     return server;
@@ -282,7 +337,9 @@ function main() {
       break;
       
     case 'server':
-      builder.startServer(parseInt(args[1]) || 18801);
+      const port = parseInt(args[1]) || 18801;
+      const authToken = process.env.BUILDER_AUTH_TOKEN || null;
+      builder.startServer(port, authToken);
       break;
       
     default:
