@@ -107,8 +107,8 @@ class SmoothOnDemandAgent extends CognitiveRealmClient {
       importance: 0.9
     });
     
-    // Brief pause at door (2 seconds)
-    return this.sleep(2000);
+    // LONGER pause at door (10 seconds) - visible entering
+    return this.sleep(10000);
   }
 
   async walkToWorkstation() {
@@ -143,7 +143,8 @@ class SmoothOnDemandAgent extends CognitiveRealmClient {
       this.say(`⚠️ Had trouble walking, but I'm here!`);
     }
     
-    return this.sleep(500);
+    // Linger at workstation before starting work (5 seconds)
+    return this.sleep(5000);
   }
 
   async performWork() {
@@ -197,7 +198,7 @@ class SmoothOnDemandAgent extends CognitiveRealmClient {
     this.movement.moveTo(targetX, targetZ, { timeout: 3000 }).catch(() => {});
     
     // Walk back after a moment
-    await this.sleep(2000);
+    await this.sleep(3000);
     this.movement.moveTo(workstation.x, workstation.z, { timeout: 3000 }).catch(() => {});
   }
 
@@ -219,7 +220,8 @@ class SmoothOnDemandAgent extends CognitiveRealmClient {
       this.say(`📍 At ${THE_DOOR.name}, ready to exit`);
     }
     
-    return this.sleep(1000);
+    // Linger at door before exiting (5 seconds)
+    return this.sleep(5000);
   }
 
   async exit() {
@@ -241,12 +243,12 @@ class SmoothOnDemandAgent extends CognitiveRealmClient {
     // Save memory
     await this.saveSessionMemory();
     
-    // Disconnect gracefully
+    // Disconnect gracefully (longer delay so exit is visible)
     setTimeout(() => {
       this.movement.stop();
       this.disconnect();
       process.exit(0);
-    }, 2000);
+    }, 5000);
   }
 
   findWorkstation() {
@@ -324,7 +326,7 @@ async function main() {
       task: taskDesc,
       taskType: args[2] || 'general',
       requester: 'cli',
-      duration: parseInt(args[3]) || 3 // Shorter for testing
+      duration: parseInt(args[3]) || 10 // 10 min default (visible longer)
     });
     
     await agent.connect();

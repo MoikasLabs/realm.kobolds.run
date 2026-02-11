@@ -12,8 +12,8 @@
 
 const { checkCollision, findSafePosition } = require('./collision-validator.js');
 
-// Movement constants
-const MAX_SPEED = 8.0;           // meters per second
+// Movement constants - SLOWER for visibility
+const MAX_SPEED = 3.5;           // meters per second (walking speed, more visible)
 const ACCELERATION = 12.0;       // m/s²
 const DECELERATION = 16.0;       // m/s²
 const TURN_SPEED = 3.0;          // radians per second
