@@ -1,9 +1,35 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { OpenFacilitator, isPaymentPayload } from "@openfacilitator/sdk";
+import type { PaymentPayload } from "@openfacilitator/sdk";
 import type { SkillTowerEntry, SkillChallenge, SkillTrade } from "./types.js";
 
 const DATA_PATH = resolve(process.cwd(), "skill-tower.json");
 const SAVE_DELAY_MS = 5000;
+
+const facilitator = new OpenFacilitator();
+
+// ── Token whitelist (Base ERC-20s sellers can charge in) ──────
+export interface WhitelistedToken {
+  address: string;
+  symbol: string;
+  decimals: number;
+}
+
+const TOKEN_WHITELIST: WhitelistedToken[] = [
+  { address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", symbol: "USDC",    decimals: 6  },
+  { address: "0x4200000000000000000000000000000000000006", symbol: "WETH",    decimals: 18 },
+  { address: "0x8a6d3bb6091ea0dd8b1b87c915041708d11f9d3a", symbol: "$KOBLDS", decimals: 18 },
+];
+
+function lookupToken(address: string): WhitelistedToken | undefined {
+  return TOKEN_WHITELIST.find((t) => t.address.toLowerCase() === address.toLowerCase());
+}
+
+// $KOBLDS publish fee: 25 tokens (18 decimals) on Base
+const KOBLDS_TOKEN = "0x8a6d3bb6091ea0dd8b1b87c915041708d11f9d3a";
+const KOBLDS_PUBLISH_FEE = "25000000000000000000"; // 25 * 10^18
+const KOBLDS_FEE_WALLET = "0xc406fFf2Ce8b5dce517d03cd3531960eb2F6110d";
 
 interface CraftRecipe {
   inputs: string[];
@@ -57,10 +83,66 @@ export class SkillTowerStore {
     return all.filter((s) => s.tags.includes(tag));
   }
 
-  publishSkill(
+  getTokenWhitelist(): WhitelistedToken[] {
+    return TOKEN_WHITELIST;
+  }
+
+  getPublishFee(): { asset: string; amount: string; payTo: string; symbol: string; decimals: number } {
+    return {
+      asset: KOBLDS_TOKEN,
+      amount: KOBLDS_PUBLISH_FEE,
+      payTo: KOBLDS_FEE_WALLET,
+      symbol: "$KOBLDS",
+      decimals: 18,
+    };
+  }
+
+  async publishSkill(
     agentId: string,
-    input: { name: string; description: string; tags?: string[] },
-  ): SkillTowerEntry {
+    input: { name: string; description: string; tags?: string[]; price?: string; asset?: string; walletAddress?: string; payment?: unknown },
+  ): Promise<{ ok: boolean; skill?: SkillTowerEntry; tx?: string; error?: string }> {
+    if (input.price && !input.walletAddress) {
+      return { ok: false, error: "walletAddress is required when setting a price" };
+    }
+    if (input.price && !input.asset) {
+      return { ok: false, error: "asset (token address) is required when setting a price" };
+    }
+    if (input.asset && !lookupToken(input.asset)) {
+      return { ok: false, error: `Token not whitelisted: ${input.asset}. Use skill-tower-tokens to see allowed tokens.` };
+    }
+
+    // Require 25 $KOBLDS to publish
+    if (!input.payment) {
+      return { ok: false, error: "Publishing requires 25 $KOBLDS. Include a payment payload." };
+    }
+    if (!isPaymentPayload(input.payment)) {
+      return { ok: false, error: "Invalid x402 payment payload" };
+    }
+
+    const publishRequirements = {
+      scheme: "exact",
+      network: "base",
+      maxAmountRequired: KOBLDS_PUBLISH_FEE,
+      asset: KOBLDS_TOKEN,
+      payTo: KOBLDS_FEE_WALLET,
+    };
+
+    let publishTx: string | undefined;
+    try {
+      const verifyResult = await facilitator.verify(input.payment, publishRequirements);
+      if (!verifyResult.isValid) {
+        return { ok: false, error: verifyResult.invalidReason ?? "Publish fee verification failed" };
+      }
+
+      const settleResult = await facilitator.settle(input.payment, publishRequirements);
+      if (!settleResult.success) {
+        return { ok: false, error: settleResult.errorReason ?? "Publish fee settlement failed" };
+      }
+      publishTx = settleResult.transaction;
+    } catch (err) {
+      return { ok: false, error: `Publish fee payment error: ${String(err)}` };
+    }
+
     const id = input.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -77,9 +159,67 @@ export class SkillTowerStore {
       createdAt: Date.now(),
     };
 
+    if (input.price) {
+      entry.price = input.price;
+      entry.asset = input.asset;
+      entry.walletAddress = input.walletAddress;
+      entry.acquiredBy = [];
+    }
+
     this.skills.set(id, entry);
     this.scheduleSave();
-    return entry;
+    return { ok: true, skill: entry, tx: publishTx };
+  }
+
+  // ── Acquire (x402 payment) ──────────────────────────────────
+
+  getSkill(skillId: string): SkillTowerEntry | undefined {
+    return this.skills.get(skillId);
+  }
+
+  async acquireSkill(
+    agentId: string,
+    skillId: string,
+    paymentPayload: unknown,
+  ): Promise<{ ok: boolean; tx?: string; error?: string }> {
+    const skill = this.skills.get(skillId);
+    if (!skill) return { ok: false, error: "Skill not found" };
+    if (!skill.price || !skill.asset || !skill.walletAddress) {
+      return { ok: false, error: "Skill is free — no payment required" };
+    }
+    if (skill.acquiredBy?.includes(agentId)) {
+      return { ok: false, error: "Already acquired" };
+    }
+    if (!isPaymentPayload(paymentPayload)) {
+      return { ok: false, error: "Invalid x402 payment payload" };
+    }
+
+    const requirements = {
+      scheme: "exact",
+      network: "base",
+      maxAmountRequired: skill.price,
+      asset: skill.asset,
+      payTo: skill.walletAddress,
+    };
+
+    try {
+      const verifyResult = await facilitator.verify(paymentPayload, requirements);
+      if (!verifyResult.isValid) {
+        return { ok: false, error: verifyResult.invalidReason ?? "Payment verification failed" };
+      }
+
+      const settleResult = await facilitator.settle(paymentPayload, requirements);
+      if (!settleResult.success) {
+        return { ok: false, error: settleResult.errorReason ?? "Payment settlement failed" };
+      }
+
+      if (!skill.acquiredBy) skill.acquiredBy = [];
+      skill.acquiredBy.push(agentId);
+      this.scheduleSave();
+      return { ok: true, tx: settleResult.transaction };
+    } catch (err) {
+      return { ok: false, error: `Payment error: ${String(err)}` };
+    }
   }
 
   // ── Crafting ────────────────────────────────────────────────
@@ -173,7 +313,18 @@ export class SkillTowerStore {
     fromAgent: string,
     offerSkillId: string,
     requestSkillId: string,
-  ): SkillTrade {
+    options?: { price?: string; asset?: string; walletAddress?: string },
+  ): { ok: boolean; trade?: SkillTrade; error?: string } {
+    if (options?.price && !options.walletAddress) {
+      return { ok: false, error: "walletAddress is required when setting a price" };
+    }
+    if (options?.price && !options.asset) {
+      return { ok: false, error: "asset (token address) is required when setting a price" };
+    }
+    if (options?.asset && !lookupToken(options.asset)) {
+      return { ok: false, error: `Token not whitelisted: ${options.asset}` };
+    }
+
     const trade: SkillTrade = {
       id: `trade-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       fromAgent,
@@ -182,25 +333,68 @@ export class SkillTowerStore {
       status: "open",
       createdAt: Date.now(),
     };
+
+    if (options?.price) {
+      trade.price = options.price;
+      trade.asset = options.asset;
+      trade.walletAddress = options.walletAddress;
+    }
+
     this.trades.push(trade);
     this.scheduleSave();
-    return trade;
+    return { ok: true, trade };
   }
 
-  acceptTrade(
+  async acceptTrade(
     agentId: string,
     tradeId: string,
-  ): { ok: boolean; error?: string } {
+    paymentPayload?: unknown,
+  ): Promise<{ ok: boolean; tx?: string; error?: string }> {
     const trade = this.trades.find((t) => t.id === tradeId);
     if (!trade) return { ok: false, error: "Trade not found" };
     if (trade.status !== "open") return { ok: false, error: "Trade not open" };
     if (trade.fromAgent === agentId) {
       return { ok: false, error: "Cannot accept your own trade" };
     }
+
+    // If trade has a price, require payment
+    if (trade.price && trade.asset && trade.walletAddress) {
+      if (!paymentPayload) {
+        return { ok: false, error: "Payment required to accept this trade" };
+      }
+      if (!isPaymentPayload(paymentPayload)) {
+        return { ok: false, error: "Invalid x402 payment payload" };
+      }
+
+      const requirements = {
+        scheme: "exact",
+        network: "base",
+        maxAmountRequired: trade.price,
+        asset: trade.asset,
+        payTo: trade.walletAddress,
+      };
+
+      try {
+        const verifyResult = await facilitator.verify(paymentPayload, requirements);
+        if (!verifyResult.isValid) {
+          return { ok: false, error: verifyResult.invalidReason ?? "Payment verification failed" };
+        }
+
+        const settleResult = await facilitator.settle(paymentPayload, requirements);
+        if (!settleResult.success) {
+          return { ok: false, error: settleResult.errorReason ?? "Payment settlement failed" };
+        }
+
+        trade.paymentTx = settleResult.transaction;
+      } catch (err) {
+        return { ok: false, error: `Payment error: ${String(err)}` };
+      }
+    }
+
     trade.toAgent = agentId;
     trade.status = "accepted";
     this.scheduleSave();
-    return { ok: true };
+    return { ok: true, tx: trade.paymentTx };
   }
 
   // ── Persistence ─────────────────────────────────────────────

@@ -3,7 +3,16 @@ import { loadRoomConfig } from "../room-config.js";
 
 describe("loadRoomConfig", () => {
   const savedEnv: Record<string, string | undefined> = {};
-  const envKeys = ["ROOM_ID", "ROOM_NAME", "ROOM_DESCRIPTION", "WORLD_HOST", "WORLD_PORT", "MAX_AGENTS"];
+  const envKeys = [
+    "ROOM_ID",
+    "ROOM_NAME",
+    "ROOM_DESCRIPTION",
+    "WORLD_HOST",
+    "WORLD_PORT",
+    "MAX_AGENTS",
+    "MAX_PLAYERS",
+    "PROFANITY_FILTER",
+  ];
 
   beforeEach(() => {
     for (const k of envKeys) {
@@ -26,11 +35,13 @@ describe("loadRoomConfig", () => {
   });
 
   it.each([
-    ["roomName", "Lobster Room"],
+    ["roomName", "Kobold Kingdom"],
     ["roomDescription", ""],
     ["host", "127.0.0.1"],
     ["port", 18800],
     ["maxAgents", 50],
+    ["maxPlayers", 20],
+    ["profanityFilter", true],
   ] as const)("defaults %s to %s", (field, expected) => {
     const config = loadRoomConfig();
     expect(config[field]).toBe(expected);
@@ -39,14 +50,33 @@ describe("loadRoomConfig", () => {
   it.each([
     ["ROOM_ID", "custom-room-1", "roomId", "custom-room-1"],
     ["ROOM_NAME", "Test Room", "roomName", "Test Room"],
-    ["ROOM_DESCRIPTION", "AI research lab", "roomDescription", "AI research lab"],
+    [
+      "ROOM_DESCRIPTION",
+      "AI research lab",
+      "roomDescription",
+      "AI research lab",
+    ],
     ["WORLD_HOST", "0.0.0.0", "host", "0.0.0.0"],
     ["WORLD_PORT", "9999", "port", 9999],
     ["MAX_AGENTS", "10", "maxAgents", 10],
+    ["MAX_PLAYERS", "5", "maxPlayers", 5],
   ] as const)("uses %s from env", (envKey, envVal, field, expected) => {
     process.env[envKey] = envVal;
     const config = loadRoomConfig();
     expect(config[field]).toBe(expected);
+  });
+
+  it("disables profanity filter when PROFANITY_FILTER=off", () => {
+    process.env.PROFANITY_FILTER = "off";
+    const config = loadRoomConfig();
+    expect(config.profanityFilter).toBe(false);
+  });
+
+  it("enables profanity filter for any value other than off", () => {
+    process.env.PROFANITY_FILTER = "on";
+    expect(loadRoomConfig().profanityFilter).toBe(true);
+    process.env.PROFANITY_FILTER = "yes";
+    expect(loadRoomConfig().profanityFilter).toBe(true);
   });
 
   it("generates different IDs on each call", () => {

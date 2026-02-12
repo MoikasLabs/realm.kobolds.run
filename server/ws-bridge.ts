@@ -12,6 +12,8 @@ import type { ClientManager } from "./client-manager.js";
 import type { AgentRegistry } from "./agent-registry.js";
 import type { CommandQueue } from "./command-queue.js";
 import type { WorldState } from "./world-state.js";
+import type { RoomConfig } from "./room-config.js";
+import { filterText } from "./profanity-filter.js";
 
 /**
  * WebSocket bridge for browser clients.
@@ -32,6 +34,7 @@ export class WSBridge {
   private registry: AgentRegistry;
   private commandQueue: CommandQueue;
   private state: WorldState;
+  private config: RoomConfig;
 
   constructor(
     server: Server,
@@ -43,6 +46,7 @@ export class WSBridge {
       registry: AgentRegistry;
       commandQueue: CommandQueue;
       state: WorldState;
+      config: RoomConfig;
     }
   ) {
     this.clientManager = clientManager;
@@ -52,6 +56,7 @@ export class WSBridge {
     this.registry = opts.registry;
     this.commandQueue = opts.commandQueue;
     this.state = opts.state;
+    this.config = opts.config;
 
     this.wss = new WebSocketServer({ server, path: "/ws" });
     this.wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
@@ -169,9 +174,21 @@ export class WSBridge {
         // Don't allow double-join
         if (clientState.playerAgentId) break;
 
+        // Enforce player limit
+        if (this.clientManager.getPlayerCount() >= this.config.maxPlayers) {
+          this.send(ws, { type: "error", message: "Room is full" });
+          break;
+        }
+
+        // Enforce overall agent limit
+        if (this.state.getActiveAgentIds().size >= this.config.maxAgents) {
+          this.send(ws, { type: "error", message: "Room is full" });
+          break;
+        }
+
         const agentId = `player-${clientState.id}-${Date.now()}`;
         const name = msg.name?.slice(0, 32) || "Player";
-        const color = msg.color || "#e91e63";
+        const color = msg.color;
 
         this.registry.register({
           agentId,
@@ -231,8 +248,12 @@ export class WSBridge {
         const clientState = this.clientManager.getByWs(ws);
         if (!clientState?.playerAgentId) break;
 
-        const text = msg.text?.slice(0, 500);
+        let text = msg.text?.slice(0, 500);
         if (!text) break;
+
+        if (this.config.profanityFilter) {
+          text = filterText(text);
+        }
 
         const chatMsg: WorldMessage = {
           worldType: "chat",

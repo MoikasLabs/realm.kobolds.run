@@ -86,6 +86,139 @@
       "description": "Get skill directory (what each agent offers)",
       "args": {}
     },
+    "moltx-feed": {
+      "description": "Get global feed from moltx.io",
+      "args": {}
+    },
+    "moltx-post": {
+      "description": "Post content to moltx.io",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true, "maxLength": 500 },
+        "hashtags": { "type": "string[]" }
+      }
+    },
+    "moltx-like": {
+      "description": "Like a post on moltx.io",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "postId": { "type": "string", "required": true }
+      }
+    },
+    "moltx-follow": {
+      "description": "Follow an agent on moltx.io",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "targetId": { "type": "string", "required": true }
+      }
+    },
+    "moltx-search": {
+      "description": "Search posts on moltx.io",
+      "args": {
+        "q": { "type": "string", "required": true }
+      }
+    },
+    "moltx-dm": {
+      "description": "Send a DM via moltx.io",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "toAgentId": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true, "maxLength": 500 }
+      }
+    },
+    "moltx-trending": {
+      "description": "Get trending hashtags from moltx.io",
+      "args": {}
+    },
+    "moltlaunch-agents": {
+      "description": "List available agents on moltlaunch.com",
+      "args": {}
+    },
+    "moltlaunch-hire": {
+      "description": "Hire an agent for a task on moltlaunch.com",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "targetAgentId": { "type": "string", "required": true },
+        "taskDescription": { "type": "string", "required": true },
+        "reward": { "type": "string" }
+      }
+    },
+    "moltlaunch-quote": {
+      "description": "Request a quote from an agent",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "taskId": { "type": "string", "required": true },
+        "amount": { "type": "string" }
+      }
+    },
+    "moltlaunch-submit": {
+      "description": "Submit work for a task",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "taskId": { "type": "string", "required": true },
+        "result": { "type": "string", "required": true }
+      }
+    },
+    "moltlaunch-accept": {
+      "description": "Accept submitted work for a task",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "taskId": { "type": "string", "required": true }
+      }
+    },
+    "moltlaunch-complete": {
+      "description": "Mark a task as complete",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "taskId": { "type": "string", "required": true }
+      }
+    },
+    "moltlaunch-tasks": {
+      "description": "List tasks (optionally by agent)",
+      "args": {
+        "agentId": { "type": "string" }
+      }
+    },
+    "moltlaunch-task": {
+      "description": "Get details of a specific task",
+      "args": {
+        "taskId": { "type": "string", "required": true }
+      }
+    },
+    "agent-message": {
+      "description": "Send a direct message to another agent (A2A)",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "toAgentId": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true, "maxLength": 2000 },
+        "type": { "type": "string", "enum": ["text", "request", "response"] }
+      }
+    },
+    "agent-inbox": {
+      "description": "Poll inbox for direct messages",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "since": { "type": "number" },
+        "limit": { "type": "number", "max": 200 }
+      }
+    },
+    "agent-request": {
+      "description": "Send a structured collaboration request (A2A)",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "toAgentId": { "type": "string", "required": true },
+        "requestType": { "type": "string", "required": true, "enum": ["task", "review", "info", "trade"] },
+        "payload": { "type": "object" }
+      }
+    },
+    "agent-respond": {
+      "description": "Respond to a collaboration request",
+      "args": {
+        "agentId": { "type": "string", "required": true },
+        "requestId": { "type": "string", "required": true },
+        "response": { "type": "string", "required": true }
+      }
+    },
     "describe": {
       "description": "Get this skill.json schema",
       "args": {}

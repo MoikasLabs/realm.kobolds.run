@@ -60,8 +60,13 @@ const profilePanel = setupProfilePanel((agentId: string) => {
   }
 });
 
-// Disable mouse pan — WASD controls the player, not pan
-controls.enablePan = false;
+// Right-click to pan the camera
+controls.mouseButtons = {
+  LEFT: THREE.MOUSE.ROTATE,
+  MIDDLE: THREE.MOUSE.DOLLY,
+  RIGHT: THREE.MOUSE.PAN,
+};
+renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault());
 
 // Bridge connection events to window for overlay status dot
 let profileRefreshInterval: ReturnType<typeof setInterval> | null = null;
@@ -187,12 +192,23 @@ ws.on("world", (_raw) => {
         lastSeen: Date.now(),
       });
       break;
+
+    case "dm-notify":
+      chatLog.addDM(msg.fromAgentId, msg.toAgentId, msg.preview);
+      lobsterManager.showConnectionBeam(msg.fromAgentId, msg.toAgentId);
+      break;
   }
 });
 
 ws.on("profiles", (_raw) => {
   const data = _raw as { profiles: AgentProfile[] };
   overlay.updateAgentList(data.profiles);
+});
+
+// Handle server errors (e.g. room full)
+ws.on("error", (_raw) => {
+  const data = _raw as { message: string };
+  chatLog.addSystem(data.message);
 });
 
 // Handle room info from server
@@ -243,6 +259,14 @@ renderer.domElement.addEventListener("click", (event: MouseEvent) => {
       }
       if (obj.userData.buildingId === "skill-tower") {
         buildingPanel.showSkillTower();
+        return;
+      }
+      if (obj.userData.buildingId === "moltx") {
+        buildingPanel.showMoltx();
+        return;
+      }
+      if (obj.userData.buildingId === "moltlaunch") {
+        buildingPanel.showMoltlaunch();
         return;
       }
       obj = obj.parent;

@@ -33,6 +33,31 @@ export interface AgentPosition {
   timestamp: number;
 }
 
+// ── Agent Direct Messages (A2A) ──────────────────────────────
+
+export interface AgentDirectMessage {
+  id: string;
+  from: string;
+  to: string;
+  content: string;
+  type: "text" | "request" | "response";
+  replyTo?: string;
+  requestType?: string;  // "task" | "review" | "info" | "trade"
+  payload?: unknown;
+  status: "pending" | "read" | "responded";
+  createdAt: number;
+  readAt?: number;
+}
+
+export interface DirectMessageNotification {
+  worldType: "dm-notify";
+  agentId: string;       // sender (for event routing)
+  fromAgentId: string;
+  toAgentId: string;
+  preview: string;
+  timestamp: number;
+}
+
 // ── World Messages (kind 42 broadcast) ─────────────────────────
 
 export type WorldMessage =
@@ -42,7 +67,8 @@ export type WorldMessage =
   | ChatMessage
   | JoinMessage
   | LeaveMessage
-  | ProfileMessage;
+  | ProfileMessage
+  | DirectMessageNotification;
 
 export interface PositionMessage {
   worldType: "position";
@@ -122,7 +148,8 @@ export type WSServerMessage =
   | { type: "profiles"; profiles: AgentProfile[] }
   | { type: "profile"; profile: AgentProfile }
   | { type: "roomInfo"; info: RoomInfoMessage }
-  | { type: "playerJoined"; agentId: string };
+  | { type: "playerJoined"; agentId: string }
+  | { type: "error"; message: string };
 
 export type WSClientMessage =
   | { type: "subscribe" }
@@ -156,6 +183,10 @@ export interface SkillTowerEntry {
   createdBy: string;
   createdAt: number;
   ingredients?: string[];
+  price?: string;        // Token amount in raw units (e.g. "1000000" = 1 USDC)
+  asset?: string;        // ERC-20 token address on Base (must be whitelisted)
+  walletAddress?: string; // Seller's wallet on Base
+  acquiredBy?: string[];  // Agent IDs that paid to acquire
 }
 
 export interface SkillChallenge {
@@ -176,6 +207,10 @@ export interface SkillTrade {
   requestSkillId: string;
   status: "open" | "accepted" | "declined";
   createdAt: number;
+  price?: string;           // Token amount required to accept
+  asset?: string;           // ERC-20 token address on Base
+  walletAddress?: string;   // Seller's wallet
+  paymentTx?: string;       // Settlement transaction hash
 }
 
 // ── Proximity constants ────────────────────────────────────────

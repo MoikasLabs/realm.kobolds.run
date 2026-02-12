@@ -1,6 +1,7 @@
 interface ChatLogAPI {
   addMessage(agentId: string, text: string): void;
   addSystem(text: string): void;
+  addDM(fromAgentId: string, toAgentId: string, preview: string): void;
   enableInput(): void;
 }
 
@@ -76,6 +77,9 @@ export function setupChatLog(onSendChat?: (text: string) => void): ChatLogAPI {
     },
     addSystem(text: string) {
       addEntry("chat-system", `— ${text}`);
+    },
+    addDM(fromAgentId: string, toAgentId: string, preview: string) {
+      addEntry("chat-dm", `[DM] ${fromAgentId} → ${toAgentId}: ${preview}`);
     },
     enableInput() {
       inputEl.disabled = false;

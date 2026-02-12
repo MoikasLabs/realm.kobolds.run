@@ -97,6 +97,15 @@ export class ClientManager {
     return this.cachedClients;
   }
 
+  /** Count clients that have joined as browser players */
+  getPlayerCount(): number {
+    let count = 0;
+    for (const client of this.clients.values()) {
+      if (client.playerAgentId) count++;
+    }
+    return count;
+  }
+
   get size(): number {
     return this.clients.size;
   }

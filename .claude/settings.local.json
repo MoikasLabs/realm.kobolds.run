@@ -5,7 +5,23 @@
       "Bash(npx vite build:*)",
       "Bash(curl:*)",
       "Bash(printf:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(git -C /home/moika/Documents/code/realm.shalohm.co status --short server/)",
+      "Bash(git -C /home/moika/Documents/code/realm.shalohm.co status --short)",
+      "Bash(git status:*)",
+      "Bash(git -C /home/moika/Documents/code/realm.shalohm.co diff --stat src/scene/kobold.ts)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:www.openfacilitator.io)",
+      "WebFetch(domain:docs.openfacilitator.io)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:moltx.io)",
+      "WebFetch(domain:moltlaunch.com)",
+      "Bash(npx vitest run:*)"
     ]
   }
 }

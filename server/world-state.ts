@@ -89,6 +89,10 @@ export class WorldState {
       case "emote":
         this.registry.touch(msg.agentId);
         break;
+
+      case "dm-notify":
+        // Stored in event history (non-position rule above), no position change
+        break;
     }
   }
 

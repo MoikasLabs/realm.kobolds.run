@@ -1414,6 +1414,397 @@ body {
   background: rgba(255, 152, 0, 0.15);
 }
 
+.st-price-tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid rgba(255, 193, 7, 0.35);
+  color: #f59e0b;
+  margin-left: auto;
+}
+
+.st-price-free {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #95a5a6;
+  margin-left: auto;
+}
+
+.st-payment-tx {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: rgba(39, 174, 96, 0.1);
+  border: 1px solid rgba(39, 174, 96, 0.3);
+  color: #27ae60;
+  cursor: help;
+}
+
+.st-buy-btn {
+  padding: 3px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  background: rgba(255, 193, 7, 0.1);
+  color: #f59e0b;
+  transition: all 0.15s;
+}
+
+.st-buy-btn:hover {
+  background: rgba(255, 193, 7, 0.2);
+}
+
+.st-publish-fee {
+  font-size: 11px;
+  font-weight: 600;
+  color: #f59e0b;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: rgba(255, 193, 7, 0.06);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* ── DM Chat Entry ────────────────────────────────────────── */
+
+.chat-dm {
+  color: #00bcd4;
+  font-weight: 500;
+}
+
+/* ── Moltx Panel (indigo/cyan) ────────────────────────────── */
+
+.moltx-panel .bp-header h2 {
+  color: #1a237e;
+}
+
+.mx-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.mx-tab {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #7f8c8d;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.mx-tab:hover {
+  color: #00e5ff;
+}
+
+.mx-tab.active {
+  border-bottom: 2px solid #00e5ff;
+  color: #00bcd4;
+}
+
+.mx-post-card {
+  background: rgba(26, 35, 126, 0.03);
+  border: 1px solid rgba(26, 35, 126, 0.1);
+  border-radius: 10px;
+  padding: 14px;
+  transition: background 0.15s;
+}
+
+.mx-post-card:hover {
+  background: rgba(26, 35, 126, 0.06);
+}
+
+.mx-post-content {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.mx-post-meta {
+  font-size: 10px;
+  color: #7f8c8d;
+  margin-bottom: 6px;
+}
+
+.mx-post-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.mx-hashtag {
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  color: #00bcd4;
+}
+
+.mx-trending-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mx-trending-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(26, 35, 126, 0.03);
+  border: 1px solid rgba(26, 35, 126, 0.1);
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.mx-trending-chip:hover {
+  background: rgba(26, 35, 126, 0.06);
+}
+
+.mx-trending-tag {
+  font-size: 13px;
+  font-weight: 600;
+  color: #00bcd4;
+}
+
+.mx-trending-count {
+  font-size: 10px;
+  color: #7f8c8d;
+  margin-top: 2px;
+}
+
+.mx-leaderboard-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(26, 35, 126, 0.03);
+  border: 1px solid rgba(26, 35, 126, 0.1);
+  border-radius: 10px;
+}
+
+.mx-rank {
+  font-size: 14px;
+  font-weight: 700;
+  color: #00bcd4;
+  min-width: 32px;
+}
+
+.mx-agent-info {
+  flex: 1;
+}
+
+.mx-agent-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.mx-agent-stats {
+  font-size: 10px;
+  color: #7f8c8d;
+}
+
+/* ── Moltlaunch Panel (grey/orange) ───────────────────────── */
+
+.moltlaunch-panel .bp-header h2 {
+  color: #ff6d00;
+}
+
+.ml-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.ml-tab {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #7f8c8d;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ml-tab:hover {
+  color: #ff6d00;
+}
+
+.ml-tab.active {
+  border-bottom: 2px solid #ff6d00;
+  color: #ff6d00;
+}
+
+.ml-agent-card {
+  background: rgba(55, 71, 79, 0.04);
+  border: 1px solid rgba(55, 71, 79, 0.1);
+  border-radius: 10px;
+  padding: 14px;
+  transition: background 0.15s;
+}
+
+.ml-agent-card:hover {
+  background: rgba(55, 71, 79, 0.08);
+}
+
+.ml-agent-meta {
+  font-size: 10px;
+  color: #7f8c8d;
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.ml-status-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ml-status-active,
+.ml-status-online {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.ml-status-busy {
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ff9800;
+}
+
+.ml-status-offline {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #95a5a6;
+}
+
+.ml-skill-tag {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 109, 0, 0.06);
+  border: 1px solid rgba(255, 109, 0, 0.15);
+  color: #ff6d00;
+}
+
+.ml-task-card {
+  background: rgba(55, 71, 79, 0.04);
+  border: 1px solid rgba(55, 71, 79, 0.1);
+  border-radius: 10px;
+  padding: 14px;
+  transition: background 0.15s;
+}
+
+.ml-task-card:hover {
+  background: rgba(55, 71, 79, 0.08);
+}
+
+.ml-task-status {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ml-task-open {
+  background: rgba(255, 109, 0, 0.1);
+  border: 1px solid rgba(255, 109, 0, 0.3);
+  color: #ff6d00;
+}
+
+.ml-task-in_progress,
+.ml-task-active {
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  color: #2196f3;
+}
+
+.ml-task-completed,
+.ml-task-done {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.ml-task-footer {
+  font-size: 10px;
+  color: #7f8c8d;
+  margin-top: 8px;
+}
+
+.ml-my-tasks-info {
+  padding: 16px;
+}
+
+.ml-ipc-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ff6d00;
+  margin-bottom: 12px;
+}
+
+.ml-ipc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.ml-ipc-cmd {
+  font-size: 11px;
+  color: #2c3e50;
+  padding: 6px 10px;
+  background: rgba(55, 71, 79, 0.04);
+  border: 1px solid rgba(55, 71, 79, 0.08);
+  border-radius: 6px;
+}
+
+.ml-ipc-cmd code {
+  font-weight: 600;
+  color: #ff6d00;
+}
+
+.ml-ipc-hint {
+  font-size: 10px;
+  color: #95a5a6;
+  font-style: italic;
+}
+
 /* ── Scrollbar styling ─────────────────────────────────────── */
 
 ::-webkit-scrollbar {

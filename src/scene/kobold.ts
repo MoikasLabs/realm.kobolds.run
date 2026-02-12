@@ -10,6 +10,12 @@ export function createKobold(color: string): THREE.Group {
   const group = new THREE.Group();
   group.name = "kobold";
 
+  // Inner container offset so feet sit at y=0 (ground level).
+  // All geometry is added here; animations target `group` and
+  // getObjectByName searches recursively so named parts still resolve.
+  const inner = new THREE.Group();
+  inner.position.y = 0.22; // lifts geometry so lowest point (toes) ≈ y=0
+
   const baseColor = new THREE.Color(color);
   const darkColor = baseColor.clone().multiplyScalar(0.55);
   const bellyColor = baseColor.clone().offsetHSL(0.02, -0.1, 0.2);
@@ -33,7 +39,7 @@ export function createKobold(color: string): THREE.Group {
   body.position.set(0, 0.86, 0.02);
   body.rotation.x = 0.12; // slight forward hunch
   body.castShadow = true;
-  group.add(body);
+  inner.add(body);
 
   // Belly (lighter underside, rounder)
   const belly = new THREE.Mesh(
@@ -42,7 +48,7 @@ export function createKobold(color: string): THREE.Group {
   );
   belly.scale.set(0.85, 1.15, 0.55);
   belly.position.set(0, 0.81, 0.18);
-  group.add(belly);
+  inner.add(belly);
 
   // Scale plates on the back (dorsal ridge bumps)
   for (let i = 0; i < 4; i++) {
@@ -52,7 +58,7 @@ export function createKobold(color: string): THREE.Group {
     );
     ridge.scale.set(1.4, 0.6, 1);
     ridge.position.set(0, 1.11 - i * 0.12, -0.28);
-    group.add(ridge);
+    inner.add(ridge);
   }
 
   // ── Head (wider, more reptilian) ───────────────────────────
@@ -201,7 +207,7 @@ export function createKobold(color: string): THREE.Group {
     headGroup.add(pupil);
   }
 
-  group.add(headGroup);
+  inner.add(headGroup);
 
   // ── Arms ───────────────────────────────────────────────────
   for (const side of [-1, 1]) {
@@ -218,12 +224,12 @@ export function createKobold(color: string): THREE.Group {
     shoulderPlate.position.set(side * 0.04, 0.0, 0);
     armGroup.add(shoulderPlate);
 
-    // Upper arm
+    // Upper arm (35% longer)
     const upperArm = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.07, 0.2, 4, 6),
+      new THREE.CapsuleGeometry(0.07, 0.27, 4, 6),
       bodyMat,
     );
-    upperArm.position.set(side * 0.06, -0.14, 0);
+    upperArm.position.set(side * 0.06, -0.19, 0);
     upperArm.rotation.z = side * 0.15;
     upperArm.castShadow = true;
     armGroup.add(upperArm);
@@ -233,15 +239,15 @@ export function createKobold(color: string): THREE.Group {
       new THREE.SphereGeometry(0.055, 5, 4),
       scaleMat,
     );
-    elbow.position.set(side * 0.08, -0.26, -0.02);
+    elbow.position.set(side * 0.08, -0.35, -0.02);
     armGroup.add(elbow);
 
-    // Forearm
+    // Forearm (35% longer)
     const forearm = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.06, 0.18, 4, 6),
+      new THREE.CapsuleGeometry(0.06, 0.24, 4, 6),
       bodyMat,
     );
-    forearm.position.set(side * 0.1, -0.34, 0.04);
+    forearm.position.set(side * 0.1, -0.46, 0.04);
     forearm.rotation.x = -0.25;
     forearm.castShadow = true;
     armGroup.add(forearm);
@@ -252,7 +258,7 @@ export function createKobold(color: string): THREE.Group {
       darkMat,
     );
     palm.scale.set(1.1, 0.7, 1.0);
-    palm.position.set(side * 0.11, -0.46, 0.07);
+    palm.position.set(side * 0.11, -0.62, 0.07);
     armGroup.add(palm);
 
     // Claws (3 fingers)
@@ -263,14 +269,14 @@ export function createKobold(color: string): THREE.Group {
       );
       claw.position.set(
         side * 0.11 + f * 0.03,
-        -0.52,
+        -0.70,
         0.1 + Math.abs(f) * -0.02,
       );
       claw.rotation.x = -0.5;
       armGroup.add(claw);
     }
 
-    group.add(armGroup);
+    inner.add(armGroup);
   }
 
   // ── Legs (digitigrade / lizard-like stance) ─────────────────
@@ -279,31 +285,31 @@ export function createKobold(color: string): THREE.Group {
     legGroup.name = side === -1 ? "leg_left" : "leg_right";
     legGroup.position.set(side * 0.16, 0.64, 0);
 
-    // Thigh (longer, angled forward into the knee)
+    // Thigh — mostly vertical, slight forward lean
     const thigh = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.1, 0.45, 4, 6),
+      new THREE.CapsuleGeometry(0.1, 0.4, 4, 6),
       bodyMat,
     );
-    thigh.position.set(0, -0.2, 0.08);
-    thigh.rotation.x = 0.45;
+    thigh.position.set(0, -0.22, 0.02);
+    thigh.rotation.x = 0.15;
     thigh.castShadow = true;
     legGroup.add(thigh);
 
-    // Knee joint (prominent, pushed forward — lizard bend)
+    // Knee bump (slightly forward of the leg line)
     const knee = new THREE.Mesh(
-      new THREE.SphereGeometry(0.09, 6, 5),
+      new THREE.SphereGeometry(0.085, 6, 5),
       scaleMat,
     );
-    knee.position.set(0, -0.48, 0.2);
+    knee.position.set(0, -0.46, 0.07);
     legGroup.add(knee);
 
-    // Shin (longer, angled back steeply — digitigrade)
+    // Shin — 55% of original length
     const shin = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.065, 0.45, 4, 6),
+      new THREE.CapsuleGeometry(0.075, 0.26, 4, 6),
       bodyMat,
     );
-    shin.position.set(0, -0.76, 0.08);
-    shin.rotation.x = -0.4;
+    shin.position.set(0, -0.61, 0.0);
+    shin.rotation.x = -0.1;
     shin.castShadow = true;
     legGroup.add(shin);
 
@@ -312,16 +318,16 @@ export function createKobold(color: string): THREE.Group {
       new THREE.SphereGeometry(0.05, 5, 4),
       darkMat,
     );
-    ankle.position.set(0, -1.02, -0.04);
+    ankle.position.set(0, -0.77, -0.02);
     legGroup.add(ankle);
 
-    // Metatarsal (elongated lizard foot bone, angled forward to ground)
+    // Metatarsal (lizard foot bone — angled forward to ground)
     const metatarsal = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.04, 0.18, 4, 5),
+      new THREE.CapsuleGeometry(0.04, 0.08, 4, 5),
       bodyMat,
     );
-    metatarsal.position.set(0, -1.1, 0.06);
-    metatarsal.rotation.x = 0.6;
+    metatarsal.position.set(0, -0.80, 0.02);
+    metatarsal.rotation.x = 0.35;
     metatarsal.castShadow = true;
     legGroup.add(metatarsal);
 
@@ -330,22 +336,22 @@ export function createKobold(color: string): THREE.Group {
       new THREE.SphereGeometry(0.07, 6, 5),
       darkMat,
     );
-    footBase.scale.set(1.2, 0.35, 1.5);
-    footBase.position.set(0, -1.18, 0.16);
+    footBase.scale.set(1.1, 0.35, 1.5);
+    footBase.position.set(0, -0.85, 0.06);
     legGroup.add(footBase);
 
-    // Toe claws (splayed wider)
+    // Toe claws
     for (let t = -1; t <= 1; t++) {
       const toe = new THREE.Mesh(
-        new THREE.ConeGeometry(0.025, 0.12, 4),
+        new THREE.ConeGeometry(0.025, 0.1, 4),
         scaleMat,
       );
-      toe.position.set(t * 0.05, -1.2, 0.26 + Math.abs(t) * -0.04);
+      toe.position.set(t * 0.05, -0.86, 0.12 + Math.abs(t) * -0.03);
       toe.rotation.x = -1.3;
       legGroup.add(toe);
     }
 
-    group.add(legGroup);
+    inner.add(legGroup);
   }
 
   // ── Tail (thick, tapered, reptilian with ridges) ───────────
@@ -363,7 +369,7 @@ export function createKobold(color: string): THREE.Group {
     tailSeg.rotation.x = 0.25 + i * 0.08;
     tailSeg.castShadow = true;
     tailSeg.name = `tail_${i}`;
-    group.add(tailSeg);
+    inner.add(tailSeg);
 
     // Dorsal ridge on each tail segment
     if (i < 4) {
@@ -373,7 +379,7 @@ export function createKobold(color: string): THREE.Group {
       );
       tailRidge.position.set(0, 0.54 - i * 0.04 + radius * 0.8, -0.3 - i * 0.22);
       tailRidge.rotation.x = -0.3;
-      group.add(tailRidge);
+      inner.add(tailRidge);
     }
   }
 
@@ -386,7 +392,7 @@ export function createKobold(color: string): THREE.Group {
   tunic.position.set(0, 0.81, 0.03);
   tunic.rotation.x = 0.12;
   tunic.castShadow = true;
-  group.add(tunic);
+  inner.add(tunic);
 
   // Tunic skirt (hangs lower in front)
   const skirt = new THREE.Mesh(
@@ -394,7 +400,7 @@ export function createKobold(color: string): THREE.Group {
     leatherMat,
   );
   skirt.position.set(0, 0.61, 0.08);
-  group.add(skirt);
+  inner.add(skirt);
 
   // Cross strap (diagonal)
   const crossStrap = new THREE.Mesh(
@@ -403,7 +409,7 @@ export function createKobold(color: string): THREE.Group {
   );
   crossStrap.position.set(-0.08, 0.86, 0.28);
   crossStrap.rotation.z = 0.35;
-  group.add(crossStrap);
+  inner.add(crossStrap);
 
   // Belt
   const belt = new THREE.Mesh(
@@ -411,7 +417,7 @@ export function createKobold(color: string): THREE.Group {
     beltMat,
   );
   belt.position.set(0, 0.68, 0.02);
-  group.add(belt);
+  inner.add(belt);
 
   // Belt buckle
   const buckle = new THREE.Mesh(
@@ -419,7 +425,9 @@ export function createKobold(color: string): THREE.Group {
     buckleMat,
   );
   buckle.position.set(0, 0.68, 0.3);
-  group.add(buckle);
+  inner.add(buckle);
+
+  group.add(inner);
 
   // ── Scale the whole kobold ─────────────────────────────────
   group.scale.set(1.3, 1.3, 1.3);

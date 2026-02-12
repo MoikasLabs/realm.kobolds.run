@@ -373,4 +373,46 @@ export class LobsterManager {
   getAgentIds(): string[] {
     return Array.from(this.agents.keys());
   }
+
+  /** Draw a temporary glowing connection beam between two agents (A2A DM visual) */
+  showConnectionBeam(fromId: string, toId: string): void {
+    const fromEntry = this.agents.get(fromId);
+    const toEntry = this.agents.get(toId);
+    if (!fromEntry || !toEntry) return;
+
+    const fromPos = fromEntry.group.position;
+    const toPos = toEntry.group.position;
+
+    const points = [
+      new THREE.Vector3(fromPos.x, fromPos.y + 2, fromPos.z),
+      new THREE.Vector3(toPos.x, toPos.y + 2, toPos.z),
+    ];
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: 0x00e5ff,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const line = new THREE.Line(geometry, material);
+    this.scene.add(line);
+
+    // Fade out over 3 seconds
+    const startTime = performance.now();
+    const fadeDuration = 3000;
+
+    const fadeOut = () => {
+      const elapsed = performance.now() - startTime;
+      const t = Math.min(elapsed / fadeDuration, 1);
+      material.opacity = 0.8 * (1 - t);
+
+      if (t < 1) {
+        requestAnimationFrame(fadeOut);
+      } else {
+        this.scene.remove(line);
+        geometry.dispose();
+        material.dispose();
+      }
+    };
+    requestAnimationFrame(fadeOut);
+  }
 }

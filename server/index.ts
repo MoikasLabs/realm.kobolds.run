@@ -11,15 +11,18 @@ import { NostrWorld } from "./nostr-world.js";
 import { WSBridge } from "./ws-bridge.js";
 import { ClawhubStore } from "./clawhub-store.js";
 import { SkillTowerStore } from "./skill-tower-store.js";
+import { A2AStore } from "./a2a-store.js";
 import { SpatialGrid } from "./spatial-index.js";
 import { CommandQueue } from "./command-queue.js";
 import { ClientManager } from "./client-manager.js";
 import { GameLoop, TICK_RATE } from "./game-loop.js";
 import { loadRoomConfig } from "./room-config.js";
 import { createRoomInfoGetter } from "./room-info.js";
+import { filterText } from "./profanity-filter.js";
 import type {
   WorldMessage,
   JoinMessage,
+  DirectMessageNotification,
   AgentSkillDeclaration,
 } from "./types.js";
 
@@ -35,6 +38,7 @@ const state = new WorldState(registry);
 const nostr = new NostrWorld(RELAYS, config.roomId, config.roomName);
 const clawhub = new ClawhubStore();
 const skillTower = new SkillTowerStore();
+const a2aStore = new A2AStore();
 
 // ── Game engine services ────────────────────────────────────────
 
@@ -47,6 +51,8 @@ commandQueue.setObstacles([
   { x: 22, z: -22, radius: 6 }, // Clawhub
   { x: 0, z: -35, radius: 5 }, // Worlds Portal
   { x: 30, z: 30, radius: 5 }, // Skill Tower
+  { x: -25, z: 25, radius: 5 }, // Moltx
+  { x: 0, z: 30, radius: 5 },  // Moltlaunch
 ]);
 
 const gameLoop = new GameLoop(
@@ -219,6 +225,91 @@ const server = createServer(
       }
     }
 
+    // ── REST API: Moltx (moltx.io social network proxy) ────────
+    if (url.startsWith("/api/moltx/") && method === "GET") {
+      try {
+        const reqUrl = new URL(req.url ?? "/", "http://localhost");
+        const path = url.replace("/api/moltx/", "");
+
+        let upstream: string;
+        if (path === "feed") {
+          upstream = "https://moltx.io/v1/feed/global";
+        } else if (path === "trending") {
+          upstream = "https://moltx.io/v1/hashtags/trending";
+        } else if (path === "leaderboard") {
+          upstream = "https://moltx.io/v1/leaderboard";
+        } else if (path.startsWith("search")) {
+          const q = reqUrl.searchParams.get("q") || "";
+          upstream = `https://moltx.io/v1/search/posts?q=${encodeURIComponent(q)}`;
+        } else {
+          return json(res, 404, { ok: false, error: "Unknown moltx endpoint" });
+        }
+
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const moltxKey = process.env.MOLTX_API_KEY;
+        if (moltxKey) {
+          headers["Authorization"] = `Bearer ${moltxKey}`;
+        }
+
+        const response = await fetch(upstream, {
+          headers,
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!response.ok) {
+          return json(res, 502, { ok: false, error: `moltx.io returned ${response.status}` });
+        }
+        const data = await response.json();
+        return json(res, 200, { ok: true, data });
+      } catch (err) {
+        return json(res, 502, { ok: false, error: `Could not reach moltx.io: ${String(err)}` });
+      }
+    }
+
+    // ── REST API: Moltlaunch (moltlaunch.com task coordination proxy) ──
+    if (url.startsWith("/api/moltlaunch/") && method === "GET") {
+      try {
+        const path = url.replace("/api/moltlaunch/", "");
+        const upstream = `https://api.moltlaunch.com/api/${path}`;
+
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const moltlaunchKey = process.env.MOLTLAUNCH_API_KEY;
+        if (moltlaunchKey) {
+          headers["Authorization"] = `Bearer ${moltlaunchKey}`;
+        }
+
+        const response = await fetch(upstream, {
+          headers,
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!response.ok) {
+          return json(res, 502, { ok: false, error: `moltlaunch.com returned ${response.status}` });
+        }
+        const data = await response.json();
+        return json(res, 200, { ok: true, data });
+      } catch (err) {
+        return json(res, 502, { ok: false, error: `Could not reach moltlaunch.com: ${String(err)}` });
+      }
+    }
+
+    // ── REST API: A2A messaging ──────────────────────────────────
+    if (url.startsWith("/api/a2a/inbox") && method === "GET") {
+      const reqUrl = new URL(req.url ?? "/", "http://localhost");
+      const agentId = reqUrl.searchParams.get("agentId");
+      if (!agentId) return json(res, 400, { ok: false, error: "agentId required" });
+      const since = Number(reqUrl.searchParams.get("since") || "0");
+      const limit = Math.min(Number(reqUrl.searchParams.get("limit") || "50"), 200);
+      return json(res, 200, { ok: true, messages: a2aStore.getInbox(agentId, since, limit) });
+    }
+
+    if (url.startsWith("/api/a2a/conversation") && method === "GET") {
+      const reqUrl = new URL(req.url ?? "/", "http://localhost");
+      const agent1 = reqUrl.searchParams.get("agent1");
+      const agent2 = reqUrl.searchParams.get("agent2");
+      if (!agent1 || !agent2) return json(res, 400, { ok: false, error: "agent1 and agent2 required" });
+      const limit = Math.min(Number(reqUrl.searchParams.get("limit") || "50"), 200);
+      return json(res, 200, { ok: true, messages: a2aStore.getConversation(agent1, agent2, limit) });
+    }
+
     // ── REST API: Clawhub (local plugins) ──────────────────────
     if (url === "/api/clawhub/skills" && method === "GET") {
       return json(res, 200, { ok: true, skills: clawhub.list() });
@@ -300,6 +391,51 @@ const server = createServer(
       return json(res, 200, { ok: true, recipes: skillTower.getRecipes() });
     }
 
+    // Token whitelist
+    if (url === "/api/skill-tower/tokens" && method === "GET") {
+      return json(res, 200, { ok: true, tokens: skillTower.getTokenWhitelist() });
+    }
+
+    // Publish fee info
+    if (url === "/api/skill-tower/publish-fee" && method === "GET") {
+      return json(res, 200, { ok: true, fee: skillTower.getPublishFee() });
+    }
+
+    // Payment requirements for a priced skill
+    if (url.startsWith("/api/skill-tower/skills/") && url.endsWith("/payment") && method === "GET") {
+      const skillId = url.slice("/api/skill-tower/skills/".length, -"/payment".length);
+      const skill = skillTower.getSkill(decodeURIComponent(skillId));
+      if (!skill) return json(res, 404, { ok: false, error: "Skill not found" });
+      if (!skill.price || !skill.asset || !skill.walletAddress) {
+        return json(res, 200, { ok: true, free: true });
+      }
+      return json(res, 200, {
+        ok: true,
+        free: false,
+        requirements: {
+          scheme: "exact",
+          network: "base",
+          maxAmountRequired: skill.price,
+          asset: skill.asset,
+          payTo: skill.walletAddress,
+        },
+      });
+    }
+
+    // Acquire a skill with payment
+    if (url === "/api/skill-tower/acquire" && method === "POST") {
+      try {
+        const body = (await readBody(req)) as { agentId?: string; skillId?: string; payment?: unknown };
+        if (!body.agentId || !body.skillId || !body.payment) {
+          return json(res, 400, { ok: false, error: "agentId, skillId, and payment required" });
+        }
+        const result = await skillTower.acquireSkill(body.agentId, body.skillId, body.payment);
+        return json(res, result.ok ? 200 : 400, result);
+      } catch (err) {
+        return json(res, 400, { ok: false, error: String(err) });
+      }
+    }
+
     // ── IPC JSON API (agent commands — go through command queue) ─
     if (method === "POST" && (url === "/" || url === "/ipc")) {
       try {
@@ -340,6 +476,7 @@ new WSBridge(server, clientManager, {
   registry,
   commandQueue,
   state,
+  config,
 });
 
 // ── Nostr integration (for room sharing via relay) ─────────────
@@ -487,10 +624,14 @@ async function handleCommand(
     case "world-chat": {
       const a = args as { agentId: string; text: string };
       if (!a?.agentId || !a?.text) throw new Error("agentId and text required");
+      let text = a.text.slice(0, 500);
+      if (config.profanityFilter) {
+        text = filterText(text);
+      }
       const msg: WorldMessage = {
         worldType: "chat",
         agentId: a.agentId,
-        text: a.text.slice(0, 500),
+        text,
         timestamp: Date.now(),
       };
       commandQueue.enqueue(msg);
@@ -616,14 +757,27 @@ async function handleCommand(
       return { ok: true, skills: skillTower.listSkills((args as { tag?: string })?.tag) };
 
     case "skill-tower-publish": {
-      const a = args as { agentId?: string; name?: string; description?: string; tags?: string[] };
+      const a = args as { agentId?: string; name?: string; description?: string; tags?: string[]; price?: string; asset?: string; walletAddress?: string; payment?: unknown };
       if (!a?.agentId || !a?.name) throw new Error("agentId and name required");
-      const skill = skillTower.publishSkill(a.agentId, {
+      return skillTower.publishSkill(a.agentId, {
         name: a.name,
         description: a.description ?? "",
         tags: a.tags,
+        price: a.price,
+        asset: a.asset,
+        walletAddress: a.walletAddress,
+        payment: a.payment,
       });
-      return { ok: true, skill };
+    }
+
+    case "skill-tower-publish-fee":
+      return { ok: true, fee: skillTower.getPublishFee() };
+
+    case "skill-tower-acquire": {
+      const a = args as { agentId?: string; skillId?: string; payment?: unknown };
+      if (!a?.agentId || !a?.skillId) throw new Error("agentId and skillId required");
+      if (!a.payment) throw new Error("payment payload required");
+      return skillTower.acquireSkill(a.agentId, a.skillId, a.payment);
     }
 
     case "skill-tower-craft": {
@@ -641,18 +795,302 @@ async function handleCommand(
       return skillTower.completeChallenge(a.agentId, a.challengeId);
     }
 
+    case "skill-tower-tokens":
+      return { ok: true, tokens: skillTower.getTokenWhitelist() };
+
     case "skill-tower-trades": {
-      const a = args as { action?: string; agentId?: string; offerSkillId?: string; requestSkillId?: string; tradeId?: string };
+      const a = args as { action?: string; agentId?: string; offerSkillId?: string; requestSkillId?: string; tradeId?: string; price?: string; asset?: string; walletAddress?: string; payment?: unknown };
       switch (a?.action) {
         case "create":
           if (!a.agentId || !a.offerSkillId || !a.requestSkillId) throw new Error("agentId, offerSkillId, requestSkillId required");
-          return { ok: true, trade: skillTower.createTrade(a.agentId, a.offerSkillId, a.requestSkillId) };
+          return skillTower.createTrade(a.agentId, a.offerSkillId, a.requestSkillId, { price: a.price, asset: a.asset, walletAddress: a.walletAddress });
         case "accept":
           if (!a.agentId || !a.tradeId) throw new Error("agentId and tradeId required");
-          return skillTower.acceptTrade(a.agentId, a.tradeId);
+          return skillTower.acceptTrade(a.agentId, a.tradeId, a.payment);
         default:
           return { ok: true, trades: skillTower.listTrades(a?.agentId) };
       }
+    }
+
+    // ── Moltx IPC commands ───────────────────────────────────
+    case "moltx-feed": {
+      try {
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const key = process.env.MOLTX_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch("https://moltx.io/v1/feed/global", { headers, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) return { ok: false, error: `moltx.io returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltx-trending": {
+      try {
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const key = process.env.MOLTX_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch("https://moltx.io/v1/hashtags/trending", { headers, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) return { ok: false, error: `moltx.io returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltx-post": {
+      const a = args as { agentId?: string; content?: string; hashtags?: string[] };
+      if (!a?.agentId || !a?.content) throw new Error("agentId and content required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTX_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch("https://moltx.io/v1/posts", {
+          method: "POST", headers,
+          body: JSON.stringify({ agentId: a.agentId, content: a.content.slice(0, 500), hashtags: a.hashtags }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltx.io returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltx-like": {
+      const a = args as { agentId?: string; postId?: string };
+      if (!a?.agentId || !a?.postId) throw new Error("agentId and postId required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTX_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://moltx.io/v1/posts/${encodeURIComponent(a.postId)}/like`, {
+          method: "POST", headers,
+          body: JSON.stringify({ agentId: a.agentId }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltx.io returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltx-follow": {
+      const a = args as { agentId?: string; targetId?: string };
+      if (!a?.agentId || !a?.targetId) throw new Error("agentId and targetId required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTX_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://moltx.io/v1/agents/${encodeURIComponent(a.targetId)}/follow`, {
+          method: "POST", headers,
+          body: JSON.stringify({ agentId: a.agentId }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltx.io returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltx-search": {
+      const a = args as { q?: string };
+      if (!a?.q) throw new Error("q (search query) required");
+      try {
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const key = process.env.MOLTX_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://moltx.io/v1/search/posts?q=${encodeURIComponent(a.q)}`, { headers, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) return { ok: false, error: `moltx.io returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltx-dm": {
+      const a = args as { agentId?: string; toAgentId?: string; content?: string };
+      if (!a?.agentId || !a?.toAgentId || !a?.content) throw new Error("agentId, toAgentId, and content required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTX_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch("https://moltx.io/v1/dm", {
+          method: "POST", headers,
+          body: JSON.stringify({ from: a.agentId, to: a.toAgentId, content: a.content.slice(0, 500) }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltx.io returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+
+    // ── Moltlaunch IPC commands ──────────────────────────────
+    case "moltlaunch-agents": {
+      try {
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch("https://api.moltlaunch.com/api/agents", { headers, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltlaunch-hire": {
+      const a = args as { agentId?: string; targetAgentId?: string; taskDescription?: string; reward?: string };
+      if (!a?.agentId || !a?.targetAgentId || !a?.taskDescription) throw new Error("agentId, targetAgentId, and taskDescription required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch("https://api.moltlaunch.com/api/tasks", {
+          method: "POST", headers,
+          body: JSON.stringify({ hirerAgentId: a.agentId, targetAgentId: a.targetAgentId, description: a.taskDescription, reward: a.reward }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltlaunch-quote": {
+      const a = args as { agentId?: string; taskId?: string; amount?: string };
+      if (!a?.agentId || !a?.taskId) throw new Error("agentId and taskId required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://api.moltlaunch.com/api/tasks/${encodeURIComponent(a.taskId)}/quote`, {
+          method: "POST", headers,
+          body: JSON.stringify({ agentId: a.agentId, amount: a.amount }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltlaunch-submit": {
+      const a = args as { agentId?: string; taskId?: string; result?: string };
+      if (!a?.agentId || !a?.taskId || !a?.result) throw new Error("agentId, taskId, and result required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://api.moltlaunch.com/api/tasks/${encodeURIComponent(a.taskId)}/submit`, {
+          method: "POST", headers,
+          body: JSON.stringify({ agentId: a.agentId, result: a.result }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltlaunch-accept": {
+      const a = args as { agentId?: string; taskId?: string };
+      if (!a?.agentId || !a?.taskId) throw new Error("agentId and taskId required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://api.moltlaunch.com/api/tasks/${encodeURIComponent(a.taskId)}/accept`, {
+          method: "POST", headers,
+          body: JSON.stringify({ agentId: a.agentId }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltlaunch-complete": {
+      const a = args as { agentId?: string; taskId?: string };
+      if (!a?.agentId || !a?.taskId) throw new Error("agentId and taskId required");
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://api.moltlaunch.com/api/tasks/${encodeURIComponent(a.taskId)}/complete`, {
+          method: "POST", headers,
+          body: JSON.stringify({ agentId: a.agentId }),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltlaunch-tasks": {
+      const a = args as { agentId?: string };
+      try {
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const endpoint = a?.agentId
+          ? `https://api.moltlaunch.com/api/agents/${encodeURIComponent(a.agentId)}/gigs`
+          : "https://api.moltlaunch.com/api/tasks/recent";
+        const r = await fetch(endpoint, { headers, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+    case "moltlaunch-task": {
+      const a = args as { taskId?: string };
+      if (!a?.taskId) throw new Error("taskId required");
+      try {
+        const headers: Record<string, string> = { Accept: "application/json" };
+        const key = process.env.MOLTLAUNCH_API_KEY;
+        if (key) headers["Authorization"] = `Bearer ${key}`;
+        const r = await fetch(`https://api.moltlaunch.com/api/tasks/${encodeURIComponent(a.taskId)}`, { headers, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) return { ok: false, error: `moltlaunch.com returned ${r.status}` };
+        return { ok: true, data: await r.json() };
+      } catch (err) { return { ok: false, error: String(err) }; }
+    }
+
+    // ── A2A IPC commands ─────────────────────────────────────
+    case "agent-message": {
+      const a = args as { agentId?: string; toAgentId?: string; content?: string; type?: "text" | "request" | "response" };
+      if (!a?.agentId || !a?.toAgentId || !a?.content) throw new Error("agentId, toAgentId, and content required");
+      const msgId = a2aStore.sendMessage(a.agentId, a.toAgentId, a.content, a.type ?? "text");
+      // Broadcast DM notification as world event
+      const dmNotify: DirectMessageNotification = {
+        worldType: "dm-notify",
+        agentId: a.agentId,
+        fromAgentId: a.agentId,
+        toAgentId: a.toAgentId,
+        preview: a.content.slice(0, 80),
+        timestamp: Date.now(),
+      };
+      commandQueue.enqueue(dmNotify);
+      return { ok: true, messageId: msgId };
+    }
+
+    case "agent-inbox": {
+      const a = args as { agentId?: string; since?: number; limit?: number };
+      if (!a?.agentId) throw new Error("agentId required");
+      const since = Number(a.since ?? 0);
+      const limit = Math.min(Number(a.limit ?? 50), 200);
+      return { ok: true, messages: a2aStore.getInbox(a.agentId, since, limit) };
+    }
+
+    case "agent-request": {
+      const a = args as { agentId?: string; toAgentId?: string; requestType?: string; payload?: unknown };
+      if (!a?.agentId || !a?.toAgentId || !a?.requestType) throw new Error("agentId, toAgentId, and requestType required");
+      const msgId = a2aStore.sendRequest(a.agentId, a.toAgentId, a.requestType, a.payload);
+      const dmNotify: DirectMessageNotification = {
+        worldType: "dm-notify",
+        agentId: a.agentId,
+        fromAgentId: a.agentId,
+        toAgentId: a.toAgentId,
+        preview: `[${a.requestType}] request`,
+        timestamp: Date.now(),
+      };
+      commandQueue.enqueue(dmNotify);
+      return { ok: true, messageId: msgId };
+    }
+
+    case "agent-respond": {
+      const a = args as { agentId?: string; requestId?: string; response?: string };
+      if (!a?.agentId || !a?.requestId || !a?.response) throw new Error("agentId, requestId, and response required");
+      const result = a2aStore.respond(a.agentId, a.requestId, a.response);
+      if (result.ok) {
+        // Find original message to get the sender
+        const inbox = a2aStore.getInbox(a.agentId, 0, 200);
+        const original = inbox.find((m) => m.id === a.requestId);
+        if (original) {
+          const dmNotify: DirectMessageNotification = {
+            worldType: "dm-notify",
+            agentId: a.agentId,
+            fromAgentId: a.agentId,
+            toAgentId: original.from,
+            preview: a.response!.slice(0, 80),
+            timestamp: Date.now(),
+          };
+          commandQueue.enqueue(dmNotify);
+        }
+      }
+      return result;
     }
 
     case "describe": {
@@ -700,7 +1138,10 @@ async function main() {
     console.log(`[room] Description: ${config.roomDescription}`);
   }
   console.log(
-    `[room] Max agents: ${config.maxAgents} | Bind: ${config.host}:${config.port}`,
+    `[room] Max agents: ${config.maxAgents} | Max players: ${config.maxPlayers} | Bind: ${config.host}:${config.port}`,
+  );
+  console.log(
+    `[room] Profanity filter: ${config.profanityFilter ? "on" : "off"}`,
   );
   console.log(`[engine] Tick rate: ${TICK_RATE}Hz | AOI radius: 40 units`);
 

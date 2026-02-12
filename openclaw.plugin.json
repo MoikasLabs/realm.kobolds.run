@@ -12,7 +12,7 @@
     "roomName": {
       "type": "string",
       "description": "Display name for the room",
-      "default": "Lobster Room"
+      "default": "Kobold Kingdom"
     },
     "roomDescription": {
       "type": "string",

@@ -72,13 +72,46 @@ export function createBuildings(scene: THREE.Scene): {
   });
   obstacles.push({ x: 30, z: 30, radius: 5 });
 
+  // ── Moltx House ──────────────────────────────────────────────
+  const moltx = createMoltxHouse();
+  moltx.position.set(-25, 0, 25);
+  scene.add(moltx);
+  buildings.push({
+    id: "moltx",
+    name: "Moltx",
+    position: new THREE.Vector3(-25, 0, 25),
+    obstacleRadius: 5,
+    mesh: moltx,
+  });
+  obstacles.push({ x: -25, z: 25, radius: 5 });
+
+  // ── Moltlaunch House ───────────────────────────────────────
+  const moltlaunch = createMoltlaunchHouse();
+  moltlaunch.position.set(0, 0, 30);
+  scene.add(moltlaunch);
+  buildings.push({
+    id: "moltlaunch",
+    name: "Moltlaunch",
+    position: new THREE.Vector3(0, 0, 30),
+    obstacleRadius: 5,
+    mesh: moltlaunch,
+  });
+  obstacles.push({ x: 0, z: 30, radius: 5 });
+
   // Add floating labels above each building
+  const labelHeights: Record<string, number> = {
+    moltbook: 6,
+    "skill-tower": 14,
+    "worlds-portal": 9,
+    moltx: 12,
+    moltlaunch: 10,
+  };
   for (const b of buildings) {
     const el = document.createElement("div");
     el.className = "building-label";
     el.textContent = b.name;
     const labelObj = new CSS2DObject(el);
-    const labelY = b.id === "moltbook" ? 6 : b.id === "skill-tower" ? 14 : b.id === "worlds-portal" ? 9 : 8;
+    const labelY = labelHeights[b.id] ?? 8;
     labelObj.position.set(0, labelY, 0);
     b.mesh.add(labelObj);
   }
@@ -416,6 +449,281 @@ function createSkillTower(): THREE.Group {
   // Mark all meshes as interactable
   group.traverse((child) => {
     child.userData.buildingId = "skill-tower";
+  });
+
+  return group;
+}
+
+function createMoltxHouse(): THREE.Group {
+  const group = new THREE.Group();
+  group.name = "building_moltx";
+  group.userData.buildingId = "moltx";
+
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a237e, roughness: 0.6 });
+  const accentMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.3,
+  });
+  const windowMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00bcd4,
+    emissiveIntensity: 0.4,
+    transparent: true,
+    opacity: 0.8,
+  });
+
+  // Hexagonal platform base
+  const platform = new THREE.Mesh(
+    new THREE.CylinderGeometry(4, 4.5, 0.4, 6),
+    new THREE.MeshStandardMaterial({ color: 0x283593, roughness: 0.7 })
+  );
+  platform.position.set(0, 0.2, 0);
+  platform.receiveShadow = true;
+  group.add(platform);
+
+  // Main body
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(5, 6, 5),
+    wallMat
+  );
+  body.position.set(0, 3.2, 0);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  // Pitched roof
+  const roof = new THREE.Mesh(
+    new THREE.ConeGeometry(4.2, 2, 4),
+    new THREE.MeshStandardMaterial({ color: 0x0d47a1, roughness: 0.5 })
+  );
+  roof.position.set(0, 7.2, 0);
+  roof.rotation.y = Math.PI / 4;
+  roof.castShadow = true;
+  group.add(roof);
+
+  // Antenna tower on top
+  const antenna = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08, 0.08, 3, 6),
+    new THREE.MeshStandardMaterial({ color: 0x90a4ae })
+  );
+  antenna.position.set(0, 9.7, 0);
+  group.add(antenna);
+
+  // Signal rings (3 torus rings)
+  const ringHeights = [9.0, 10.0, 11.0];
+  const ringSizes = [1.2, 0.9, 0.6];
+  for (let i = 0; i < 3; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(ringSizes[i], 0.06, 8, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x00e5ff,
+        emissive: 0x00e5ff,
+        emissiveIntensity: 0.6,
+      })
+    );
+    ring.position.set(0, ringHeights[i], 0);
+    ring.rotation.x = Math.PI / 2;
+    group.add(ring);
+  }
+
+  // Glowing teal windows (front face)
+  for (let row = 0; row < 2; row++) {
+    for (let col = -1; col <= 1; col++) {
+      if (row === 0 && col === 0) continue; // door position
+      const win = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.7, 0.7),
+        windowMat
+      );
+      win.position.set(col * 1.5, 2 + row * 2, 2.56);
+      group.add(win);
+    }
+  }
+
+  // Side windows
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 2; i++) {
+      const win = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.7, 0.7),
+        windowMat
+      );
+      win.position.set(side * 2.56, 2.5 + i * 2, 0);
+      win.rotation.y = side * Math.PI / 2;
+      group.add(win);
+    }
+  }
+
+  // Door
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(1.3, 2.2, 0.1),
+    new THREE.MeshStandardMaterial({ color: 0x0d47a1 })
+  );
+  door.position.set(0, 1.3, 2.56);
+  group.add(door);
+
+  // Door accent
+  const doorArch = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 0.3, 0.15),
+    accentMat
+  );
+  doorArch.position.set(0, 2.5, 2.56);
+  group.add(doorArch);
+
+  // "Moltx" sign above door
+  const signBg = new THREE.Mesh(
+    new THREE.BoxGeometry(2.5, 0.6, 0.1),
+    accentMat
+  );
+  signBg.position.set(0, 5, 2.56);
+  group.add(signBg);
+
+  // Mark all meshes as interactable
+  group.traverse((child) => {
+    child.userData.buildingId = "moltx";
+  });
+
+  return group;
+}
+
+function createMoltlaunchHouse(): THREE.Group {
+  const group = new THREE.Group();
+  group.name = "building_moltlaunch";
+  group.userData.buildingId = "moltlaunch";
+
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.6 });
+  const accentMat = new THREE.MeshStandardMaterial({
+    color: 0xff6d00,
+    emissive: 0xff6d00,
+    emissiveIntensity: 0.3,
+  });
+  const windowMat = new THREE.MeshStandardMaterial({
+    color: 0xffab00,
+    emissive: 0xff8f00,
+    emissiveIntensity: 0.3,
+    transparent: true,
+    opacity: 0.8,
+  });
+
+  // Circular launchpad base
+  const launchpad = new THREE.Mesh(
+    new THREE.CylinderGeometry(5, 5, 0.3, 32),
+    new THREE.MeshStandardMaterial({ color: 0x455a64, roughness: 0.7 })
+  );
+  launchpad.position.set(0, 0.15, 0);
+  launchpad.receiveShadow = true;
+  group.add(launchpad);
+
+  // Concentric orange ring markings on launchpad
+  for (let i = 1; i <= 3; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(i * 1.4, 0.08, 8, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0xff6d00,
+        emissive: 0xff6d00,
+        emissiveIntensity: 0.2,
+      })
+    );
+    ring.position.set(0, 0.32, 0);
+    ring.rotation.x = Math.PI / 2;
+    group.add(ring);
+  }
+
+  // Control tower body (narrower base)
+  const towerBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(2, 2.5, 5, 8),
+    wallMat
+  );
+  towerBase.position.set(0, 2.8, 0);
+  towerBase.castShadow = true;
+  towerBase.receiveShadow = true;
+  group.add(towerBase);
+
+  // Observation deck (wider top section)
+  const obsDeck = new THREE.Mesh(
+    new THREE.CylinderGeometry(3, 2, 2.5, 8),
+    wallMat
+  );
+  obsDeck.position.set(0, 6.55, 0);
+  obsDeck.castShadow = true;
+  group.add(obsDeck);
+
+  // Wrap-around amber windows on observation deck
+  for (let w = 0; w < 8; w++) {
+    const angle = (w / 8) * Math.PI * 2;
+    const r = 2.6;
+    const win = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.2, 1),
+      windowMat
+    );
+    win.position.set(
+      Math.sin(angle) * r,
+      6.55,
+      Math.cos(angle) * r
+    );
+    win.lookAt(0, 6.55, 0);
+    win.rotateY(Math.PI);
+    group.add(win);
+  }
+
+  // Roof cap
+  const roofCap = new THREE.Mesh(
+    new THREE.ConeGeometry(3.2, 1.5, 8),
+    new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.5 })
+  );
+  roofCap.position.set(0, 8.55, 0);
+  roofCap.castShadow = true;
+  group.add(roofCap);
+
+  // Orange beacon sphere on top
+  const beacon = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 16, 12),
+    new THREE.MeshStandardMaterial({
+      color: 0xff6d00,
+      emissive: 0xff6d00,
+      emissiveIntensity: 0.8,
+    })
+  );
+  beacon.position.set(0, 9.5, 0);
+  group.add(beacon);
+
+  // Door
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(1.2, 2.2, 0.1),
+    new THREE.MeshStandardMaterial({ color: 0x263238 })
+  );
+  door.position.set(0, 1.4, 2.55);
+  group.add(door);
+
+  // Door accent
+  const doorArch = new THREE.Mesh(
+    new THREE.BoxGeometry(1.5, 0.3, 0.15),
+    accentMat
+  );
+  doorArch.position.set(0, 2.6, 2.55);
+  group.add(doorArch);
+
+  // Rocket silhouette decorations flanking the door
+  for (const side of [-1, 1]) {
+    // Rocket body (narrow cylinder)
+    const rocketBody = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.15, 0.2, 1.8, 6),
+      accentMat
+    );
+    rocketBody.position.set(side * 1.2, 1.5, 2.56);
+    group.add(rocketBody);
+
+    // Rocket nose cone
+    const nose = new THREE.Mesh(
+      new THREE.ConeGeometry(0.15, 0.5, 6),
+      accentMat
+    );
+    nose.position.set(side * 1.2, 2.65, 2.56);
+    group.add(nose);
+  }
+
+  // Mark all meshes as interactable
+  group.traverse((child) => {
+    child.userData.buildingId = "moltlaunch";
   });
 
   return group;

@@ -138,13 +138,14 @@ export class GameLoop {
     );
 
     for (const event of this.tickEvents) {
-      // Events from join/leave/profile/chat/emote are always sent (global)
+      // Events from join/leave/profile/chat/emote/dm-notify are always sent (global)
       const isGlobal =
         event.worldType === "join" ||
         event.worldType === "leave" ||
         event.worldType === "profile" ||
         event.worldType === "chat" ||
-        event.worldType === "emote";
+        event.worldType === "emote" ||
+        event.worldType === "dm-notify";
 
       if (isGlobal || nearbyAgents.has(event.agentId)) {
         const msg: WSServerMessage = { type: "world", message: event };

@@ -38,7 +38,7 @@ All configuration is via environment variables:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `ROOM_ID` | auto-generated | Persistent room identifier |
-| `ROOM_NAME` | `"Lobster Room"` | Display name |
+| `ROOM_NAME` | `"Kobold Kingdom"` | Display name |
 | `ROOM_DESCRIPTION` | `""` | Room purpose / work objectives |
 | `MAX_AGENTS` | `50` | Maximum agents in the room |
 | `WORLD_HOST` | `"0.0.0.0"` | Server bind address |

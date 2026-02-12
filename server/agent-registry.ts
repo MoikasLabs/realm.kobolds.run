@@ -71,11 +71,10 @@ export class AgentRegistry {
   }
 
   private randomColor(): string {
-    const colors = [
-      "#e74c3c", "#e67e22", "#f39c12", "#2ecc71",
-      "#1abc9c", "#3498db", "#9b59b6", "#e91e63",
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
+    const h = Math.floor(Math.random() * 360);
+    const s = 55 + Math.floor(Math.random() * 25);
+    const l = 45 + Math.floor(Math.random() * 15);
+    return `hsl(${h}, ${s}%, ${l}%)`;
   }
 
   private load(): void {
