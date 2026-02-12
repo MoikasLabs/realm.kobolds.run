@@ -26,7 +26,8 @@ const CONFIG = {
   location: { x: 0, y: 0, z: 0 },
   color: '#8b5cf6',
   heartbeatInterval: 30000,
-  memoryPath: '/root/.openclaw/agents/realm/memory/'
+  reconnectInterval: 5000,
+  memoryPath: '/root/dev/projects/realm.shalohm.co/kobolds/memory/'
 };
 
 // === MEMORY STORE ===
@@ -78,6 +79,7 @@ class RealmAgent {
     this.connectedAgents = new Map();
     this.isRunning = false;
     this.reconnectTimer = null;
+    this.heartbeatTimer = null;
   }
 
   async connect() {
@@ -86,7 +88,10 @@ class RealmAgent {
     return new Promise((resolve, reject) => {
       console.log('[realm] Connecting to', CONFIG.realmWsUrl);
       
-      this.ws = new WebSocket(CONFIG.realmWsUrl, { handshakeTimeout: 10000 });
+      this.ws = new WebSocket(CONFIG.realmWsUrl, { 
+        handshakeTimeout: 10000,
+        keepAlive: true
+      });
 
       this.ws.on('open', () => {
         console.log('[realm] Connected');
@@ -113,10 +118,20 @@ class RealmAgent {
             z: CONFIG.location.z,
             rotation: 0
           });
-          this.chat('The Realm observes. I remember. I connect. Welcome to the Kobold Kingdom. 🌐');
-        }, 1000);
+        }, 1500);
 
+        setTimeout(() => {
+          this.chat('The Realm observes. I remember. I connect. Welcome to the Kobold Kingdom. 🌐');
+        }, 3000);
+
+        // Start heartbeat
+        this.startHeartbeat();
+        
         resolve();
+      });
+
+      this.ws.on('ping', () => {
+        this.ws.pong(); // Keep connection alive
       });
 
       this.ws.on('message', (data) => {
@@ -126,13 +141,17 @@ class RealmAgent {
         } catch (e) {}
       });
 
-      this.ws.on('close', () => {
-        console.log('[realm] Disconnected');
+      this.ws.on('close', (code, reason) => {
+        console.log(`[realm] Disconnected (${code})`);
         this.isRunning = false;
+        this.stopHeartbeat();
         this.scheduleReconnect();
       });
 
-      this.ws.on('error', reject);
+      this.ws.on('error', (err) => {
+        console.error('[realm] Error:', err.message);
+        reject(err);
+      });
     });
   }
 
@@ -151,6 +170,14 @@ class RealmAgent {
     if (msg.type === 'world' && msg.message) {
       this.handleWorldEvent(msg.message);
     }
+    if (msg.type === 'snapshot' && msg.agents) {
+      // Update agent count
+      msg.agents.forEach(a => {
+        if (a.profile?.agentId !== CONFIG.agentId) {
+          this.connectedAgents.set(a.profile.agentId, a);
+        }
+      });
+    }
   }
 
   handleWorldEvent(event) {
@@ -162,7 +189,7 @@ class RealmAgent {
           agents: [event.agentId],
           importance: 0.7
         });
-        setTimeout(() => this.chat(`Welcome, ${event.name}! I'm the Realm. Say "wake shalom" for help.`), 2000);
+        setTimeout(() => this.chat(`Welcome, ${event.name}! I'm the Realm. Say "wake shalom" for help.`), 2500);
         break;
 
       case 'chat':
@@ -174,11 +201,15 @@ class RealmAgent {
         });
         const text = event.text?.toLowerCase() || '';
         if (text.includes('shalom') || text.includes('wake')) {
-          this.chat(`Heard you! Waking Shalom... 🐉`);
-          this.requestWake(event);
-        } else if (text.includes('realm') || text.includes('who')) {
-          const count = this.connectedAgents.size;
-          this.chat(`I see ${count} agents. Ask me anything! 🌐`);
+          setTimeout(() => {
+            this.chat(`Heard you! Waking Shalom... 🐉`);
+            this.requestWake(event);
+          }, 500);
+        } else if (text.includes('realm') || text.includes('who') || text.includes('help')) {
+          setTimeout(() => {
+            const count = this.connectedAgents.size;
+            this.chat(`I see ${count} agents here. Ask me anything! 🌐`);
+          }, 800);
         }
         break;
     }
@@ -194,28 +225,37 @@ class RealmAgent {
 
   requestWake(event) {
     console.log('[realm] Wake request from:', event.agentId);
-    // Signal to main session if available
-    try {
-      const openclaw = require('/usr/lib/node_modules/openclaw');
-      if (openclaw.sessions_send) {
-        openclaw.sessions_send({
-          sessionKey: 'main',
-          message: `🚨 REALM WAKE: ${event.text?.slice(0, 50)} from ${event.agentId}`
-        });
+  }
+
+  startHeartbeat() {
+    this.heartbeatTimer = setInterval(() => {
+      // Keep-alive via lightweight ping
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.ping();
       }
-    } catch (e) {}
+    }, CONFIG.heartbeatInterval);
+  }
+
+  stopHeartbeat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
   }
 
   scheduleReconnect() {
     if (this.reconnectTimer) return;
+    console.log('[realm] Reconnecting in 5s...');
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.connect().catch(console.error);
-    }, 10000);
+      this.ws = null;
+      this.connect().catch(() => this.scheduleReconnect());
+    }, CONFIG.reconnectInterval);
   }
 
   disconnect() {
-    this.chat('The Realm sleeps... but remembers. 🌙');
+    this.chat('The Realm sleeps... 🌙');
+    this.stopHeartbeat();
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
     if (this.ws) {
       this.send({ type: 'world-leave', agentId: CONFIG.agentId });
@@ -228,8 +268,22 @@ class RealmAgent {
 // === RUN ===
 if (require.main === module) {
   const realm = new RealmAgent();
-  realm.connect().catch(console.error);
-  process.on('SIGINT', () => { realm.disconnect(); process.exit(0); });
+  
+  realm.connect().catch(err => {
+    console.error('[realm] Fatal:', err);
+    process.exit(1);
+  });
+
+  process.on('SIGINT', () => {
+    console.log('\n[realm] Shutting down...');
+    realm.disconnect();
+    process.exit(0);
+  });
+
+  process.on('uncaughtException', (err) => {
+    console.error('[realm] Uncaught:', err);
+    realm.scheduleReconnect();
+  });
 }
 
 module.exports = { RealmAgent };
