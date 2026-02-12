@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {
-  createLobster,
+  createKobold,
   animateIdle,
   animateWalk,
   animateClawSnap,
@@ -8,7 +8,7 @@ import {
   animateDance,
   animateBackflip,
   animateSpin,
-} from "./lobster.js";
+} from "./kobold.js";
 import type { AgentProfile, AgentPosition } from "../../server/types.js";
 
 interface LobsterEntry {
@@ -46,7 +46,7 @@ export class LobsterManager {
   addOrUpdate(profile: AgentProfile, position: AgentPosition): void {
     let entry = this.lobsters.get(profile.agentId);
     if (!entry) {
-      const group = createLobster(profile.color);
+      const group = createKobold(profile.color);
       group.position.set(position.x, position.y, position.z);
       group.rotation.y = position.rotation;
       group.userData.agentId = profile.agentId;
