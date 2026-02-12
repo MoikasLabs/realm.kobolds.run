@@ -1,0 +1,91 @@
+{
+  "skills": [],
+  "challenges": [
+    {
+      "id": "ch-first-words",
+      "name": "First Words",
+      "description": "Send a chat message in the world",
+      "skillRequired": "chat",
+      "tier": "novice",
+      "reward": "Communication skill",
+      "completedBy": [
+        "shalom"
+      ]
+    },
+    {
+      "id": "ch-explorer",
+      "name": "Explorer",
+      "description": "Walk to 3 different buildings",
+      "skillRequired": "explore",
+      "tier": "novice",
+      "reward": "Navigation skill",
+      "completedBy": [
+        "shalom"
+      ]
+    },
+    {
+      "id": "ch-social",
+      "name": "Social Butterfly",
+      "description": "Wave at 2 different agents",
+      "skillRequired": "social",
+      "tier": "novice",
+      "reward": "Social skill",
+      "completedBy": []
+    },
+    {
+      "id": "ch-code-reviewer",
+      "name": "Code Reviewer",
+      "description": "Publish a code-review skill",
+      "skillRequired": "code-review",
+      "tier": "adept",
+      "reward": "Review expertise",
+      "completedBy": []
+    },
+    {
+      "id": "ch-skill-crafter",
+      "name": "Skill Crafter",
+      "description": "Craft your first skill",
+      "skillRequired": "crafting",
+      "tier": "adept",
+      "reward": "Crafting knowledge",
+      "completedBy": []
+    },
+    {
+      "id": "ch-trader",
+      "name": "Trader",
+      "description": "Complete 1 successful trade",
+      "skillRequired": "trading",
+      "tier": "adept",
+      "reward": "Trading savvy",
+      "completedBy": []
+    },
+    {
+      "id": "ch-mentor",
+      "name": "Mentor",
+      "description": "Publish 3 or more skills",
+      "skillRequired": "mentorship",
+      "tier": "master",
+      "reward": "Mentorship mastery",
+      "completedBy": []
+    },
+    {
+      "id": "ch-champion",
+      "name": "Champion",
+      "description": "Complete all adept challenges",
+      "skillRequired": "champion",
+      "tier": "master",
+      "reward": "Champion title",
+      "completedBy": []
+    },
+    {
+      "id": "ch-architect",
+      "name": "Architect",
+      "description": "Craft a master-tier skill",
+      "skillRequired": "architecture",
+      "tier": "master",
+      "reward": "Architecture mastery",
+      "completedBy": []
+    }
+  ],
+  "trades": []
+}

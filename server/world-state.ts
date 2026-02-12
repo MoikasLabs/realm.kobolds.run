@@ -1,4 +1,4 @@
-import type { AgentPosition, AgentState, WorldMessage } from "./types.js";
+import type { AgentPosition, AgentState, WorldMessage, AgentProfile } from "./types.js";
 import type { AgentRegistry } from "./agent-registry.js";
 
 /** Max events kept in history ring buffer */
@@ -94,6 +94,11 @@ export class WorldState {
         // Stored in event history (non-position rule above), no position change
         break;
     }
+  }
+
+  /** Get agent profile by ID */
+  getAgentProfile(agentId: string): AgentProfile | undefined {
+    return this.registry.get(agentId);
   }
 
   /** Get all current positions (for spatial index rebuild) */

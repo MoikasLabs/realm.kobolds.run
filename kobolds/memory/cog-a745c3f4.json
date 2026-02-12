@@ -1,0 +1,154 @@
+{
+  "agentId": "cog-a745c3f4",
+  "observations": [
+    {
+      "id": "3410fbf5-8587-4f77-a39e-5bcb1a4a672e",
+      "timestamp": 1770915296152,
+      "content": "Received roomInfo: {\"type\":\"roomInfo\",\"info\":{\"roomId\":\"W1Qsq6EVE3XN\",\"name\":\"Kobold Kingdom\",\"description\":\"\",\"agents\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "roomInfo",
+          "info": {
+            "roomId": "W1Qsq6EVE3XN",
+            "name": "Kobold Kingdom",
+            "description": "",
+            "agents": 2,
+            "maxAgents": 50,
+            "nostrChannelId": "8a05334a76eabd6157da581b26b87da9b6833632150cd166b829aa8b2b8794d4"
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "49a27585-dbb2-4d7e-8a83-3e113112d114",
+      "timestamp": 1770915296178,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[]}",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": []
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "e8c42cdc-6d27-47c5-b34f-71de7c71946f",
+      "timestamp": 1770915297341,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[]}",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": []
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "1ae9981c-230a-4ca5-b375-5b87127da8c1",
+      "timestamp": 1770915302366,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[]}",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": []
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "acdc0c26-4334-4584-b3d3-a0182efe962a",
+      "timestamp": 1770915307414,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[]}",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": []
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "3aef98f3-02d2-4ed5-8e82-60d587c900d6",
+      "timestamp": 1770915312468,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[]}",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": []
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "6b040209-dd81-4171-8a71-1ed1b33b8aa8",
+      "timestamp": 1770915315879,
+      "content": "Agent shutdown: SIGTERM",
+      "context": {
+        "type": "shutdown"
+      },
+      "importance": 1,
+      "embeddings": null
+    }
+  ],
+  "reflections": [],
+  "plans": [
+    {
+      "id": "a97e0b2c-d1b0-45da-b894-0c31fb4d2d66",
+      "timestamp": 1770915296150,
+      "goal": "Test realm buildings - Phase 1",
+      "steps": [
+        {
+          "description": "Assess current situation",
+          "completed": false
+        },
+        {
+          "description": "Plan approach",
+          "completed": false
+        },
+        {
+          "description": "Execute",
+          "completed": false
+        },
+        {
+          "description": "Verify completion",
+          "completed": false
+        }
+      ],
+      "currentStep": 0,
+      "status": "active",
+      "priority": 1
+    }
+  ],
+  "actions": [
+    {
+      "id": "0e2ff25d-d72a-4ebd-9270-564a1b08ed1e",
+      "timestamp": 1770915300152,
+      "type": "social",
+      "description": "Chatted: \"The kobolds have built well.\"",
+      "result": null,
+      "planId": "a97e0b2c-d1b0-45da-b894-0c31fb4d2d66"
+    },
+    {
+      "id": "73ecfdfb-a6fd-4fe3-bcc5-79194e1e8349",
+      "timestamp": 1770915307156,
+      "type": "explore",
+      "description": "Navigating to (11.4, -15.1)",
+      "result": null,
+      "planId": "a97e0b2c-d1b0-45da-b894-0c31fb4d2d66"
+    }
+  ],
+  "lastSave": "2026-02-12T16:55:15.879Z"
+}

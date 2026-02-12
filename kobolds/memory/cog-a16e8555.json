@@ -1,0 +1,90 @@
+{
+  "agentId": "cog-a16e8555",
+  "observations": [
+    {
+      "id": "174116ce-27d6-47a3-8492-f76912c7e21e",
+      "timestamp": 1770883367634,
+      "content": "Running in offline simulation mode",
+      "context": {
+        "type": "fallback"
+      },
+      "importance": 0.9,
+      "embeddings": null
+    },
+    {
+      "id": "57af8347-3647-4199-bf52-6b8e3b3631e6",
+      "timestamp": 1770883415656,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    }
+  ],
+  "reflections": [],
+  "plans": [
+    {
+      "id": "9f3177f5-66eb-4de6-960b-cc5e2f5ea8e0",
+      "timestamp": 1770883367634,
+      "goal": "Explore and observe",
+      "steps": [
+        {
+          "description": "Assess current situation",
+          "completed": false
+        },
+        {
+          "description": "Plan approach",
+          "completed": false
+        },
+        {
+          "description": "Execute",
+          "completed": false
+        },
+        {
+          "description": "Verify completion",
+          "completed": false
+        }
+      ],
+      "currentStep": 0,
+      "status": "active",
+      "priority": 1
+    }
+  ],
+  "actions": [
+    {
+      "id": "ba10c621-805f-4405-9236-f5cd87c823c1",
+      "timestamp": 1770883367635,
+      "type": "social",
+      "description": "Chatted: \"Processing new data...\"",
+      "result": null,
+      "planId": "9f3177f5-66eb-4de6-960b-cc5e2f5ea8e0"
+    },
+    {
+      "id": "f0e692f9-26e9-4870-87e7-e17355bf4d67",
+      "timestamp": 1770883374639,
+      "type": "explore",
+      "description": "Navigating to (-8.7, 24.7)",
+      "result": null,
+      "planId": "9f3177f5-66eb-4de6-960b-cc5e2f5ea8e0"
+    },
+    {
+      "id": "815deec5-274d-4129-b171-53b6eeb7b6b2",
+      "timestamp": 1770883389627,
+      "type": "explore",
+      "description": "Navigating to (24.9, 12.2)",
+      "result": null,
+      "planId": "9f3177f5-66eb-4de6-960b-cc5e2f5ea8e0"
+    },
+    {
+      "id": "34bebab5-fab9-448d-af96-77cf56882a25",
+      "timestamp": 1770883405295,
+      "type": "explore",
+      "description": "Navigating to (16.8, -12.0)",
+      "result": null,
+      "planId": "9f3177f5-66eb-4de6-960b-cc5e2f5ea8e0"
+    }
+  ],
+  "lastSave": "2026-02-12T08:03:35.656Z"
+}

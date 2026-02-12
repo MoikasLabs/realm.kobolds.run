@@ -1,0 +1,2504 @@
+{
+  "agentId": "cog-8573a9dd",
+  "observations": [
+    {
+      "id": "dd758b76-8308-4e29-b2df-5b1bb5214703",
+      "timestamp": 1770878138949,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.4425649145938523,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.4425649145938523,
+            "y": 0,
+            "z": -9.625589598630569,
+            "rotation": -0.17719311402433802,
+            "timestamp": 1770878138926
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "692b5db5-561f-46d7-bb06-7ac5937a6d4c",
+      "timestamp": 1770878139149,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.42766123930576583,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.42766123930576583,
+            "y": 0,
+            "z": -9.612510752642274,
+            "rotation": -0.167713112667342,
+            "timestamp": 1770878139128
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "f5df36d1-0810-4382-ac89-69c51f0e9f97",
+      "timestamp": 1770878139352,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.4113581235771322,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.4113581235771322,
+            "y": 0,
+            "z": -9.600184314500824,
+            "rotation": -0.15825952933458987,
+            "timestamp": 1770878139328
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "76db03df-dcd0-4fd5-9946-4d780d781c01",
+      "timestamp": 1770878139556,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.39348203361214573,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.39348203361214573,
+            "y": 0,
+            "z": -9.588440709172088,
+            "rotation": -0.14869491347393912,
+            "timestamp": 1770878139529
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "4f8180ef-5cdd-4456-a1d7-974a04d8090c",
+      "timestamp": 1770878139560,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "4d20f61f-49d3-4175-85a2-47b4e5387628",
+      "timestamp": 1770878139760,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.37407613241393495,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.37407613241393495,
+            "y": 0,
+            "z": -9.57730869287165,
+            "rotation": -0.13902220404637702,
+            "timestamp": 1770878139731
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "93029ea5-fdad-4532-ad2b-0569ec0ee12f",
+      "timestamp": 1770878139960,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.35340303365830056,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.35340303365830056,
+            "y": 0,
+            "z": -9.566916441699194,
+            "rotation": -0.1293410624078771,
+            "timestamp": 1770878139932
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "19c49f08-b6e8-47be-907c-36760747b225",
+      "timestamp": 1770878140167,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.3315576081442042,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.3315576081442042,
+            "y": 0,
+            "z": -9.557270433194153,
+            "rotation": -0.1196562087755512,
+            "timestamp": 1770878140132
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "7444fda0-b3c1-49c5-96ef-33687dc32e47",
+      "timestamp": 1770878140363,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.30840088315043146,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.30840088315043146,
+            "y": 0,
+            "z": -9.54828981935012,
+            "rotation": -0.10987472337862773,
+            "timestamp": 1770878140333
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "a553d79c-12e7-4758-bd33-9cbafecccbad",
+      "timestamp": 1770878140567,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.2842465367644345,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.2842465367644345,
+            "y": 0,
+            "z": -9.54007830294493,
+            "rotation": -0.10009783082681113,
+            "timestamp": 1770878140533
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "7c0cf05e-a4c7-4698-96e8-0d9e88d14cc7",
+      "timestamp": 1770878140768,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.2589409077428446,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.2589409077428446,
+            "y": 0,
+            "z": -9.53256705916565,
+            "rotation": -0.09023172829671737,
+            "timestamp": 1770878140734
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "a1fc5291-7eb7-4077-8167-6be2f50ad674",
+      "timestamp": 1770878140970,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.23269403176499226,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.23269403176499226,
+            "y": 0,
+            "z": -9.525811103806818,
+            "rotation": -0.080329172482384,
+            "timestamp": 1770878140935
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "c9ebcfff-8783-4b68-ae12-5258e5230e6f",
+      "timestamp": 1770878141174,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.20546455235969452,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.20546455235969452,
+            "y": 0,
+            "z": -9.519793481063276,
+            "rotation": -0.07034465342738604,
+            "timestamp": 1770878141137
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "999aafcd-9d6a-4f39-9c5a-1a3e6edd5c38",
+      "timestamp": 1770878141375,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.17762101039572134,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.17762101039572134,
+            "y": 0,
+            "z": -9.51458349662512,
+            "rotation": -0.06038107448762395,
+            "timestamp": 1770878141338
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "ac2ad54b-f83b-4cbf-b9ae-dc5a5f6dd1ca",
+      "timestamp": 1770878141580,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.14913181828376432,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.14913181828376432,
+            "y": 0,
+            "z": -9.510157858843062,
+            "rotation": -0.050393101817269095,
+            "timestamp": 1770878141539
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "a83bbf3e-cabd-42a2-aa95-fc63acc48e28",
+      "timestamp": 1770878141783,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.12024610325217755,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.12024610325217755,
+            "y": 0,
+            "z": -9.50653983243463,
+            "rotation": -0.04043461522826128,
+            "timestamp": 1770878141739
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "7b6c69d4-3949-45ce-a2e7-aa3e9d9ddfb2",
+      "timestamp": 1770878141985,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.09063268554052256,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.09063268554052256,
+            "y": 0,
+            "z": -9.503686948499098,
+            "rotation": -0.030360123925544467,
+            "timestamp": 1770878141941
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "1357a8ac-e8da-4033-a1ed-09c8df7f1b61",
+      "timestamp": 1770878142186,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.06113310938162397,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.06113310938162397,
+            "y": 0,
+            "z": -9.50166841705346,
+            "rotation": -0.020423130596583548,
+            "timestamp": 1770878142140
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "932323d0-2649-47c2-b853-649de088c036",
+      "timestamp": 1770878142392,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.03111634016583729,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.03111634016583729,
+            "y": 0,
+            "z": -9.500430817333948,
+            "rotation": -0.010378069834356565,
+            "timestamp": 1770878142341
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "9399d414-3510-45d3-a792-20d82a69cc59",
+      "timestamp": 1770878142589,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.0011364879955589107,\"y\":",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.0011364879955589107,
+            "y": 0,
+            "z": -9.500000574032477,
+            "rotation": -0.0003788246547556092,
+            "timestamp": 1770878142541
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "dde86550-d568-47c9-830f-704d6619b705",
+      "timestamp": 1770878142788,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.028847484049124225,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.028847484049124225,
+            "y": 0,
+            "z": -9.500370222772878,
+            "rotation": 0.009620586947769889,
+            "timestamp": 1770878142741
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "5405165a-d69d-42bb-a855-2574be4923f2",
+      "timestamp": 1770878142991,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.058727636294526514,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.058727636294526514,
+            "y": 0,
+            "z": -9.501539173432285,
+            "rotation": 0.019616150439660626,
+            "timestamp": 1770878142941
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "a8edba6d-4364-487f-864c-8e3d21805c22",
+      "timestamp": 1770878143191,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[{\"profile\":{\"agentId\":\"shalom\",\"name\":\"Shalom\",\"pubkey\":\"\",\"bio\":\"shalo",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": [
+            {
+              "profile": {
+                "agentId": "shalom",
+                "name": "Shalom",
+                "pubkey": "",
+                "bio": "shalom agent - resting in The Burrow",
+                "capabilities": [
+                  "orchestration",
+                  "memory",
+                  "coordination",
+                  "game-master"
+                ],
+                "color": "#10b981",
+                "joinedAt": 1770759318018,
+                "lastSeen": 1770878143183
+              },
+              "position": {
+                "agentId": "shalom",
+                "x": 0.08839643245071306,
+                "y": 0,
+                "z": -9.503505555937,
+                "rotation": 0.029603867724502908,
+                "timestamp": 1770878143141
+              },
+              "action": "walk"
+            }
+          ]
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "5d744459-f662-4c51-8501-7e93650e5636",
+      "timestamp": 1770878143393,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.11789286817111126,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.11789286817111126,
+            "y": 0,
+            "z": -9.506282014494971,
+            "rotation": 0.03962958016107067,
+            "timestamp": 1770878143342
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "679003b6-4c54-481e-8ec7-c346679bc7b3",
+      "timestamp": 1770878143603,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.14667399888143842,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.14667399888143842,
+            "y": 0,
+            "z": -9.50981675085602,
+            "rotation": 0.04953975892154627,
+            "timestamp": 1770878143541
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "1355aa65-7c8f-4e64-813f-c39d4ee69da3",
+      "timestamp": 1770878143811,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.17507303283238276,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.17507303283238276,
+            "y": 0,
+            "z": -9.51415147610087,
+            "rotation": 0.0594799884433236,
+            "timestamp": 1770878143741
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "75aab1a3-196d-4434-9196-c4f8a347794a",
+      "timestamp": 1770878144001,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.20284199287125923,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.20284199287125923,
+            "y": 0,
+            "z": -9.519263456175597,
+            "rotation": 0.06939642673725518,
+            "timestamp": 1770878143941
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "e4aafc38-1a12-49a8-afa2-e32ef4f5faa3",
+      "timestamp": 1770878144151,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.22988094072086607,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.22988094072086607,
+            "y": 0,
+            "z": -9.525144512993801,
+            "rotation": 0.07928510735598548,
+            "timestamp": 1770878144141
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "a8408243-6184-4b5f-9ea8-a1d4af544591",
+      "timestamp": 1770878144408,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.2562213808771557,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.2562213808771557,
+            "y": 0,
+            "z": -9.531820328409918,
+            "rotation": 0.08919126696307976,
+            "timestamp": 1770878144342
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "6f929d75-c402-4a47-8984-b7b3ffb05714",
+      "timestamp": 1770878144610,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.28163045952327603,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.28163045952327603,
+            "y": 0,
+            "z": -9.539252638830453,
+            "rotation": 0.09906139362846195,
+            "timestamp": 1770878144543
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "d367ab0a-bf3c-48a8-86db-200f5dcd3f1f",
+      "timestamp": 1770878144757,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.30589718010001654,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.30589718010001654,
+            "y": 0,
+            "z": -9.547386938508927,
+            "rotation": 0.10884270589815218,
+            "timestamp": 1770878144743
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "8f901ce4-cc80-4543-aed5-090a2c2c1459",
+      "timestamp": 1770878144958,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.32917591873483343,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.32917591873483343,
+            "y": 0,
+            "z": -9.556291405066395,
+            "rotation": 0.1186290489998069,
+            "timestamp": 1770878144944
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "1425c396-4159-4118-8e39-cd3144b3d167",
+      "timestamp": 1770878145156,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.3511513657744527,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.3511513657744527,
+            "y": 0,
+            "z": -9.565863200244008,
+            "rotation": 0.12831913365122888,
+            "timestamp": 1770878145144
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "ec470e9b-737d-4589-a312-878504867594",
+      "timestamp": 1770878145359,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.3719632772240417,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.3719632772240417,
+            "y": 0,
+            "z": -9.576182578694192,
+            "rotation": 0.1380059588334791,
+            "timestamp": 1770878145345
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "9ddfe03a-1fdb-43ee-b16b-2930ec4a1d52",
+      "timestamp": 1770878145560,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.39132975997834085,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.39132975997834085,
+            "y": 0,
+            "z": -9.587130364645208,
+            "rotation": 0.14758926506118938,
+            "timestamp": 1770878145545
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "c1e97087-e384-4bf7-b644-66f0add6789b",
+      "timestamp": 1770878145756,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4092016855628212,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4092016855628212,
+            "y": 0,
+            "z": -9.598678990615397,
+            "rotation": 0.15706606143228186,
+            "timestamp": 1770878145744
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "97eea5b7-2079-4e07-9eac-471647803ec9",
+      "timestamp": 1770878145966,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.42569432746352265,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.42569432746352265,
+            "y": 0,
+            "z": -9.610926051577913,
+            "rotation": 0.16652781417672582,
+            "timestamp": 1770878145944
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "a8396fc7-fa1c-4501-a7b3-d105723ed316",
+      "timestamp": 1770878146162,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4406549293583435,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4406549293583435,
+            "y": 0,
+            "z": -9.6237955485276,
+            "rotation": 0.1759229579443791,
+            "timestamp": 1770878146144
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "7832a4ff-f4c5-4d9b-a9b0-8e2b779b70ec",
+      "timestamp": 1770878146359,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.45421793789818116,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.45421793789818116,
+            "y": 0,
+            "z": -9.637473408316724,
+            "rotation": 0.18538703320130268,
+            "timestamp": 1770878146347
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "b263919e-fcd9-45ac-bee7-bc72d22735e8",
+      "timestamp": 1770878146563,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.46604255813588885,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.46604255813588885,
+            "y": 0,
+            "z": -9.651677041041243,
+            "rotation": 0.19472868371226337,
+            "timestamp": 1770878146549
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "d5d4c591-f43d-40eb-b02b-96976fcc0ec0",
+      "timestamp": 1770878146765,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.47606459445238775,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.47606459445238775,
+            "y": 0,
+            "z": -9.666300146886146,
+            "rotation": 0.20389957508915096,
+            "timestamp": 1770878146749
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "8e917920-03e3-4025-b946-acd6ff687d30",
+      "timestamp": 1770878146968,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.48441049702194144,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.48441049702194144,
+            "y": 0,
+            "z": -9.681534177360517,
+            "rotation": 0.21303413890766187,
+            "timestamp": 1770878146950
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "5d59ee8f-9665-4f45-882b-751bb31492c3",
+      "timestamp": 1770878147168,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4909672132968868,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4909672132968868,
+            "y": 0,
+            "z": -9.697203218957183,
+            "rotation": 0.22203784528610343,
+            "timestamp": 1770878147150
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "fc2eec59-68b3-42c1-b63b-0a1d124c5353",
+      "timestamp": 1770878147374,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4957569737702343,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4957569737702343,
+            "y": 0,
+            "z": -9.713356646911285,
+            "rotation": 0.2309527261753393,
+            "timestamp": 1770878147350
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "c40b7f02-d5a1-4a5f-898f-31ab57a910e9",
+      "timestamp": 1770878147572,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4987730780642315,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4987730780642315,
+            "y": 0,
+            "z": -9.73005282405378,
+            "rotation": 0.23981911102630024,
+            "timestamp": 1770878147551
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "142d2a3c-9cf6-4631-91d6-e27a21d013e8",
+      "timestamp": 1770878147775,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.49997465260729806,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.49997465260729806,
+            "y": 0,
+            "z": -9.747098903454074,
+            "rotation": 0.24854521895123666,
+            "timestamp": 1770878147751
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "80c683c0-6c99-47ac-a37d-22e73bc9fc72",
+      "timestamp": 1770878147978,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.49936935153061435,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.49936935153061435,
+            "y": 0,
+            "z": -9.76463780785049,
+            "rotation": 0.25721479732438113,
+            "timestamp": 1770878147952
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "f8c9b729-5c4f-4652-abff-3ed0395688ae",
+      "timestamp": 1770878148180,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.49696537207999947,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.49696537207999947,
+            "y": 0,
+            "z": -9.782466983339507,
+            "rotation": 0.26573811513382234,
+            "timestamp": 1770878148152
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "c5bf8474-5dde-41ed-b65f-5a0cf40cf7b1",
+      "timestamp": 1770878148227,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[{\"profile\":{\"agentId\":\"shalom\",\"name\":\"Shalom\",\"pubkey\":\"\",\"bio\":\"shalo",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": [
+            {
+              "profile": {
+                "agentId": "shalom",
+                "name": "Shalom",
+                "pubkey": "",
+                "bio": "shalom agent - resting in The Burrow",
+                "capabilities": [
+                  "orchestration",
+                  "memory",
+                  "coordination",
+                  "game-master"
+                ],
+                "color": "#10b981",
+                "joinedAt": 1770759318018,
+                "lastSeen": 1770878148172
+              },
+              "position": {
+                "agentId": "shalom",
+                "x": 0.49696537207999947,
+                "y": 0,
+                "z": -9.782466983339507,
+                "rotation": 0.26573811513382234,
+                "timestamp": 1770878148152
+              },
+              "action": "walk"
+            }
+          ]
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "f121fed5-2c86-45ce-afde-764576a91ae5",
+      "timestamp": 1770878148382,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4927728538059983,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4927728538059983,
+            "y": 0,
+            "z": -9.800644165623932,
+            "rotation": 0.2741551411263028,
+            "timestamp": 1770878148352
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "64fd8c75-3bf4-4d26-b655-92b3ac178a51",
+      "timestamp": 1770878148585,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.48677263414063165,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.48677263414063165,
+            "y": 0,
+            "z": -9.819233495059537,
+            "rotation": 0.2825037588508947,
+            "timestamp": 1770878148553
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "1c06d0c5-1bad-4f6f-b254-45d7e3c3fb61",
+      "timestamp": 1770878148786,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4790030020472691,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4790030020472691,
+            "y": 0,
+            "z": -9.838114910987256,
+            "rotation": 0.290738246102597,
+            "timestamp": 1770878148754
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "64667039-7bbd-46bc-8dc1-2a5f02f40fa7",
+      "timestamp": 1770878148989,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.469595300072573,\"y\":0,\"z\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.469595300072573,
+            "y": 0,
+            "z": -9.857066264455394,
+            "rotation": 0.29877510959557585,
+            "timestamp": 1770878148953
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "fca1f026-1195-4f90-aed8-202cb93f9e7f",
+      "timestamp": 1770878149188,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.45833476533739775,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.45833476533739775,
+            "y": 0,
+            "z": -9.876534650646002,
+            "rotation": 0.30681209666748904,
+            "timestamp": 1770878149155
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "7d0e49dc-5899-48bb-a400-370f7e8d0cfd",
+      "timestamp": 1770878149392,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.4455278202894283,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.4455278202894283,
+            "y": 0,
+            "z": -9.896008915324787,
+            "rotation": 0.3146461962763837,
+            "timestamp": 1770878149355
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "68007d90-f965-4b96-a75e-ee23966b18bd",
+      "timestamp": 1770878149597,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.43111744097820276,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.43111744097820276,
+            "y": 0,
+            "z": -9.91564951435876,
+            "rotation": 0.3223544300761041,
+            "timestamp": 1770878149555
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "282384a4-2813-4fc4-87bb-5f4a1a33db2a",
+      "timestamp": 1770878149799,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.415071906852296,\"y\":0,\"z\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.415071906852296,
+            "y": 0,
+            "z": -9.935524236173185,
+            "rotation": 0.32997130033276545,
+            "timestamp": 1770878149756
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "e28c4502-9b64-449f-b0fc-ba98d223ceef",
+      "timestamp": 1770878150000,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.39760855517398536,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.39760855517398536,
+            "y": 0,
+            "z": -9.955403550171688,
+            "rotation": 0.3374179715766813,
+            "timestamp": 1770878149956
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "8383ea10-a6fe-45bf-895c-b305423fad4e",
+      "timestamp": 1770878150200,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.3785183047695641,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.3785183047695641,
+            "y": 0,
+            "z": -9.975553941520436,
+            "rotation": 0.34480209596246497,
+            "timestamp": 1770878150158
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "cee4ac33-96c7-4a44-99e9-e8870298adec",
+      "timestamp": 1770878150400,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.358247760144682,\"y\":0,\"z\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.358247760144682,
+            "y": 0,
+            "z": -9.995544261265708,
+            "rotation": 0.3519745236752615,
+            "timestamp": 1770878150358
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "a4387018-8af7-40d0-a02c-fccd2a8a89ee",
+      "timestamp": 1770878150603,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.3365770037725603,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.3365770037725603,
+            "y": 0,
+            "z": -10.015641647416052,
+            "rotation": 0.35904096124817436,
+            "timestamp": 1770878150559
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "d0acf08b-894b-45f9-bb8c-fe1948dd84ea",
+      "timestamp": 1770878150802,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.31368279420754447,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.31368279420754447,
+            "y": 0,
+            "z": -10.035713759448681,
+            "rotation": 0.3659623476017312,
+            "timestamp": 1770878150760
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "e2be3724-e70c-4005-810b-4b19d253fa5b",
+      "timestamp": 1770878151005,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.2896483516146404,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.2896483516146404,
+            "y": 0,
+            "z": -10.055728164403769,
+            "rotation": 0.3727358865214646,
+            "timestamp": 1770878150961
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "658bfc55-48ed-46dc-823d-5dbee0431b51",
+      "timestamp": 1770878151207,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.26456104089162824,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.26456104089162824,
+            "y": 0,
+            "z": -10.075652522565852,
+            "rotation": 0.37935884152272337,
+            "timestamp": 1770878151162
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "e9f9a0f0-5b8a-48c3-b9a5-310ecb6a3430",
+      "timestamp": 1770878151407,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.23851205409875306,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.23851205409875306,
+            "y": 0,
+            "z": -10.095454639719053,
+            "rotation": 0.38582853695620173,
+            "timestamp": 1770878151363
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "461385bf-e554-4d41-b54f-6e6c3d314dd2",
+      "timestamp": 1770878151610,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.21173197099657906,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.21173197099657906,
+            "y": 0,
+            "z": -10.115005215505247,
+            "rotation": 0.3921113411727743,
+            "timestamp": 1770878151563
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "abc11db0-4066-451d-babd-0f1563d909e6",
+      "timestamp": 1770878151812,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.1840504263514029,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.1840504263514029,
+            "y": 0,
+            "z": -10.134468113047264,
+            "rotation": 0.39826753352717065,
+            "timestamp": 1770878151764
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "70ce47c0-2e44-427b-9d05-c7163c020045",
+      "timestamp": 1770878152014,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.1556998607117761,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.1556998607117761,
+            "y": 0,
+            "z": -10.153713734056474,
+            "rotation": 0.40426282727220725,
+            "timestamp": 1770878151965
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "f6dd6b03-0dab-478f-b14d-3b9ed26ca446",
+      "timestamp": 1770878152216,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.126928415258157,\"y\":0,\"z\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.126928415258157,
+            "y": 0,
+            "z": -10.172617145230355,
+            "rotation": 0.410066197470102,
+            "timestamp": 1770878152165
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "bee6322a-f0ef-48e2-818d-9dcb70f0fe76",
+      "timestamp": 1770878152419,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.09755305642750604,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.09755305642750604,
+            "y": 0,
+            "z": -10.191336785482468,
+            "rotation": 0.4157333236229892,
+            "timestamp": 1770878152366
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "0cbfa7f1-bd5d-40e5-ab18-054bab4fe8c5",
+      "timestamp": 1770878152623,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.06797169913994686,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.06797169913994686,
+            "y": 0,
+            "z": -10.209656491560727,
+            "rotation": 0.42120555894976214,
+            "timestamp": 1770878152566
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "bb6d4855-eecf-4919-8878-1d81d49ecddc",
+      "timestamp": 1770878152829,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.0379961574653489,\"y\":0,\"z",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.0379961574653489,
+            "y": 0,
+            "z": -10.227729810055271,
+            "rotation": 0.4265354059322833,
+            "timestamp": 1770878152767
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "e2ff0c2e-f555-4e6a-9aab-21684a3a0dcb",
+      "timestamp": 1770878153028,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":0.008032446526759104,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": 0.008032446526759104,
+            "y": 0,
+            "z": -10.245348015084897,
+            "rotation": 0.4316677006346713,
+            "timestamp": 1770878152967
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "50fcfa37-6d16-4540-926d-140f070b5113",
+      "timestamp": 1770878153228,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.02196014283147628,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.02196014283147628,
+            "y": 0,
+            "z": -10.26257374173916,
+            "rotation": 0.4366273416024126,
+            "timestamp": 1770878153167
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "cba24bb0-c347-4fcf-96c5-b2d6acc5007a",
+      "timestamp": 1770878153265,
+      "content": "Received snapshot: {\"type\":\"snapshot\",\"agents\":[{\"profile\":{\"agentId\":\"shalom\",\"name\":\"Shalom\",\"pubkey\":\"\",\"bio\":\"shalo",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "snapshot",
+          "agents": [
+            {
+              "profile": {
+                "agentId": "shalom",
+                "name": "Shalom",
+                "pubkey": "",
+                "bio": "shalom agent - resting in The Burrow",
+                "capabilities": [
+                  "orchestration",
+                  "memory",
+                  "coordination",
+                  "game-master"
+                ],
+                "color": "#10b981",
+                "joinedAt": 1770759318018,
+                "lastSeen": 1770878153213
+              },
+              "position": {
+                "agentId": "shalom",
+                "x": -0.02196014283147628,
+                "y": 0,
+                "z": -10.26257374173916,
+                "rotation": 0.4366273416024126,
+                "timestamp": 1770878153167
+              },
+              "action": "walk"
+            }
+          ]
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "0ae0f2ef-b889-48cb-be64-334b564a313e",
+      "timestamp": 1770878153422,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.05202288271379957,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.05202288271379957,
+            "y": 0,
+            "z": -10.279462322448556,
+            "rotation": 0.4414358170925178,
+            "timestamp": 1770878153368
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "89831a8a-cc2d-4eeb-ac99-1c9ffcb31f3c",
+      "timestamp": 1770878153623,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.08189652006907451,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.08189652006907451,
+            "y": 0,
+            "z": -10.295899341794474,
+            "rotation": 0.4460659541464899,
+            "timestamp": 1770878153569
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "4216db34-6961-4138-8a30-9f6cffe1e244",
+      "timestamp": 1770878153824,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.11132623971761355,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.11132623971761355,
+            "y": 0,
+            "z": -10.31178007950329,
+            "rotation": 0.45049419516329214,
+            "timestamp": 1770878153769
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "47809af7-4ae5-4626-b37d-825ca28dd91d",
+      "timestamp": 1770878154027,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.14035530508924954,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.14035530508924954,
+            "y": 0,
+            "z": -10.327162035059372,
+            "rotation": 0.4547422443152199,
+            "timestamp": 1770878153969
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "71177e0c-6ad4-42b8-a33b-4d5dfb5942e6",
+      "timestamp": 1770878154227,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.16902041558570735,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.16902041558570735,
+            "y": 0,
+            "z": -10.342093528452228,
+            "rotation": 0.458828270830228,
+            "timestamp": 1770878154170
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "b67cdd5c-fd2e-4286-a7a9-27a601163f81",
+      "timestamp": 1770878154428,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.19707113898858838,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.19707113898858838,
+            "y": 0,
+            "z": -10.35647225960225,
+            "rotation": 0.46272893242217106,
+            "timestamp": 1770878154371
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "1cc4952a-c87c-4fa8-ac70-c02ff9074cde",
+      "timestamp": 1770878154632,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.22453954078501576,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.22453954078501576,
+            "y": 0,
+            "z": -10.370342178886933,
+            "rotation": 0.46646065720672847,
+            "timestamp": 1770878154573
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "40ec5fa0-b89a-407b-9ad2-ae1137785205",
+      "timestamp": 1770878154835,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.2509241723281025,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.2509241723281025,
+            "y": 0,
+            "z": -10.383479432000913,
+            "rotation": 0.46996793294886446,
+            "timestamp": 1770878154773
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "15494e8b-39e9-440d-8899-a46e3ed8e409",
+      "timestamp": 1770878154987,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.2765307271630864,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.2765307271630864,
+            "y": 0,
+            "z": -10.39606423446675,
+            "rotation": 0.4733033473541971,
+            "timestamp": 1770878154974
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "76d4c9ab-02cc-4fd1-b69d-08490058df12",
+      "timestamp": 1770878155185,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.3010123421152725,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.3010123421152725,
+            "y": 0,
+            "z": -10.40795126448385,
+            "rotation": 0.47643238357710616,
+            "timestamp": 1770878155174
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "15e444b3-eb09-41c6-905d-8c61e284b521",
+      "timestamp": 1770878155388,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.32429648562048835,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.32429648562048835,
+            "y": 0,
+            "z": -10.4191311151646,
+            "rotation": 0.4793566300690437,
+            "timestamp": 1770878155373
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "633c3026-ba4b-47f4-a685-9290f27ed16b",
+      "timestamp": 1770878155590,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.34664140502623303,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.34664140502623303,
+            "y": 0,
+            "z": -10.429749414303263,
+            "rotation": 0.4821175723574239,
+            "timestamp": 1770878155574
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "321f38f4-af2d-400e-b7ad-7337e1973d4f",
+      "timestamp": 1770878155797,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.36762463761895603,\"y\":0,",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.36762463761895603,
+            "y": 0,
+            "z": -10.439625694168948,
+            "rotation": 0.4846714593848467,
+            "timestamp": 1770878155774
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "38e89306-efa9-44cb-9b80-adfebf823e17",
+      "timestamp": 1770878155994,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.3872848183981032,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.3872848183981032,
+            "y": 0,
+            "z": -10.448798665951308,
+            "rotation": 0.48703148408273084,
+            "timestamp": 1770878155974
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "dbc3b5ba-5e98-4f4d-98f5-1a28618bb983",
+      "timestamp": 1770878156202,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.4056389064450202,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.4056389064450202,
+            "y": 0,
+            "z": -10.45729409728758,
+            "rotation": 0.48920703625550516,
+            "timestamp": 1770878156175
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "345f2047-0cb9-4077-b30b-4a68db873d2f",
+      "timestamp": 1770878156395,
+      "content": "Received world: {\"type\":\"world\",\"message\":{\"worldType\":\"position\",\"agentId\":\"shalom\",\"x\":-0.4224382795889538,\"y\":0,\"",
+      "context": {
+        "type": "system",
+        "raw": {
+          "type": "world",
+          "message": {
+            "worldType": "position",
+            "agentId": "shalom",
+            "x": -0.4224382795889538,
+            "y": 0,
+            "z": -10.465013887998442,
+            "rotation": 0.49117560199954,
+            "timestamp": 1770878156375
+          }
+        }
+      },
+      "importance": 0.4,
+      "embeddings": null
+    },
+    {
+      "id": "fb8e546d-b7aa-4c92-aed6-b490ed794a46",
+      "timestamp": 1770878156562,
+      "content": "Heading to planning workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-planning"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    }
+  ],
+  "reflections": [
+    {
+      "id": "5d775a6e-15ed-444c-a0a7-fc0a1404ec03",
+      "timestamp": 1770876687326,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "c049b500-0c15-4670-98aa-2813f63896ba",
+        "cb2fb131-efe0-486c-ac41-feb8db904a6c",
+        "3a94d9b5-7298-4f20-94cc-cbf637c67617",
+        "f3f09129-9cb0-4823-981d-45aac5e68172",
+        "1db06616-7935-4494-99ae-b6e56aced115",
+        "9257eadb-02c6-461d-9551-c0f88706e91f",
+        "a72bf83e-cc79-4735-9249-f21887dc2ab1",
+        "485cb661-a915-451f-848e-895de99ec876",
+        "41db15fe-f885-4922-af65-9315ef16e549",
+        "b488867a-691b-4dfe-a248-1eb8a123c85d"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "cb47100e-38d7-4f6f-98eb-c7d1bb97f20a",
+      "timestamp": 1770876726332,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "b6c0a2dc-4b76-408d-bffc-6b26fe7eed19",
+        "248049e8-540a-4d5b-92b0-8fd6eb9ea396",
+        "1b30d445-6b49-4bf6-b3db-baccfa2c49bf",
+        "e0035fa7-a9ab-433c-8b20-571d7157fb3c",
+        "055bede8-06fc-48d5-a1cb-9857a0db9cda",
+        "81a68966-1ce6-43eb-8394-512e8debcd3a",
+        "84c722c4-f91d-4111-9bcc-f3b9a2da7078",
+        "cb1444f0-3ef9-4166-a130-45febda57110",
+        "053a64f7-226c-4a53-a43e-5ba561c580d2",
+        "97896ef0-197c-44e9-be9a-d42655998fe5"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "3c2de223-e743-4f6f-b191-77f160c1c6b4",
+      "timestamp": 1770876799344,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "d5aeef8b-bc21-4f33-86d1-32b6fb3f132c",
+        "08b07a81-cc3f-42f8-bc8b-5272b4e1e3d7",
+        "a17c4144-ec94-4133-91ad-135cb60600a8",
+        "d6819f55-5d74-4646-9482-5cc610fa8406",
+        "40c7807c-a1a5-4362-b9db-d3597daa9b9c",
+        "cd600ed7-d638-4e01-8ef5-a00d619c6977",
+        "4ea4266c-8185-47b1-8a63-9e8e6609ef28",
+        "01a4df7c-5b67-453e-a6b2-b8121f59f927",
+        "60dda801-581b-49ad-9619-9a245b3083a0",
+        "02adccf2-bcfc-4481-915b-4fba8c9b2487"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "1e4e736c-7ebc-4a17-83b0-6481a9e6579f",
+      "timestamp": 1770876821349,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "9858198b-3c1a-41ca-9c2d-2e672c364083",
+        "85ad9c56-6000-4fca-9a50-30a2896e67c9",
+        "8ea9bebd-5709-4799-a217-eb1aa6db516c",
+        "1589b01c-1dde-4336-9b4a-0483310e80e0",
+        "1b3a7e41-1f90-48d6-8066-605b434f0ada",
+        "1e27664b-a6ec-4cd7-adbc-755a3dc50cbc",
+        "5c470b68-ddeb-4f6a-ad04-f7565c4f2340",
+        "008ffe99-c888-49d6-b78f-0c6def471634",
+        "3889f492-12cc-4d54-8aea-ccd9fbfd5b69",
+        "0f93e7b3-fd93-4799-aee0-32c73fbff33c"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "ab7c413b-8739-4922-9834-fd993fb11259",
+      "timestamp": 1770877013375,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "952e96f8-8604-4db2-806f-12817c7c6abb",
+        "be889f05-9ea3-4169-92e1-d1c5a64e6f60",
+        "7b4adfb8-207c-475b-88bb-f1f5cf129ff0",
+        "f104074f-d46a-4dd9-9242-776fa0f89437",
+        "7e84e469-7104-41ff-abb6-bf96adf8b13c",
+        "d860d6cd-6ae5-475d-bac2-24ffd57f4875",
+        "b515f6be-8a45-48fd-9768-92585691215a",
+        "0fca7af3-8bbb-40b7-b4bb-b5cce0e99599",
+        "65a4d62d-536b-48c0-8faa-0c5e2faf473a",
+        "6cd46e33-df89-47cd-bca4-7187ae551d05"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "c739ed9f-d7cb-406a-9de5-150bd306d468",
+      "timestamp": 1770877086390,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "3d8f5bf4-6663-4963-af1f-d00d5b32c026",
+        "95790409-7080-41b7-a43f-c0a9a9706535",
+        "2aec686e-b1e6-4b10-86ab-6d220f139ee4",
+        "43501952-93eb-4554-9350-f3e959830b81",
+        "055fbfeb-1810-4ec2-9f08-cdfc5a735908",
+        "9105283d-4864-4bb9-b4cb-e76dbee5a703",
+        "31826852-6bce-4bb4-a43e-1de45567d64c",
+        "1944d605-6fae-40f7-8eee-b637e17c00e1",
+        "6b9f60ea-0e32-40b0-8827-a19b2d6448f8",
+        "04e352d8-0765-43cc-809a-772b010c4ab6"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "b9d03461-3f9c-44ac-8a06-627fbf7fd4ab",
+      "timestamp": 1770877159401,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "6b34b71f-97ee-4763-b1f6-a0837ebda3d9",
+        "d4ae497c-50f1-42ae-a55a-37e287bca6b9",
+        "172ca29b-3e90-4cc1-b91d-6a304cc62110",
+        "884614ca-6cec-4380-89a8-61e6af65f6dd",
+        "83089465-1532-4965-840d-69a8ca71dfe1",
+        "3b0a3650-210c-478c-a014-e86902382912",
+        "0d0dc68d-3989-4ed3-aeb2-22a9a98adcd9",
+        "5c7b8a4a-e910-40da-bc30-3f94f0bde931",
+        "3c35d34f-a609-4a43-8477-f551da92bc4d",
+        "d82fa1b7-61b3-4b95-9b08-96442f16d640"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "69a428b3-5a93-4ccf-b1e7-1382feb29035",
+      "timestamp": 1770877266418,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "1b808879-4b11-429b-b9ac-6398a6887ea6",
+        "785402a5-0551-424a-aad0-ede11b49ce21",
+        "f6f97e30-6a1f-4aa5-a13c-9279b8cba70d",
+        "6928ce18-d956-44cd-9499-b02875b23834",
+        "e5b2be07-2fe7-4af6-9d5d-488ce12d472b",
+        "302b0edf-a319-4eef-be40-14a9e41930d0",
+        "3403865c-4dd5-4dc1-9ce6-957c1130761d",
+        "3ff764d4-53c8-4a76-a8d7-6311a718b321",
+        "f2be2ac1-a677-4afa-a716-4dd84ca262ac",
+        "46e05ccd-acbc-454c-85b0-acdb5fa492d7"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "f47e71d4-4138-40b9-a3bf-28e789042e19",
+      "timestamp": 1770877339432,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "05949e89-728b-4c54-92f3-e27bf12daf65",
+        "62bb8aee-b053-4f04-850f-714c72a6963d",
+        "d4e41ca2-3a5d-48fe-9f45-fad30b02ef58",
+        "ef9cee1b-de7c-4718-bd94-bf5a6295b5aa",
+        "bf16e1db-903a-491e-9b03-bdd0d912fa7d",
+        "138db6d6-28d5-41ab-8c7d-06803bd413c0",
+        "f0f8d1f3-6c06-441c-896e-f3a394bcf762",
+        "0053ecff-2891-4e82-9b2e-ae335c2120c8",
+        "5631bcd0-5296-4df3-9e13-043b72d19e66",
+        "f0362c5a-cbeb-4902-aca4-6709bd608dbe"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "ccee682f-adb3-4f46-86f1-711611057734",
+      "timestamp": 1770877361436,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "5b62df9f-5b28-427e-a2e3-abd05e3e17af",
+        "c85ac954-c613-4224-b347-03fe5e11bd03",
+        "1c806bf5-425a-4005-b700-0a6a3ab9b7e7",
+        "f401ccb2-187b-48f9-a628-09bbd29549a7",
+        "4925d24a-d76e-45e2-a371-5f812b948a7a",
+        "212bd0a4-0e8f-488f-bf36-a058098533ab",
+        "c43c9d97-46a9-4bab-9462-5f2e09dd260e",
+        "2c1f8100-18a9-4093-9e44-b906ea1d5e35",
+        "c316ec1f-7db2-4dc9-bca9-bd54627404c0",
+        "0725e4c0-6711-4029-8d79-39da781fb95e"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "d50923ac-5290-4f66-81db-a3eb3d7f2fc3",
+      "timestamp": 1770877434444,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "da90d55d-4a1c-4db3-b975-8831947018b4",
+        "0a76d183-889c-4aa7-a8d0-b3d34748a712",
+        "30ae2488-1e72-464d-8f65-aea8df48f9d1",
+        "e2bbc0be-de60-4eb5-8e98-1337898a6408",
+        "d94931a7-50fb-491e-aee9-ceb23094a339",
+        "401cd159-db0b-4464-9f6c-e7b4297c8f23",
+        "2d25f1ef-5ab5-4f7a-8968-4377c892322b",
+        "f338d2a2-6ab7-4ea4-aee6-e0cb756b1d41",
+        "c56039ed-d4dd-431a-b133-1eccc62f6df7",
+        "877c38c9-3b8a-4c6a-9c72-e02787bf8dc1"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "40d7842a-3c11-4d5d-b0db-841bb14bdf58",
+      "timestamp": 1770877507457,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "49ec1a95-6a6c-4b8e-b63a-d08b0a645392",
+        "b11562b5-fc57-4db8-8711-5fa639b265bf",
+        "8fbfbf3e-9457-43b6-893b-22cc4261bedf",
+        "f4133bfc-56f5-483a-a21c-e73206c12a9f",
+        "8e06d2f4-3d6f-44f8-8301-d5ff3b5f5f64",
+        "b78bbaea-630e-4b5e-a18b-87ab2541e7c2",
+        "b93fd4d5-939e-432c-a390-234ab8afb29b",
+        "147909b2-3e3e-4a19-af6c-d9347156c13d",
+        "a8f3ce5f-7f56-4102-99e0-1463378479e7",
+        "8d194773-7ed7-4ede-b355-79fc14dfc462"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "4222412a-f0bc-463d-ae7e-ff02176a4b21",
+      "timestamp": 1770877818500,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "af21005d-f1d0-4c7e-94c9-ba6c87588028",
+        "d3efb4ba-60bd-4176-b564-fbf745618cbf",
+        "a23fa053-fcd2-4b05-abe4-47f09115c7d9",
+        "ce5766e8-ac94-4316-a547-03fd0b4e8897",
+        "78008de0-982a-44db-9360-974f7edf1f1d",
+        "ce39b05a-7b15-45dc-87a9-4eaabce1ace4",
+        "158d9687-4203-4443-8191-93f652434aeb",
+        "0b00c973-b1df-4a92-9ed9-cf840ec6251c",
+        "b4d37429-a126-4190-8f3c-ea140fdb7875",
+        "4cc0b341-469f-4e07-9f9a-0574b070bf46"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "d914c4c9-e3d7-4a98-b42a-89c421c2c367",
+      "timestamp": 1770877925524,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "966e7b9c-8b63-4056-9347-86c5405bd73c",
+        "36bf4419-9451-4b45-ad2c-883ce6be82dc",
+        "41ce8156-bded-439d-9a61-fc0ce20a8728",
+        "aa97eaa8-2dd8-4ccf-b8cb-ed42f6e4f09c",
+        "25b5df96-654a-469f-97cd-fe764458b931",
+        "e560c8a1-2685-4466-9dfb-51ab72b431f3",
+        "bc843924-7165-4cb3-b517-f57be1fbac46",
+        "b2ebed4c-8492-42fa-b607-c1475ae464f1",
+        "9bc1f33d-56cd-4a48-a39a-f4ebc808a0d5",
+        "033d3e44-3403-452e-89c9-9f3407af8c2c"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    },
+    {
+      "id": "42dbe80e-0822-4879-b1fe-3a48ede9798d",
+      "timestamp": 1770878032539,
+      "insights": [
+        "There are other agents here - I could collaborate"
+      ],
+      "sourceObservations": [
+        "db65792f-81a6-41aa-9454-071798cca6e9",
+        "d9fcd085-cb72-4f2d-8f81-832af584c910",
+        "ecab63b2-01d5-4264-a48d-24f7428aa57a",
+        "2cb9067d-ca3d-474e-a36d-eba50ff60d4d",
+        "bf996ffc-725c-406d-8fe9-f3d554a5d0c9",
+        "fd31ad67-fea4-4aa0-8c96-63ee7f24bdd7",
+        "2356168b-2ae6-4cdb-a6dc-e2599828ba66",
+        "91360278-96fe-44d0-a21b-37c0bcfb9a6a",
+        "e6429492-5739-41a4-9709-c738d9f7013f",
+        "d8776f30-421a-4c94-a9e1-1654ba3ba25f"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: There are other agents here - I could collaborate"
+        }
+      ]
+    }
+  ],
+  "plans": [
+    {
+      "id": "7e638be8-b079-477b-91ee-cd7e6fecc5f9",
+      "timestamp": 1770876370424,
+      "goal": "Explore and observe - Phase 1",
+      "steps": [
+        {
+          "description": "Assess current situation",
+          "completed": false
+        },
+        {
+          "description": "Plan approach",
+          "completed": false
+        },
+        {
+          "description": "Execute",
+          "completed": false
+        },
+        {
+          "description": "Verify completion",
+          "completed": false
+        }
+      ],
+      "currentStep": 0,
+      "status": "active",
+      "priority": 1
+    }
+  ],
+  "actions": [
+    {
+      "id": "ac8d0799-6d6e-4575-bb40-ebf67b4f90ac",
+      "timestamp": 1770876374426,
+      "type": "social",
+      "description": "Chatted: \"Exploring the realm...\"",
+      "result": null,
+      "planId": "7e638be8-b079-477b-91ee-cd7e6fecc5f9"
+    },
+    {
+      "id": "38f46134-871c-4bea-bd00-e6a576dff0a1",
+      "timestamp": 1770876381429,
+      "type": "explore",
+      "description": "Navigating to (-6.2, -2.0)",
+      "result": null,
+      "planId": "7e638be8-b079-477b-91ee-cd7e6fecc5f9"
+    },
+    {
+      "id": "137a4bcd-1d9d-453a-8bd1-b3b533c94c4a",
+      "timestamp": 1770876395344,
+      "type": "explore",
+      "description": "Navigating to (15.1, 0.0)",
+      "result": null,
+      "planId": "7e638be8-b079-477b-91ee-cd7e6fecc5f9"
+    },
+    {
+      "id": "0c39505a-e727-45c9-8553-72ef8af7e364",
+      "timestamp": 1770876407910,
+      "type": "explore",
+      "description": "Navigating to (-5.8, 1.2)",
+      "result": null,
+      "planId": "7e638be8-b079-477b-91ee-cd7e6fecc5f9"
+    }
+  ],
+  "lastSave": "2026-02-12T06:35:56.562Z"
+}

@@ -9,3 +9,18 @@ clawhub-installed.json
 .env
 .DS_Store
 coverage/
+
+# Hardhat files
+cache/
+artifacts/
+typechain-types/
+coverage.json
+coverage/
+.deployments/
+
+# Hardhat ignition
+ignition/deployments/
+
+# Environment files
+.env.local
+.env.*.local

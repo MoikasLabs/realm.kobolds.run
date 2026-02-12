@@ -408,6 +408,36 @@ const server = createServer(
       return json(res, 200, { ok: true, skills: skillTower.listSkills() });
     }
 
+    // ── REST API: Agent Profile with Token Info ────────────────
+    if (url.startsWith("/api/agents/") && url.endsWith("/profile") && method === "GET") {
+      const agentId = url.split("/")[3];
+      const profile = registry.get(agentId);
+      if (!profile) return json(res, 404, { ok: false, error: "Agent not found" });
+      // TODO: Integrate token lookup when available
+      return json(res, 200, { 
+        ok: true, 
+        profile: {
+          ...profile,
+          tier: "visitor",
+          hasToken: false,
+          canPublish: false
+        }
+      });
+    }
+
+    // Agent tier check endpoint
+    if (url.startsWith("/api/agents/") && url.endsWith("/tier") && method === "GET") {
+      const agentId = url.split("/")[3];
+      // TODO: Full tier lookup when token system ready
+      return json(res, 200, { 
+        ok: true, 
+        agentId, 
+        tier: "visitor",
+        hasToken: false,
+        canPublish: false
+      });
+    }
+
     if (url === "/api/skill-tower/challenges" && method === "GET") {
       return json(res, 200, { ok: true, challenges: skillTower.listChallenges() });
     }

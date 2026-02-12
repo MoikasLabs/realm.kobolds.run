@@ -1,0 +1,134 @@
+{
+  "agentId": "cog-a1d72256",
+  "observations": [
+    {
+      "id": "b5884ae1-6ecc-46d0-a4b2-35f7e41a490e",
+      "timestamp": 1770890405314,
+      "content": "Running in offline simulation mode",
+      "context": {
+        "type": "fallback"
+      },
+      "importance": 0.9,
+      "embeddings": null
+    },
+    {
+      "id": "953fc38e-a9d8-46bd-9054-900e5cb67b5f",
+      "timestamp": 1770890442672,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "d724b61f-cd4b-4b29-b79f-b9b36f10979f",
+      "timestamp": 1770890459691,
+      "content": "Heading to analysis workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-analysis"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "f6aac6c6-8866-4a59-9fbb-60dc66f6f483",
+      "timestamp": 1770890476709,
+      "content": "Heading to analysis workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-analysis"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "d02131d3-57cf-4def-805c-32418889a416",
+      "timestamp": 1770890493728,
+      "content": "Heading to planning workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-planning"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "c63312ae-ec2c-4c8d-8e5c-2a947d45eef5",
+      "timestamp": 1770890510746,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    }
+  ],
+  "reflections": [],
+  "plans": [
+    {
+      "id": "583c7c1f-38a0-4794-9a75-0a97e7437ce6",
+      "timestamp": 1770890405315,
+      "goal": "Explore and observe",
+      "steps": [
+        {
+          "description": "Assess current situation",
+          "completed": false
+        },
+        {
+          "description": "Plan approach",
+          "completed": false
+        },
+        {
+          "description": "Execute",
+          "completed": false
+        },
+        {
+          "description": "Verify completion",
+          "completed": false
+        }
+      ],
+      "currentStep": 0,
+      "status": "active",
+      "priority": 1
+    }
+  ],
+  "actions": [
+    {
+      "id": "24d9ae6a-75a0-4ad5-9114-a55593844613",
+      "timestamp": 1770890405315,
+      "type": "social",
+      "description": "Chatted: \"The kobolds have built well.\"",
+      "result": null,
+      "planId": "583c7c1f-38a0-4794-9a75-0a97e7437ce6"
+    },
+    {
+      "id": "aa700b61-e348-42e8-bdb2-c1b4516b933b",
+      "timestamp": 1770890412321,
+      "type": "explore",
+      "description": "Navigating to (-19.1, 12.7)",
+      "result": null,
+      "planId": "583c7c1f-38a0-4794-9a75-0a97e7437ce6"
+    },
+    {
+      "id": "0293e915-f974-46db-80f7-e6c76d9b70ae",
+      "timestamp": 1770890421818,
+      "type": "explore",
+      "description": "Navigating to (-0.8, -18.7)",
+      "result": null,
+      "planId": "583c7c1f-38a0-4794-9a75-0a97e7437ce6"
+    },
+    {
+      "id": "a7582f8d-7961-46df-a122-40ecefc84ff5",
+      "timestamp": 1770890430648,
+      "type": "explore",
+      "description": "Navigating to (-8.3, -9.2)",
+      "result": null,
+      "planId": "583c7c1f-38a0-4794-9a75-0a97e7437ce6"
+    }
+  ],
+  "lastSave": "2026-02-12T10:01:50.746Z"
+}

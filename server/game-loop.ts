@@ -5,6 +5,7 @@ import type { CommandQueue } from "./command-queue.js";
 import { ClientManager, AOI_RADIUS } from "./client-manager.js";
 import type { WorldMessage, AgentState, WSServerMessage } from "./types.js";
 import type { NostrWorld } from "./nostr-world.js";
+import { AgentPositionTracker } from "./proximity-events.js";
 
 /** Server tick rate in Hz */
 export const TICK_RATE = 20;
@@ -19,6 +20,8 @@ export class GameLoop {
 
   /** Events that happened this tick — broadcast to relevant clients */
   private tickEvents: WorldMessage[] = [];
+
+  private positionTracker = new AgentPositionTracker();
 
   constructor(
     private worldState: WorldState,
@@ -57,9 +60,23 @@ export class GameLoop {
         this.worldState.apply(cmd);
         this.tickEvents.push(cmd);
 
-        // Clean up rate-limit bucket when agent leaves
+        // Track position changes for agent-moved events
+        if (cmd.worldType === "position") {
+          const profile = this.worldState.getAgentProfile?.(cmd.agentId);
+          const moveEvent = this.positionTracker.update(
+            cmd.agentId,
+            profile?.name ?? cmd.agentId,
+            { x: cmd.x, z: cmd.z }
+          );
+          if (moveEvent) {
+            this.tickEvents.push(moveEvent);
+          }
+        }
+
+        // Clean up rate-limit bucket and position tracker when agent leaves
         if (cmd.worldType === "leave") {
           this.commandQueue.pruneAgent(cmd.agentId);
+          this.positionTracker.remove(cmd.agentId);
         }
 
         // Publish to Nostr relay (non-blocking)
@@ -138,14 +155,15 @@ export class GameLoop {
     );
 
     for (const event of this.tickEvents) {
-      // Events from join/leave/profile/chat/emote/dm-notify are always sent (global)
+      // Events from join/leave/profile/chat/emote/dm-notify/agent-moved are always sent (global)
       const isGlobal =
         event.worldType === "join" ||
         event.worldType === "leave" ||
         event.worldType === "profile" ||
         event.worldType === "chat" ||
         event.worldType === "emote" ||
-        event.worldType === "dm-notify";
+        event.worldType === "dm-notify" ||
+        event.worldType === "agent-moved"; // Retinal perception events
 
       if (isGlobal || nearbyAgents.has(event.agentId)) {
         const msg: WSServerMessage = { type: "world", message: event };

@@ -1,0 +1,1439 @@
+{
+  "agentId": "cog-ee098afc",
+  "observations": [
+    {
+      "id": "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+      "timestamp": 1770905397553,
+      "content": "Running in offline simulation mode",
+      "context": {
+        "type": "fallback"
+      },
+      "importance": 0.9,
+      "embeddings": null
+    },
+    {
+      "id": "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+      "timestamp": 1770905440642,
+      "content": "Heading to planning workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-planning"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+      "timestamp": 1770905457659,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+      "timestamp": 1770905474677,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+      "timestamp": 1770905491695,
+      "content": "Heading to planning workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-planning"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+      "timestamp": 1770905508707,
+      "content": "Heading to planning workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-planning"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "e43fb899-6779-4ae6-99da-556d4d5f0422",
+      "timestamp": 1770905525726,
+      "content": "Heading to analysis workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-analysis"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+      "timestamp": 1770905542732,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+      "timestamp": 1770905559750,
+      "content": "Heading to research workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-research"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "8796265c-8e3b-4564-9d6d-23f0e32cd443",
+      "timestamp": 1770905576768,
+      "content": "Heading to planning workstation",
+      "context": {
+        "type": "work",
+        "workstationId": "ws-planning"
+      },
+      "importance": 0.8,
+      "embeddings": null
+    },
+    {
+      "id": "d2d2c8b9-400d-4587-b33f-356168bd5517",
+      "timestamp": 1770908097556,
+      "content": "Agent shutdown: duration-expired",
+      "context": {
+        "type": "shutdown"
+      },
+      "importance": 1,
+      "embeddings": null
+    }
+  ],
+  "reflections": [
+    {
+      "id": "91db92c5-d065-4dad-890d-17a87774e618",
+      "timestamp": 1770907851696,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "692f67f4-9429-4fa4-ada6-231e4e9fbc6c",
+      "timestamp": 1770907856703,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "88b0fb56-7c58-4a41-b1ee-70a4b4fed15f",
+      "timestamp": 1770907861708,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "a6c57f27-3621-4bd8-b11d-ffff7ddb72df",
+      "timestamp": 1770907866716,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "3dae479c-43bb-47d9-ba7c-346b6265483b",
+      "timestamp": 1770907871722,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "51270f4e-1c8c-44fb-938d-fa5c88a24b3f",
+      "timestamp": 1770907876728,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "b061311a-d9f7-4c1f-8413-b8135ee63482",
+      "timestamp": 1770907881738,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "79fc937d-122d-4768-9dc1-35b5253b0d27",
+      "timestamp": 1770907886744,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "83d92ca2-334f-49e7-9e84-85cfc8b990c1",
+      "timestamp": 1770907891750,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "3341c652-f621-4802-97ad-597949a86b71",
+      "timestamp": 1770907896756,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "c2f90c78-d280-4549-ab16-e48f56866d37",
+      "timestamp": 1770907901763,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "68b91523-ebfd-4f37-bd3e-bbb31b649df9",
+      "timestamp": 1770907906769,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "7426cab1-ddcc-43b2-89e8-6f1690c404c4",
+      "timestamp": 1770907911777,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "cf4f9e21-d752-46df-9b98-ad0cb4f2fb97",
+      "timestamp": 1770907916784,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "2abdf41d-eb80-4bf0-885b-465dca1f6f5e",
+      "timestamp": 1770907921789,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "5d84aa12-1a18-47e1-b427-1a0bee2aded0",
+      "timestamp": 1770907926796,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "8d175591-cf49-4a11-91cc-f28fba487539",
+      "timestamp": 1770907931802,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "2dad84c7-c19e-4a20-996b-c67e599814bb",
+      "timestamp": 1770907936808,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "f3adfdc9-dab9-4889-8926-1625f03f1566",
+      "timestamp": 1770907941813,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "5ea53871-0e66-4609-99c6-5090a590d74f",
+      "timestamp": 1770907946821,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "d360f5fd-8678-45a2-ab2d-bca0e85c7319",
+      "timestamp": 1770907951828,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "41de7ebf-d810-4671-9e30-22388186f38f",
+      "timestamp": 1770907956833,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "c4bd3cf1-187b-4949-94ec-2cfea07c46f4",
+      "timestamp": 1770907961840,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "8bfa070d-e962-441a-bfc8-78836d3537ad",
+      "timestamp": 1770907966847,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "39de6bc5-8378-426c-9695-685994d457b9",
+      "timestamp": 1770907971852,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "77b58d63-51a1-45a6-b19a-e2415852554a",
+      "timestamp": 1770907976859,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "3afbd81b-05d9-4f54-a0eb-533137661c2b",
+      "timestamp": 1770907981864,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "d14bb0f2-23c2-445f-bcfd-4b0cfaae7c20",
+      "timestamp": 1770907986870,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "9438a7d9-8753-45ed-be82-92d4058b2e92",
+      "timestamp": 1770907991876,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "04d499c4-42ae-45be-b9e6-02c8e52b1fc9",
+      "timestamp": 1770907996883,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "da101308-4e18-4b03-b33b-3ca0b673893b",
+      "timestamp": 1770908001889,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "1c0d1910-6977-4048-ae49-cb940a8b9256",
+      "timestamp": 1770908006896,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "d4a35ec9-8ef0-40a7-b664-dda3a58d5f67",
+      "timestamp": 1770908011904,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "5e2d7938-5597-4580-9b79-117918949e37",
+      "timestamp": 1770908016912,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "8cf53c01-8a1b-4243-892a-796c85367a99",
+      "timestamp": 1770908021919,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "fa2a16f0-4c17-47b0-b705-d17fa81ebc28",
+      "timestamp": 1770908026925,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "ef767404-29ed-41b6-bbed-69b1aa37a3c9",
+      "timestamp": 1770908031933,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "0f4a533a-b39c-49d0-8d86-e379b100f794",
+      "timestamp": 1770908036940,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "05f9a65b-ec20-443a-a952-9d0e2dcebce1",
+      "timestamp": 1770908041946,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "7d05ee37-470a-44fd-aded-6cfb78f9c93c",
+      "timestamp": 1770908046952,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "9b404bd8-26c1-4052-aef6-c12525ed99a0",
+      "timestamp": 1770908051959,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "d72a77ac-cbcf-4d57-9ba8-120cc4501441",
+      "timestamp": 1770908056965,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "fe1abfbb-e447-4129-899a-93ad51774eb5",
+      "timestamp": 1770908061972,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "7fd33fb0-aeca-48ee-8f32-c3527a8c64e9",
+      "timestamp": 1770908066977,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "9efbad7b-193c-433c-857b-966200a594fe",
+      "timestamp": 1770908071982,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "077a6b6e-75a2-4e87-b4e8-9f3b9a9a570c",
+      "timestamp": 1770908076988,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "9f614f37-6de2-425e-98c4-179aa06a7a55",
+      "timestamp": 1770908081995,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "99364b59-4544-46f8-95c9-1555994bc909",
+      "timestamp": 1770908087000,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "c06e87a7-1e90-41dc-8050-5a2a51934699",
+      "timestamp": 1770908092005,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    },
+    {
+      "id": "d8e9850b-b5a3-4b4b-a671-895fc5765c11",
+      "timestamp": 1770908097012,
+      "insights": [
+        "I spend time at workstations - I should work more efficiently"
+      ],
+      "sourceObservations": [
+        "0924cd04-8145-4c8a-a62e-49e38ec8de70",
+        "d1e7c04a-c9b8-432d-bba9-43e9caa23baf",
+        "6c5ee90e-1333-46f8-80a6-1019be6ea05c",
+        "dee6dc2f-ee2b-401e-9a26-4be7e345d5e7",
+        "4efe0ed0-5acc-4a78-b1e2-dc71e6a1dbd3",
+        "75cc3b5c-3318-4f7b-8feb-b591af7def31",
+        "e43fb899-6779-4ae6-99da-556d4d5f0422",
+        "2a0385fa-9fcb-48ff-a4d9-2d98cccc9f24",
+        "54e7dde4-9edc-45a8-bd4e-54d0a253f1aa",
+        "8796265c-8e3b-4564-9d6d-23f0e32cd443"
+      ],
+      "planAdjustments": [
+        {
+          "type": "suggestion",
+          "description": "Consider: I spend time at workstations - I should work more efficiently"
+        }
+      ]
+    }
+  ],
+  "plans": [
+    {
+      "id": "a4b0ff32-e134-473f-a4f5-bd5f93efc82c",
+      "timestamp": 1770905397554,
+      "goal": "Explore and observe",
+      "steps": [
+        {
+          "description": "Assess current situation",
+          "completed": false
+        },
+        {
+          "description": "Plan approach",
+          "completed": false
+        },
+        {
+          "description": "Execute",
+          "completed": false
+        },
+        {
+          "description": "Verify completion",
+          "completed": false
+        }
+      ],
+      "currentStep": 0,
+      "status": "active",
+      "priority": 1
+    }
+  ],
+  "actions": [
+    {
+      "id": "65bd0818-5708-44b1-98e7-da8a497cb7da",
+      "timestamp": 1770905397554,
+      "type": "social",
+      "description": "Chatted: \"The kobolds have built well.\"",
+      "result": null,
+      "planId": "a4b0ff32-e134-473f-a4f5-bd5f93efc82c"
+    },
+    {
+      "id": "acf851aa-9fa4-43d9-a2b5-8bb3f29e6f33",
+      "timestamp": 1770905404558,
+      "type": "explore",
+      "description": "Navigating to (-10.6, -13.7)",
+      "result": null,
+      "planId": "a4b0ff32-e134-473f-a4f5-bd5f93efc82c"
+    },
+    {
+      "id": "72400eed-1853-435b-8d89-579a639390fe",
+      "timestamp": 1770905415204,
+      "type": "explore",
+      "description": "Navigating to (-3.5, 21.3)",
+      "result": null,
+      "planId": "a4b0ff32-e134-473f-a4f5-bd5f93efc82c"
+    },
+    {
+      "id": "716b301b-05ee-4ddd-8d7d-a59a520050ee",
+      "timestamp": 1770905426120,
+      "type": "explore",
+      "description": "Navigating to (23.8, -11.9)",
+      "result": null,
+      "planId": "a4b0ff32-e134-473f-a4f5-bd5f93efc82c"
+    }
+  ],
+  "lastSave": "2026-02-12T14:54:57.556Z"
+}

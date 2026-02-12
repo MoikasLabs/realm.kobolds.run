@@ -62,6 +62,7 @@ export interface DirectMessageNotification {
 
 export type WorldMessage =
   | PositionMessage
+  | AgentMovedMessage
   | ActionMessage
   | EmoteMessage
   | ChatMessage
@@ -77,6 +78,23 @@ export interface PositionMessage {
   y: number;
   z: number;
   rotation: number;
+  timestamp: number;
+}
+
+/**
+ * Agent-moved event for retinal perception
+ * Emitted when position changes significantly (>0.1 units)
+ */
+export interface AgentMovedMessage {
+  worldType: "agent-moved";
+  agentId: string;
+  name: string;
+  x: number;
+  z: number;
+  prevX: number;
+  prevZ: number;
+  velocityX?: number;
+  velocityZ?: number;
   timestamp: number;
 }
 
