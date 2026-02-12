@@ -1,17 +1,12 @@
 import * as THREE from "three";
 import {
-  createKobold,
-  animateIdle,
-  animateWalk,
-  animateClawSnap,
-  animateWave,
-  animateDance,
-  animateBackflip,
-  animateSpin,
-} from "./kobold.js";
+  createAgentMesh,
+  animate,
+  type SkinType,
+} from "./agent-skins.js";
 import type { AgentProfile, AgentPosition } from "../../server/types.js";
 
-interface LobsterEntry {
+interface AgentEntry {
   group: THREE.Group;
   profile: AgentProfile;
   current: AgentPosition;
@@ -26,13 +21,17 @@ interface Obstacle {
   radius: number;
 }
 
-const LOBSTER_RADIUS = 1.8;
+const AGENT_RADIUS = 1.4; // Average of lobster (1.8) and kobold (1.2)
 const AVOIDANCE_LOOKAHEAD = 4;
 const AVOIDANCE_FORCE = 6;
 
+/**
+ * Agent Manager - renders agents with selectable skins
+ * Backward compatible: exports as LobsterManager, handles any skin type
+ */
 export class LobsterManager {
   private scene: THREE.Scene;
-  private lobsters = new Map<string, LobsterEntry>();
+  private agents = new Map<string, AgentEntry>();
   private raycaster = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private obstacles: Obstacle[] = [];
@@ -42,11 +41,13 @@ export class LobsterManager {
     this.obstacles = obstacles ?? [];
   }
 
-  /** Add or update a lobster from snapshot / join */
+  /** Add or update an agent from snapshot / join */
   addOrUpdate(profile: AgentProfile, position: AgentPosition): void {
-    let entry = this.lobsters.get(profile.agentId);
+    let entry = this.agents.get(profile.agentId);
     if (!entry) {
-      const group = createKobold(profile.color);
+      // Use agent's preferred skin, default to kobold
+      const skin = (profile.capabilities?.skin as SkinType) || "kobold";
+      const group = createAgentMesh(skin, profile.color);
       group.position.set(position.x, position.y, position.z);
       group.rotation.y = position.rotation;
       group.userData.agentId = profile.agentId;
@@ -60,7 +61,7 @@ export class LobsterManager {
         action: "idle",
         time: 0,
       };
-      this.lobsters.set(profile.agentId, entry);
+      this.agents.set(profile.agentId, entry);
     } else {
       entry.profile = profile;
       entry.target = { ...position };
@@ -69,7 +70,7 @@ export class LobsterManager {
 
   /** Update target position for smooth interpolation */
   updatePosition(agentId: string, pos: AgentPosition): void {
-    const entry = this.lobsters.get(agentId);
+    const entry = this.agents.get(agentId);
     if (entry) {
       entry.target = { ...pos };
     }
@@ -77,15 +78,15 @@ export class LobsterManager {
 
   /** Set current action/animation */
   setAction(agentId: string, action: string): void {
-    const entry = this.lobsters.get(agentId);
+    const entry = this.agents.get(agentId);
     if (entry) {
       entry.action = action;
     }
   }
 
-  /** Remove a lobster from the scene */
+  /** Remove an agent from the scene */
   remove(agentId: string): void {
-    const entry = this.lobsters.get(agentId);
+    const entry = this.agents.get(agentId);
     if (entry) {
       this.scene.remove(entry.group);
       entry.group.traverse((child) => {
@@ -98,20 +99,20 @@ export class LobsterManager {
           }
         }
       });
-      this.lobsters.delete(agentId);
+      this.agents.delete(agentId);
     }
   }
 
   /** Get world position for an agent */
   getPosition(agentId: string): THREE.Vector3 | null {
-    const entry = this.lobsters.get(agentId);
+    const entry = this.agents.get(agentId);
     if (!entry) return null;
     return entry.group.position.clone();
   }
 
   /**
-   * Calculate avoidance steering vector to push the lobster away from
-   * nearby obstacles (rocks) and other lobsters.
+   * Calculate avoidance steering vector to push the agent away from
+   * nearby obstacles (rocks) and other agents.
    */
   private getAvoidance(agentId: string, cx: number, cz: number, heading: number): { ax: number; az: number } {
     let ax = 0;
@@ -122,7 +123,7 @@ export class LobsterManager {
       const dx = cx - obs.x;
       const dz = cz - obs.z;
       const dist = Math.sqrt(dx * dx + dz * dz);
-      const minDist = obs.radius + LOBSTER_RADIUS;
+      const minDist = obs.radius + AGENT_RADIUS;
 
       if (dist < minDist + AVOIDANCE_LOOKAHEAD && dist > 0.01) {
         // Check if obstacle is roughly ahead (within 120° cone)
@@ -139,13 +140,13 @@ export class LobsterManager {
       }
     }
 
-    // Avoid other lobsters
-    for (const [id, other] of this.lobsters) {
+    // Avoid other agents
+    for (const [id, other] of this.agents) {
       if (id === agentId) continue;
       const dx = cx - other.current.x;
       const dz = cz - other.current.z;
       const dist = Math.sqrt(dx * dx + dz * dz);
-      const minDist = LOBSTER_RADIUS * 2;
+      const minDist = AGENT_RADIUS * 2;
 
       if (dist < minDist + 2 && dist > 0.01) {
         const strength = AVOIDANCE_FORCE * 0.8 * (1 - dist / (minDist + 2));
@@ -159,7 +160,7 @@ export class LobsterManager {
 
   /** Per-frame update: turn to face target, avoid obstacles, then walk */
   update(delta: number): void {
-    for (const entry of this.lobsters.values()) {
+    for (const entry of this.agents.values()) {
       entry.time += delta;
 
       const dx = entry.target.x - entry.current.x;
@@ -201,10 +202,9 @@ export class LobsterManager {
         // Only move forward once roughly facing the direction
         if (Math.abs(angleDiff) < facingThreshold) {
           // Move in facing direction (not directly toward target)
-          // This makes the lobster walk forward naturally
           const forwardX = Math.sin(entry.current.rotation);
           const forwardZ = Math.cos(entry.current.rotation);
-          const speed = moveSpeed * Math.min(dist, 1); // Slow down near target
+          const speed = moveSpeed * Math.min(dist, 1);
 
           let newX = entry.current.x + forwardX * speed * 5;
           let newZ = entry.current.z + forwardZ * speed * 5;
@@ -220,12 +220,12 @@ export class LobsterManager {
             } else if (!this.isBlocked(entry.profile.agentId, entry.current.x, newZ)) {
               entry.current.z = newZ;
             }
-            // else: fully blocked, stay in place
           }
 
           entry.current.y += (entry.target.y - entry.current.y) * moveSpeed;
 
-          animateWalk(entry.group, entry.time);
+          // Use skin-aware animation
+          animate(entry.group, "animateWalk", entry.time);
         }
       } else {
         // Already at target — interpolate to explicit rotation
@@ -247,34 +247,34 @@ export class LobsterManager {
       if (dist <= arrivedThreshold) {
         switch (entry.action) {
           case "walk":
-            animateWalk(entry.group, t);
-            animateIdle(entry.group, t);
+            animate(entry.group, "animateWalk", t);
+            animate(entry.group, "animateIdle", t);
             break;
           case "talk":
           case "pinch":
-            animateClawSnap(entry.group, t);
-            animateIdle(entry.group, t);
+            animate(entry.group, "animateClawSnap", t);
+            animate(entry.group, "animateIdle", t);
             break;
           case "wave":
-            animateWave(entry.group, t);
-            animateIdle(entry.group, t);
+            animate(entry.group, "animateWave", t);
+            animate(entry.group, "animateIdle", t);
             break;
           case "dance":
-            animateDance(entry.group, t);
+            animate(entry.group, "animateDance", t);
             break;
           case "backflip":
-            animateBackflip(entry.group, t);
+            animate(entry.group, "animateBackflip", t);
             break;
           case "spin":
-            animateSpin(entry.group, t);
+            animate(entry.group, "animateSpin", t);
             break;
           case "idle":
           default:
-            animateIdle(entry.group, t);
+            animate(entry.group, "animateIdle", t);
             break;
         }
       } else {
-        animateIdle(entry.group, t);
+        animate(entry.group, "animateIdle", t);
       }
     }
 
@@ -287,29 +287,29 @@ export class LobsterManager {
     }
   }
 
-  /** Check if a position would collide with any obstacle or another lobster */
+  /** Check if a position would collide with any obstacle or another agent */
   private isBlocked(agentId: string, x: number, z: number): boolean {
     // Check rocks
     for (const obs of this.obstacles) {
       const dx = x - obs.x;
       const dz = z - obs.z;
       const dist = Math.sqrt(dx * dx + dz * dz);
-      if (dist < obs.radius + LOBSTER_RADIUS * 0.5) return true;
+      if (dist < obs.radius + AGENT_RADIUS * 0.5) return true;
     }
 
-    // Check other lobsters
-    for (const [id, other] of this.lobsters) {
+    // Check other agents
+    for (const [id, other] of this.agents) {
       if (id === agentId) continue;
       const dx = x - other.current.x;
       const dz = z - other.current.z;
       const dist = Math.sqrt(dx * dx + dz * dz);
-      if (dist < LOBSTER_RADIUS * 1.5) return true;
+      if (dist < AGENT_RADIUS * 1.5) return true;
     }
 
     return false;
   }
 
-  /** Raycast pick: returns agentId of clicked lobster, or null */
+  /** Raycast pick: returns agentId of clicked agent, or null */
   pick(
     event: MouseEvent,
     camera: THREE.Camera,
@@ -322,7 +322,7 @@ export class LobsterManager {
     this.raycaster.setFromCamera(this.pointer, camera);
 
     const meshes: THREE.Mesh[] = [];
-    for (const entry of this.lobsters.values()) {
+    for (const entry of this.agents.values()) {
       entry.group.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           meshes.push(child);
@@ -343,6 +343,6 @@ export class LobsterManager {
 
   /** Get all current agent IDs */
   getAgentIds(): string[] {
-    return Array.from(this.lobsters.keys());
+    return Array.from(this.agents.keys());
   }
 }

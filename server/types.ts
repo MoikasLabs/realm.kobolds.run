@@ -17,6 +17,7 @@ export interface AgentProfile {
   skills?: AgentSkillDeclaration[];
   color: string;
   avatar?: string;
+  skin?: "lobster" | "kobold"; // Agent creature type
   joinedAt: number;
   lastSeen: number;
 }
