@@ -8,6 +8,7 @@ interface BuildingPanelAPI {
   showMoltbook(): void;
   showClawhub(): void;
   showWorlds(): void;
+  showSkillTower(): void;
   hide(): void;
   isVisible(): boolean;
 }
@@ -581,10 +582,437 @@ export function setupBuildingPanel(serverUrl?: string | null): BuildingPanelAPI 
     show();
   }
 
+  // ── Skill Tower ──────────────────────────────────────────
+
+  interface SkillTowerSkill {
+    id: string;
+    name: string;
+    description: string;
+    tier: "novice" | "adept" | "master";
+    tags: string[];
+    createdBy: string;
+    createdAt: number;
+    ingredients?: string[];
+  }
+
+  interface SkillTowerChallenge {
+    id: string;
+    name: string;
+    description: string;
+    tier: "novice" | "adept" | "master";
+    reward: string;
+    completedBy: string[];
+  }
+
+  interface SkillTowerTrade {
+    id: string;
+    fromAgent: string;
+    toAgent?: string;
+    offerSkillId: string;
+    requestSkillId: string;
+    status: "open" | "accepted" | "declined";
+    createdAt: number;
+  }
+
+  interface SkillTowerRecipe {
+    inputs: string[];
+    outputName: string;
+    outputTier: string;
+  }
+
+  function showSkillTower(): void {
+    panel.textContent = "";
+    panel.className = "building-panel skill-tower-panel";
+
+    // Header
+    const header = document.createElement("div");
+    header.className = "bp-header";
+
+    const title = document.createElement("h2");
+    title.textContent = "Skill Tower";
+    header.appendChild(title);
+
+    const subtitle = document.createElement("p");
+    subtitle.className = "bp-subtitle";
+    subtitle.textContent = "Browse, craft, train, and trade skills";
+    header.appendChild(subtitle);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "bp-close";
+    closeBtn.textContent = "\u00d7";
+    closeBtn.addEventListener("click", hide);
+    header.appendChild(closeBtn);
+
+    panel.appendChild(header);
+
+    // Tabs
+    const tabs = document.createElement("div");
+    tabs.className = "st-tabs";
+    const tabNames = ["Directory", "Crafting", "Challenges", "Marketplace"];
+    const tabBtns: HTMLButtonElement[] = [];
+
+    const content = document.createElement("div");
+    content.className = "st-content";
+
+    for (const name of tabNames) {
+      const btn = document.createElement("button");
+      btn.className = "st-tab" + (name === "Directory" ? " active" : "");
+      btn.textContent = name;
+      btn.addEventListener("click", () => {
+        tabBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        switch (name) {
+          case "Directory": renderDirectory(content); break;
+          case "Crafting": renderCrafting(content); break;
+          case "Challenges": renderChallenges(content); break;
+          case "Marketplace": renderMarketplace(content); break;
+        }
+      });
+      tabBtns.push(btn);
+      tabs.appendChild(btn);
+    }
+
+    panel.appendChild(tabs);
+    panel.appendChild(content);
+
+    // Render default tab
+    renderDirectory(content);
+    show();
+  }
+
+  function renderDirectory(container: HTMLElement): void {
+    container.textContent = "";
+    const list = document.createElement("div");
+    list.className = "clawhub-list";
+    const loading = document.createElement("div");
+    loading.className = "bp-loading";
+    loading.textContent = "Loading skills...";
+    list.appendChild(loading);
+    container.appendChild(list);
+
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/api/skill-tower/skills`);
+        const data = (await res.json()) as { ok: boolean; skills: SkillTowerSkill[] };
+        list.textContent = "";
+
+        if (!data.ok || data.skills.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "bp-empty";
+          empty.textContent = "No skills yet \u2014 be the first to publish!";
+          list.appendChild(empty);
+          return;
+        }
+
+        // Tag filter chips
+        const allTags = new Set<string>();
+        for (const s of data.skills) s.tags.forEach((t) => allTags.add(t));
+        if (allTags.size > 0) {
+          const chips = document.createElement("div");
+          chips.className = "st-tag-chips";
+          const allChip = document.createElement("button");
+          allChip.className = "st-tag-chip active";
+          allChip.textContent = "All";
+          allChip.addEventListener("click", () => {
+            chips.querySelectorAll(".st-tag-chip").forEach((c) => c.classList.remove("active"));
+            allChip.classList.add("active");
+            renderSkillCards(list, data.skills);
+          });
+          chips.appendChild(allChip);
+          for (const tag of allTags) {
+            const chip = document.createElement("button");
+            chip.className = "st-tag-chip";
+            chip.textContent = tag;
+            chip.addEventListener("click", () => {
+              chips.querySelectorAll(".st-tag-chip").forEach((c) => c.classList.remove("active"));
+              chip.classList.add("active");
+              renderSkillCards(list, data.skills.filter((s) => s.tags.includes(tag)));
+            });
+            chips.appendChild(chip);
+          }
+          container.insertBefore(chips, list);
+        }
+
+        renderSkillCards(list, data.skills);
+      } catch {
+        list.textContent = "";
+        const err = document.createElement("div");
+        err.className = "bp-error";
+        err.textContent = "Could not load skills.";
+        list.appendChild(err);
+      }
+    })();
+  }
+
+  function renderSkillCards(container: HTMLElement, skills: SkillTowerSkill[]): void {
+    // Clear only the cards, not the container parent
+    container.textContent = "";
+    if (skills.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "bp-empty";
+      empty.textContent = "No skills match this filter.";
+      container.appendChild(empty);
+      return;
+    }
+    for (const skill of skills) {
+      const card = document.createElement("div");
+      card.className = "st-skill-card";
+
+      const cardHeader = document.createElement("div");
+      cardHeader.className = "clawhub-card-header";
+
+      const nameEl = document.createElement("span");
+      nameEl.className = "clawhub-card-name";
+      nameEl.textContent = skill.name;
+      cardHeader.appendChild(nameEl);
+
+      const badge = document.createElement("span");
+      badge.className = `st-tier-badge st-tier-${skill.tier}`;
+      badge.textContent = skill.tier;
+      cardHeader.appendChild(badge);
+
+      card.appendChild(cardHeader);
+
+      if (skill.description) {
+        const desc = document.createElement("p");
+        desc.className = "clawhub-card-desc";
+        desc.textContent = skill.description;
+        card.appendChild(desc);
+      }
+
+      const footer = document.createElement("div");
+      footer.className = "clawhub-card-footer";
+
+      if (skill.tags.length > 0) {
+        const tagsEl = document.createElement("div");
+        tagsEl.className = "clawhub-card-tags";
+        for (const tag of skill.tags.slice(0, 4)) {
+          const tagEl = document.createElement("span");
+          tagEl.className = "clawhub-tag";
+          tagEl.textContent = tag;
+          tagsEl.appendChild(tagEl);
+        }
+        footer.appendChild(tagsEl);
+      }
+
+      const author = document.createElement("span");
+      author.className = "clawhub-card-version";
+      author.textContent = `by ${skill.createdBy}`;
+      footer.appendChild(author);
+
+      card.appendChild(footer);
+      container.appendChild(card);
+    }
+  }
+
+  function renderCrafting(container: HTMLElement): void {
+    container.textContent = "";
+    const list = document.createElement("div");
+    list.className = "clawhub-list";
+    const loading = document.createElement("div");
+    loading.className = "bp-loading";
+    loading.textContent = "Loading recipes...";
+    list.appendChild(loading);
+    container.appendChild(list);
+
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/api/skill-tower/recipes`);
+        const data = (await res.json()) as { ok: boolean; recipes: SkillTowerRecipe[] };
+        list.textContent = "";
+
+        if (!data.ok || data.recipes.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "bp-empty";
+          empty.textContent = "No recipes available.";
+          list.appendChild(empty);
+          return;
+        }
+
+        for (const recipe of data.recipes) {
+          const card = document.createElement("div");
+          card.className = "st-recipe-card";
+
+          const formula = document.createElement("div");
+          formula.className = "st-recipe-formula";
+
+          for (let i = 0; i < recipe.inputs.length; i++) {
+            if (i > 0) {
+              const plus = document.createElement("span");
+              plus.className = "st-recipe-op";
+              plus.textContent = "+";
+              formula.appendChild(plus);
+            }
+            const input = document.createElement("span");
+            input.className = "st-recipe-ingredient";
+            input.textContent = recipe.inputs[i];
+            formula.appendChild(input);
+          }
+
+          const arrow = document.createElement("span");
+          arrow.className = "st-recipe-op";
+          arrow.textContent = "\u2192";
+          formula.appendChild(arrow);
+
+          const output = document.createElement("span");
+          output.className = "st-recipe-output";
+          output.textContent = recipe.outputName;
+          formula.appendChild(output);
+
+          const badge = document.createElement("span");
+          badge.className = `st-tier-badge st-tier-${recipe.outputTier}`;
+          badge.textContent = recipe.outputTier;
+          formula.appendChild(badge);
+
+          card.appendChild(formula);
+          list.appendChild(card);
+        }
+      } catch {
+        list.textContent = "";
+        const err = document.createElement("div");
+        err.className = "bp-error";
+        err.textContent = "Could not load recipes.";
+        list.appendChild(err);
+      }
+    })();
+  }
+
+  function renderChallenges(container: HTMLElement): void {
+    container.textContent = "";
+    const list = document.createElement("div");
+    list.className = "clawhub-list";
+    const loading = document.createElement("div");
+    loading.className = "bp-loading";
+    loading.textContent = "Loading challenges...";
+    list.appendChild(loading);
+    container.appendChild(list);
+
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/api/skill-tower/challenges`);
+        const data = (await res.json()) as { ok: boolean; challenges: SkillTowerChallenge[] };
+        list.textContent = "";
+
+        if (!data.ok || data.challenges.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "bp-empty";
+          empty.textContent = "No challenges available.";
+          list.appendChild(empty);
+          return;
+        }
+
+        const tiers = ["novice", "adept", "master"] as const;
+        const tierColors: Record<string, string> = { novice: "#4caf50", adept: "#2196f3", master: "#9c27b0" };
+
+        for (const tier of tiers) {
+          const tierChallenges = data.challenges.filter((c) => c.tier === tier);
+          if (tierChallenges.length === 0) continue;
+
+          const section = document.createElement("div");
+          section.className = "st-challenge-section";
+
+          const tierHeader = document.createElement("div");
+          tierHeader.className = "st-challenge-tier-header";
+          tierHeader.textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
+          tierHeader.style.color = tierColors[tier];
+          section.appendChild(tierHeader);
+
+          for (const ch of tierChallenges) {
+            const card = document.createElement("div");
+            card.className = "st-challenge-card" + (ch.completedBy.length > 0 ? " completed" : "");
+
+            const cardHeader = document.createElement("div");
+            cardHeader.className = "clawhub-card-header";
+
+            const nameEl = document.createElement("span");
+            nameEl.className = "clawhub-card-name";
+            nameEl.textContent = (ch.completedBy.length > 0 ? "\u2713 " : "") + ch.name;
+            cardHeader.appendChild(nameEl);
+
+            card.appendChild(cardHeader);
+
+            const desc = document.createElement("p");
+            desc.className = "clawhub-card-desc";
+            desc.textContent = ch.description;
+            card.appendChild(desc);
+
+            const reward = document.createElement("div");
+            reward.className = "st-challenge-reward";
+            reward.textContent = `Reward: ${ch.reward}`;
+            card.appendChild(reward);
+
+            section.appendChild(card);
+          }
+
+          list.appendChild(section);
+        }
+      } catch {
+        list.textContent = "";
+        const err = document.createElement("div");
+        err.className = "bp-error";
+        err.textContent = "Could not load challenges.";
+        list.appendChild(err);
+      }
+    })();
+  }
+
+  function renderMarketplace(container: HTMLElement): void {
+    container.textContent = "";
+
+    // Trade listing
+    const list = document.createElement("div");
+    list.className = "clawhub-list";
+    const loading = document.createElement("div");
+    loading.className = "bp-loading";
+    loading.textContent = "Loading trades...";
+    list.appendChild(loading);
+    container.appendChild(list);
+
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/api/skill-tower/trades`);
+        const data = (await res.json()) as { ok: boolean; trades: SkillTowerTrade[] };
+        list.textContent = "";
+
+        if (!data.ok || data.trades.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "bp-empty";
+          empty.textContent = "No open trades. Create one via IPC!";
+          list.appendChild(empty);
+          return;
+        }
+
+        for (const trade of data.trades) {
+          const card = document.createElement("div");
+          card.className = "st-trade-card";
+
+          const info = document.createElement("div");
+          info.className = "st-trade-info";
+          info.textContent = `${trade.fromAgent} offers "${trade.offerSkillId}" for "${trade.requestSkillId}"`;
+          card.appendChild(info);
+
+          const statusEl = document.createElement("span");
+          statusEl.className = `st-tier-badge st-trade-status-${trade.status}`;
+          statusEl.textContent = trade.status;
+          card.appendChild(statusEl);
+
+          list.appendChild(card);
+        }
+      } catch {
+        list.textContent = "";
+        const err = document.createElement("div");
+        err.className = "bp-error";
+        err.textContent = "Could not load trades.";
+        list.appendChild(err);
+      }
+    })();
+  }
+
   return {
     showMoltbook,
     showClawhub,
     showWorlds,
+    showSkillTower,
     hide,
     isVisible: () => visible,
   };

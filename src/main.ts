@@ -241,6 +241,10 @@ renderer.domElement.addEventListener("click", (event: MouseEvent) => {
         buildingPanel.showWorlds();
         return;
       }
+      if (obj.userData.buildingId === "skill-tower") {
+        buildingPanel.showSkillTower();
+        return;
+      }
       obj = obj.parent;
     }
   }

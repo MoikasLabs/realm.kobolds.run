@@ -1180,6 +1180,240 @@ body {
   top: 48px;
 }
 
+/* ── Skill Tower Panel ─────────────────────────────────────── */
+
+.skill-tower-panel .bp-header h2 {
+  color: #ff9800;
+}
+
+.st-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.st-tab {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #7f8c8d;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.st-tab:hover {
+  color: #ff9800;
+}
+
+.st-tab.active {
+  border-bottom: 2px solid #ff9800;
+  color: #ff9800;
+}
+
+.st-tier-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.st-tier-novice {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.st-tier-adept {
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  color: #2196f3;
+}
+
+.st-tier-master {
+  background: rgba(156, 39, 176, 0.1);
+  border: 1px solid rgba(156, 39, 176, 0.3);
+  color: #9c27b0;
+}
+
+.st-skill-card {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  padding: 14px;
+  transition: background 0.15s;
+}
+
+.st-skill-card:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.st-tag-chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.st-tag-chip {
+  padding: 3px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: transparent;
+  color: #7f8c8d;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.st-tag-chip:hover {
+  border-color: #ff9800;
+  color: #ff9800;
+}
+
+.st-tag-chip.active {
+  background: #ff9800;
+  border-color: #ff9800;
+  color: white;
+}
+
+.st-recipe-card {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.st-recipe-formula {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.st-recipe-ingredient {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 3px 10px;
+  background: rgba(41, 128, 185, 0.06);
+  border: 1px solid rgba(41, 128, 185, 0.15);
+  border-radius: 6px;
+}
+
+.st-recipe-op {
+  font-size: 14px;
+  color: #95a5a6;
+  font-weight: 600;
+}
+
+.st-recipe-output {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ff9800;
+  padding: 3px 10px;
+  background: rgba(255, 152, 0, 0.06);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  border-radius: 6px;
+}
+
+.st-challenge-section {
+  margin-bottom: 12px;
+}
+
+.st-challenge-tier-header {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.st-challenge-card {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.st-challenge-card.completed {
+  opacity: 0.6;
+}
+
+.st-challenge-card.completed .clawhub-card-name {
+  color: #27ae60;
+}
+
+.st-challenge-reward {
+  font-size: 10px;
+  color: #ff9800;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.st-trade-card {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.st-trade-info {
+  font-size: 12px;
+  color: #2c3e50;
+  flex: 1;
+}
+
+.st-trade-status-open {
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ff9800;
+}
+
+.st-trade-status-accepted {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.st-trade-status-declined {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+.st-action-btn {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  background: rgba(255, 152, 0, 0.08);
+  color: #ff9800;
+  transition: all 0.15s;
+}
+
+.st-action-btn:hover:not(:disabled) {
+  background: rgba(255, 152, 0, 0.15);
+}
+
 /* ── Scrollbar styling ─────────────────────────────────────── */
 
 ::-webkit-scrollbar {

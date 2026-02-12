@@ -59,13 +59,26 @@ export function createBuildings(scene: THREE.Scene): {
   });
   obstacles.push({ x: 0, z: -35, radius: 5 });
 
+  // ── Skill Tower ────────────────────────────────────────────
+  const skillTower = createSkillTower();
+  skillTower.position.set(30, 0, 30);
+  scene.add(skillTower);
+  buildings.push({
+    id: "skill-tower",
+    name: "Skill Tower",
+    position: new THREE.Vector3(30, 0, 30),
+    obstacleRadius: 5,
+    mesh: skillTower,
+  });
+  obstacles.push({ x: 30, z: 30, radius: 5 });
+
   // Add floating labels above each building
   for (const b of buildings) {
     const el = document.createElement("div");
     el.className = "building-label";
     el.textContent = b.name;
     const labelObj = new CSS2DObject(el);
-    const labelY = b.id === "moltbook" ? 6 : b.id === "worlds-portal" ? 9 : 8;
+    const labelY = b.id === "moltbook" ? 6 : b.id === "skill-tower" ? 14 : b.id === "worlds-portal" ? 9 : 8;
     labelObj.position.set(0, labelY, 0);
     b.mesh.add(labelObj);
   }
@@ -267,6 +280,142 @@ function createClawhubSchool(): THREE.Group {
   // Mark all meshes as interactable
   group.traverse((child) => {
     child.userData.buildingId = "clawhub";
+  });
+
+  return group;
+}
+
+function createSkillTower(): THREE.Group {
+  const group = new THREE.Group();
+  group.name = "building_skill_tower";
+  group.userData.buildingId = "skill-tower";
+
+  const stoneMat = new THREE.MeshStandardMaterial({ color: 0x455a64, roughness: 0.7 });
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.5 });
+  const windowMat = new THREE.MeshStandardMaterial({
+    color: 0xffcc80,
+    emissive: 0xff9800,
+    emissiveIntensity: 0.3,
+    transparent: true,
+    opacity: 0.8,
+  });
+
+  // Platform: octagonal base
+  const platform = new THREE.Mesh(
+    new THREE.CylinderGeometry(4, 4.5, 0.4, 8),
+    stoneMat
+  );
+  platform.position.set(0, 0.2, 0);
+  platform.receiveShadow = true;
+  group.add(platform);
+
+  // Tower body: tapered cylinder
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.5, 3.5, 10, 8),
+    stoneMat
+  );
+  body.position.set(0, 5.2, 0);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  // Floor rings at 3 tiers
+  const ringColors = [0x4caf50, 0x2196f3, 0x9c27b0]; // novice, adept, master
+  const ringHeights = [3, 6, 9];
+  for (let i = 0; i < 3; i++) {
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: ringColors[i],
+      emissive: ringColors[i],
+      emissiveIntensity: 0.2,
+    });
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(3.2 - i * 0.3, 0.12, 8, 16),
+      ringMat
+    );
+    ring.position.set(0, ringHeights[i], 0);
+    ring.rotation.x = Math.PI / 2;
+    group.add(ring);
+  }
+
+  // Roof: pointed cone
+  const roof = new THREE.Mesh(
+    new THREE.ConeGeometry(3, 3, 8),
+    roofMat
+  );
+  roof.position.set(0, 11.7, 0);
+  roof.castShadow = true;
+  group.add(roof);
+
+  // Crystal: glowing sphere on top
+  const crystal = new THREE.Mesh(
+    new THREE.SphereGeometry(0.6, 16, 12),
+    new THREE.MeshStandardMaterial({
+      color: 0xffcc80,
+      emissive: 0xff9800,
+      emissiveIntensity: 0.8,
+    })
+  );
+  crystal.position.set(0, 13.5, 0);
+  group.add(crystal);
+
+  // Door: arched box on front face
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(1.2, 2.2, 0.1),
+    new THREE.MeshStandardMaterial({ color: 0x5d4037 })
+  );
+  door.position.set(0, 1.5, 3.55);
+  group.add(door);
+
+  const doorArch = new THREE.Mesh(
+    new THREE.BoxGeometry(1.5, 0.3, 0.15),
+    new THREE.MeshStandardMaterial({
+      color: 0xff9800,
+      emissive: 0xff9800,
+      emissiveIntensity: 0.15,
+    })
+  );
+  doorArch.position.set(0, 2.7, 3.55);
+  group.add(doorArch);
+
+  // Windows: 3 per tier level, around the tower
+  for (let tier = 0; tier < 3; tier++) {
+    const h = ringHeights[tier] + 0.5;
+    const r = 3.3 - tier * 0.3;
+    for (let w = 0; w < 3; w++) {
+      const angle = (w / 3) * Math.PI * 2 + Math.PI / 6;
+      const win = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.6, 0.8),
+        windowMat
+      );
+      win.position.set(
+        Math.sin(angle) * r,
+        h,
+        Math.cos(angle) * r
+      );
+      win.lookAt(0, h, 0);
+      win.rotateY(Math.PI);
+      group.add(win);
+    }
+  }
+
+  // Banner: flag pole + flag
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 2, 6),
+    new THREE.MeshStandardMaterial({ color: 0x9e9e9e })
+  );
+  pole.position.set(2.2, 11, 0);
+  group.add(pole);
+
+  const flag = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 0.6),
+    new THREE.MeshStandardMaterial({ color: 0xff9800, side: THREE.DoubleSide })
+  );
+  flag.position.set(2.7, 11.5, 0);
+  group.add(flag);
+
+  // Mark all meshes as interactable
+  group.traverse((child) => {
+    child.userData.buildingId = "skill-tower";
   });
 
   return group;

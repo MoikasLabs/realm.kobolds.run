@@ -145,6 +145,39 @@ export interface AgentState {
   action: string;
 }
 
+// ── Skill Tower ─────────────────────────────────────────────
+
+export interface SkillTowerEntry {
+  id: string;
+  name: string;
+  description: string;
+  tier: "novice" | "adept" | "master";
+  tags: string[];
+  createdBy: string;
+  createdAt: number;
+  ingredients?: string[];
+}
+
+export interface SkillChallenge {
+  id: string;
+  name: string;
+  description: string;
+  skillRequired: string;
+  tier: "novice" | "adept" | "master";
+  reward: string;
+  completedBy: string[];
+}
+
+export interface SkillTrade {
+  id: string;
+  fromAgent: string;
+  toAgent?: string;
+  offerSkillId: string;
+  requestSkillId: string;
+  status: "open" | "accepted" | "declined";
+  createdAt: number;
+}
+
 // ── Proximity constants ────────────────────────────────────────
 
 /** Distance within which labels/bubbles are visible */

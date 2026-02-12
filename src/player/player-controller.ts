@@ -11,6 +11,7 @@ const OBSTACLES = [
   { x: -20, z: -20, radius: 4 + 1.0 }, // Moltbook
   { x: 22, z: -22, radius: 6 + 1.0 },  // Clawhub
   { x: 0, z: -35, radius: 5 + 1.0 },   // Worlds Portal
+  { x: 30, z: 30, radius: 5 + 1.0 },   // Skill Tower
 ];
 
 export class PlayerController {

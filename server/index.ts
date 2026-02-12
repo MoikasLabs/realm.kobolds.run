@@ -10,6 +10,7 @@ import { WorldState } from "./world-state.js";
 import { NostrWorld } from "./nostr-world.js";
 import { WSBridge } from "./ws-bridge.js";
 import { ClawhubStore } from "./clawhub-store.js";
+import { SkillTowerStore } from "./skill-tower-store.js";
 import { SpatialGrid } from "./spatial-index.js";
 import { CommandQueue } from "./command-queue.js";
 import { ClientManager } from "./client-manager.js";
@@ -33,6 +34,7 @@ const registry = new AgentRegistry();
 const state = new WorldState(registry);
 const nostr = new NostrWorld(RELAYS, config.roomId, config.roomName);
 const clawhub = new ClawhubStore();
+const skillTower = new SkillTowerStore();
 
 // ── Game engine services ────────────────────────────────────────
 
@@ -44,6 +46,7 @@ commandQueue.setObstacles([
   { x: -20, z: -20, radius: 4 }, // Moltbook
   { x: 22, z: -22, radius: 6 }, // Clawhub
   { x: 0, z: -35, radius: 5 }, // Worlds Portal
+  { x: 30, z: 30, radius: 5 }, // Skill Tower
 ]);
 
 const gameLoop = new GameLoop(
@@ -278,6 +281,23 @@ const server = createServer(
 
     if (url === "/api/clawhub/installed" && method === "GET") {
       return json(res, 200, { ok: true, installed: clawhub.getInstalled() });
+    }
+
+    // ── REST API: Skill Tower ─────────────────────────────────
+    if (url === "/api/skill-tower/skills" && method === "GET") {
+      return json(res, 200, { ok: true, skills: skillTower.listSkills() });
+    }
+
+    if (url === "/api/skill-tower/challenges" && method === "GET") {
+      return json(res, 200, { ok: true, challenges: skillTower.listChallenges() });
+    }
+
+    if (url === "/api/skill-tower/trades" && method === "GET") {
+      return json(res, 200, { ok: true, trades: skillTower.listTrades() });
+    }
+
+    if (url === "/api/skill-tower/recipes" && method === "GET") {
+      return json(res, 200, { ok: true, recipes: skillTower.getRecipes() });
     }
 
     // ── IPC JSON API (agent commands — go through command queue) ─
@@ -589,6 +609,50 @@ async function handleCommand(
         }
       }
       return { ok: true, directory };
+    }
+
+    // ── Skill Tower IPC commands ───────────────────────────
+    case "skill-tower-skills":
+      return { ok: true, skills: skillTower.listSkills((args as { tag?: string })?.tag) };
+
+    case "skill-tower-publish": {
+      const a = args as { agentId?: string; name?: string; description?: string; tags?: string[] };
+      if (!a?.agentId || !a?.name) throw new Error("agentId and name required");
+      const skill = skillTower.publishSkill(a.agentId, {
+        name: a.name,
+        description: a.description ?? "",
+        tags: a.tags,
+      });
+      return { ok: true, skill };
+    }
+
+    case "skill-tower-craft": {
+      const a = args as { agentId?: string; ingredientIds?: string[] };
+      if (!a?.agentId || !a?.ingredientIds) throw new Error("agentId and ingredientIds required");
+      return skillTower.craftSkill(a.agentId, a.ingredientIds);
+    }
+
+    case "skill-tower-challenges":
+      return { ok: true, challenges: skillTower.listChallenges((args as { tier?: string })?.tier) };
+
+    case "skill-tower-complete": {
+      const a = args as { agentId?: string; challengeId?: string };
+      if (!a?.agentId || !a?.challengeId) throw new Error("agentId and challengeId required");
+      return skillTower.completeChallenge(a.agentId, a.challengeId);
+    }
+
+    case "skill-tower-trades": {
+      const a = args as { action?: string; agentId?: string; offerSkillId?: string; requestSkillId?: string; tradeId?: string };
+      switch (a?.action) {
+        case "create":
+          if (!a.agentId || !a.offerSkillId || !a.requestSkillId) throw new Error("agentId, offerSkillId, requestSkillId required");
+          return { ok: true, trade: skillTower.createTrade(a.agentId, a.offerSkillId, a.requestSkillId) };
+        case "accept":
+          if (!a.agentId || !a.tradeId) throw new Error("agentId and tradeId required");
+          return skillTower.acceptTrade(a.agentId, a.tradeId);
+        default:
+          return { ok: true, trades: skillTower.listTrades(a?.agentId) };
+      }
     }
 
     case "describe": {
