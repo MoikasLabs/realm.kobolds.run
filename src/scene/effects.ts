@@ -60,7 +60,7 @@ export class EffectsManager {
     this.camera = camera;
   }
 
-  /** Create or update a name label above a lobster */
+  /** Create or update a name label above a kobold */
   updateLabel(agentId: string, name: string, color: string): void {
     let entry = this.labels.get(agentId);
 
@@ -73,7 +73,7 @@ export class EffectsManager {
     }
 
     const el = document.createElement("div");
-    el.className = "lobster-label";
+    el.className = "kobold-label";
     el.textContent = name;
     el.style.borderColor = color;
     el.style.color = color;
@@ -97,7 +97,7 @@ export class EffectsManager {
     }
   }
 
-  /** Show a chat bubble above a lobster (auto-expires after 6s) */
+  /** Show a chat bubble above a kobold (auto-expires after 6s) */
   showBubble(agentId: string, text: string): void {
     this.removeBubble(agentId);
 
@@ -128,7 +128,7 @@ export class EffectsManager {
     }
   }
 
-  /** Show an emote icon above a lobster (auto-expires after 3s) */
+  /** Show an emote icon above a kobold (auto-expires after 3s) */
   showEmote(agentId: string, emote: string): void {
     const existing = this.emotes.get(agentId);
     if (existing) {
@@ -200,10 +200,10 @@ export class EffectsManager {
     }
   }
 
-  /** Attach a CSS2DObject to a lobster group in the scene */
+  /** Attach a CSS2DObject to a kobold group in the scene */
   private attachToAgent(agentId: string, obj: CSS2DObject): void {
     this.scene.traverse((child) => {
-      if (child.userData.agentId === agentId && child.name === "lobster") {
+      if (child.userData.agentId === agentId && child.name === "kobold") {
         child.add(obj);
       }
     });
