@@ -11,6 +11,7 @@ interface BuildingPanelAPI {
   showSkillTower(): void;
   showMoltx(): void;
   showMoltlaunch(): void;
+  showKobldsVault(): void;
   hide(): void;
   isVisible(): boolean;
 }
@@ -1689,6 +1690,255 @@ export function setupBuildingPanel(serverUrl?: string | null): BuildingPanelAPI 
     container.appendChild(info);
   }
 
+  // ── $KOBLDS Vault (underground vault — swap, price, balance) ──
+
+  function showKobldsVault(): void {
+    panel.textContent = "";
+    panel.className = "building-panel kv-panel";
+
+    // Header
+    const header = document.createElement("div");
+    header.className = "bp-header";
+
+    const title = document.createElement("h2");
+    title.textContent = "$KOBLDS Vault";
+    header.appendChild(title);
+
+    const subtitle = document.createElement("p");
+    subtitle.className = "bp-subtitle";
+    subtitle.textContent = "Underground vault \u2014 swap, check prices, and manage $KOBLDS on Base";
+    header.appendChild(subtitle);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "bp-close";
+    closeBtn.textContent = "\u00d7";
+    closeBtn.addEventListener("click", hide);
+    header.appendChild(closeBtn);
+
+    panel.appendChild(header);
+
+    // Tabs
+    const tabs = document.createElement("div");
+    tabs.className = "kv-tabs";
+    const tabNames = ["Exchange", "Info", "IPC Reference"];
+    const tabBtns: HTMLButtonElement[] = [];
+
+    const content = document.createElement("div");
+    content.className = "kv-content";
+
+    for (const name of tabNames) {
+      const btn = document.createElement("button");
+      btn.className = "kv-tab" + (name === "Exchange" ? " active" : "");
+      btn.textContent = name;
+      btn.addEventListener("click", () => {
+        tabBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        switch (name) {
+          case "Exchange": renderKobldsExchange(content); break;
+          case "Info": renderKobldsInfo(content); break;
+          case "IPC Reference": renderKobldsIPC(content); break;
+        }
+      });
+      tabBtns.push(btn);
+      tabs.appendChild(btn);
+    }
+
+    panel.appendChild(tabs);
+    panel.appendChild(content);
+
+    renderKobldsExchange(content);
+    show();
+  }
+
+  function renderKobldsExchange(container: HTMLElement): void {
+    container.textContent = "";
+
+    // Price banner
+    const priceBanner = document.createElement("div");
+    priceBanner.className = "kv-price-banner";
+    priceBanner.textContent = "Loading price...";
+    container.appendChild(priceBanner);
+
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/api/koblds-vault/price`);
+        const data = (await res.json()) as { ok: boolean; price?: { priceUsd: string; priceEth: string; volume24h: string; liquidity: string; change24h: string }; error?: string };
+        if (!data.ok || !data.price) {
+          priceBanner.textContent = data.error ?? "Could not fetch price";
+          return;
+        }
+        const p = data.price;
+        const change = Number(p.change24h);
+        const changeClass = change >= 0 ? "kv-change-up" : "kv-change-down";
+        const changeSign = change >= 0 ? "+" : "";
+        priceBanner.innerHTML = `
+          <div class="kv-price-main">$${Number(p.priceUsd).toFixed(6)}</div>
+          <span class="${changeClass}">${changeSign}${change.toFixed(2)}%</span>
+          <div class="kv-price-sub">Vol: $${Number(p.volume24h).toLocaleString()} &middot; Liq: $${Number(p.liquidity).toLocaleString()}</div>
+        `;
+      } catch {
+        priceBanner.textContent = "Could not fetch price data";
+      }
+    })();
+
+    // Swap form
+    const form = document.createElement("div");
+    form.className = "kv-swap-form";
+
+    const formLabel = document.createElement("div");
+    formLabel.className = "kv-form-label";
+    formLabel.textContent = "Swap";
+    form.appendChild(formLabel);
+
+    const formRow = document.createElement("div");
+    formRow.className = "kv-form-row";
+
+    // "From" token selector
+    const fromSelect = document.createElement("select");
+    fromSelect.className = "kv-token-select";
+    for (const t of ["WETH", "USDC", "$KOBLDS"]) {
+      const opt = document.createElement("option");
+      opt.value = t === "$KOBLDS" ? "KOBLDS" : t;
+      opt.textContent = t;
+      fromSelect.appendChild(opt);
+    }
+    formRow.appendChild(fromSelect);
+
+    const amountInput = document.createElement("input");
+    amountInput.type = "text";
+    amountInput.placeholder = "Amount";
+    amountInput.className = "kv-amount-input";
+    formRow.appendChild(amountInput);
+
+    const arrowSpan = document.createElement("span");
+    arrowSpan.className = "kv-swap-arrow";
+    arrowSpan.textContent = "\u2192";
+    formRow.appendChild(arrowSpan);
+
+    // "To" token selector
+    const toSelect = document.createElement("select");
+    toSelect.className = "kv-token-select";
+    for (const t of ["$KOBLDS", "WETH", "USDC"]) {
+      const opt = document.createElement("option");
+      opt.value = t === "$KOBLDS" ? "KOBLDS" : t;
+      opt.textContent = t;
+      toSelect.appendChild(opt);
+    }
+    formRow.appendChild(toSelect);
+
+    formRow.appendChild(document.createTextNode(" "));
+
+    const quoteBtn = document.createElement("button");
+    quoteBtn.className = "kv-quote-btn";
+    quoteBtn.textContent = "Get Quote";
+    formRow.appendChild(quoteBtn);
+
+    form.appendChild(formRow);
+
+    // Keep selectors in sync — one side must always be KOBLDS
+    function syncSelectors(changed: "from" | "to"): void {
+      if (changed === "from") {
+        if (fromSelect.value === "KOBLDS") {
+          // Selling KOBLDS — output must be WETH/USDC
+          if (toSelect.value === "KOBLDS") toSelect.value = "WETH";
+        } else {
+          // Buying with WETH/USDC — output is KOBLDS
+          toSelect.value = "KOBLDS";
+        }
+      } else {
+        if (toSelect.value === "KOBLDS") {
+          // Buying KOBLDS — input must be WETH/USDC
+          if (fromSelect.value === "KOBLDS") fromSelect.value = "WETH";
+        } else {
+          // Selling to get WETH/USDC — input is KOBLDS
+          fromSelect.value = "KOBLDS";
+        }
+      }
+    }
+    fromSelect.addEventListener("change", () => syncSelectors("from"));
+    toSelect.addEventListener("change", () => syncSelectors("to"));
+
+    // Output display
+    const output = document.createElement("div");
+    output.className = "kv-quote-output";
+    form.appendChild(output);
+
+    quoteBtn.addEventListener("click", async () => {
+      const inputToken = fromSelect.value;
+      const outputToken = toSelect.value;
+      const amount = amountInput.value.trim();
+      if (!amount) { output.textContent = "Enter an amount"; return; }
+      if (inputToken === outputToken) { output.textContent = "Input and output must differ"; return; }
+      output.textContent = "Fetching quote...";
+      try {
+        const params = new URLSearchParams({ inputToken, inputAmount: amount });
+        if (inputToken === "KOBLDS") params.set("outputToken", outputToken);
+        const res = await fetch(`${apiBase}/api/koblds-vault/quote?${params}`);
+        const data = (await res.json()) as { ok: boolean; quote?: { inputToken: string; outputToken: string; inputAmount: string; estimatedOutput: string; swapUrl: string }; error?: string };
+        if (!data.ok || !data.quote) {
+          output.textContent = data.error ?? "Quote failed";
+          return;
+        }
+        const q = data.quote;
+        output.innerHTML = `
+          <div class="kv-estimate">${q.inputAmount} ${q.inputToken} &rarr; ~${q.estimatedOutput} ${q.outputToken}</div>
+          <a href="${q.swapUrl}" target="_blank" rel="noopener" class="kv-swap-link">Swap on Uniswap</a>
+        `;
+      } catch {
+        output.textContent = "Could not fetch quote";
+      }
+    });
+
+    container.appendChild(form);
+  }
+
+  function renderKobldsInfo(container: HTMLElement): void {
+    container.textContent = "";
+
+    const info = document.createElement("div");
+    info.className = "kv-info-section";
+    info.innerHTML = `
+      <div class="kv-info-row"><span class="kv-info-label">Network</span><span class="kv-info-value">Base (Chain ID 8453)</span></div>
+      <div class="kv-info-row"><span class="kv-info-label">Symbol</span><span class="kv-info-value">$KOBLDS</span></div>
+      <div class="kv-info-row"><span class="kv-info-label">Decimals</span><span class="kv-info-value">18</span></div>
+      <div class="kv-info-row"><span class="kv-info-label">Contract</span><span class="kv-info-value kv-mono">0x8a6d3bb6091ea0dd8b1b87c915041708d11f9d3a</span></div>
+      <div class="kv-info-row"><span class="kv-info-label">Fee Wallet</span><span class="kv-info-value kv-mono">0xc406fFf2Ce8b5dce517d03cd3531960eb2F6110d</span></div>
+      <div class="kv-info-links">
+        <a href="https://basescan.org/token/0x8a6d3bb6091ea0dd8b1b87c915041708d11f9d3a" target="_blank" rel="noopener" class="kv-link">BaseScan</a>
+        <a href="https://dexscreener.com/base/0x8a6d3bb6091ea0dd8b1b87c915041708d11f9d3a" target="_blank" rel="noopener" class="kv-link">DexScreener</a>
+        <a href="https://app.uniswap.org/swap?outputCurrency=0x8a6d3bb6091ea0dd8b1b87c915041708d11f9d3a&chain=base" target="_blank" rel="noopener" class="kv-link">Uniswap</a>
+      </div>
+    `;
+    container.appendChild(info);
+  }
+
+  function renderKobldsIPC(container: HTMLElement): void {
+    container.textContent = "";
+
+    const info = document.createElement("div");
+    info.className = "kv-ipc-section";
+    info.innerHTML = `
+      <div class="kv-ipc-header">IPC Commands Reference</div>
+      <div class="kv-ipc-list">
+        <div class="kv-ipc-cmd"><code>koblds-price</code> &mdash; Get current $KOBLDS price, volume, and liquidity</div>
+        <div class="kv-ipc-cmd"><code>koblds-quote</code> &mdash; Get a swap quote (inputToken, inputAmount, outputToken?)</div>
+        <div class="kv-ipc-cmd"><code>koblds-swap</code> &mdash; Get swap quote + Uniswap URL</div>
+        <div class="kv-ipc-cmd"><code>koblds-balance</code> &mdash; Check $KOBLDS balance for a wallet</div>
+        <div class="kv-ipc-cmd"><code>koblds-token-info</code> &mdash; Get token metadata and links</div>
+      </div>
+      <div class="kv-ipc-example">
+        <div class="kv-ipc-example-label">Example: Buy $KOBLDS with USDC</div>
+        <pre class="kv-ipc-code">{"command": "koblds-quote", "args": {"inputToken": "USDC", "inputAmount": "10"}}</pre>
+      </div>
+      <div class="kv-ipc-example">
+        <div class="kv-ipc-example-label">Example: Sell $KOBLDS for WETH</div>
+        <pre class="kv-ipc-code">{"command": "koblds-quote", "args": {"inputToken": "KOBLDS", "inputAmount": "100", "outputToken": "WETH"}}</pre>
+      </div>
+      <p class="kv-ipc-hint">Swaps are bidirectional: buy $KOBLDS with WETH/USDC, or sell $KOBLDS for WETH/USDC. All swaps execute via Uniswap on Base.</p>
+    `;
+    container.appendChild(info);
+  }
+
   return {
     showMoltbook,
     showClawhub,
@@ -1696,6 +1946,7 @@ export function setupBuildingPanel(serverUrl?: string | null): BuildingPanelAPI 
     showSkillTower,
     showMoltx,
     showMoltlaunch,
+    showKobldsVault,
     hide,
     isVisible: () => visible,
   };

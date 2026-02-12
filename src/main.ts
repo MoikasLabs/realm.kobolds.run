@@ -269,6 +269,10 @@ renderer.domElement.addEventListener("click", (event: MouseEvent) => {
         buildingPanel.showMoltlaunch();
         return;
       }
+      if (obj.userData.buildingId === "koblds-vault") {
+        buildingPanel.showKobldsVault();
+        return;
+      }
       obj = obj.parent;
     }
   }

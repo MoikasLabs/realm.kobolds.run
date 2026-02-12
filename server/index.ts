@@ -11,6 +11,7 @@ import { NostrWorld } from "./nostr-world.js";
 import { WSBridge } from "./ws-bridge.js";
 import { ClawhubStore } from "./clawhub-store.js";
 import { SkillTowerStore } from "./skill-tower-store.js";
+import { KobldsVaultStore } from "./koblds-vault-store.js";
 import { A2AStore } from "./a2a-store.js";
 import { SpatialGrid } from "./spatial-index.js";
 import { CommandQueue } from "./command-queue.js";
@@ -39,6 +40,7 @@ const nostr = new NostrWorld(RELAYS, config.roomId, config.roomName);
 const clawhub = new ClawhubStore();
 const skillTower = new SkillTowerStore();
 const a2aStore = new A2AStore();
+const kobldsVault = new KobldsVaultStore();
 
 // ── Game engine services ────────────────────────────────────────
 
@@ -53,6 +55,7 @@ commandQueue.setObstacles([
   { x: 30, z: 30, radius: 5 }, // Skill Tower
   { x: -25, z: 25, radius: 5 }, // Moltx
   { x: 0, z: 30, radius: 5 },  // Moltlaunch
+  { x: 35, z: 0, radius: 5 },  // $KOBLDS Vault
 ]);
 
 const gameLoop = new GameLoop(
@@ -289,6 +292,32 @@ const server = createServer(
       } catch (err) {
         return json(res, 502, { ok: false, error: `Could not reach moltlaunch.com: ${String(err)}` });
       }
+    }
+
+    // ── REST API: $KOBLDS Vault ──────────────────────────────────
+    if (url === "/api/koblds-vault/price" && method === "GET") {
+      const result = await kobldsVault.getPrice();
+      return json(res, result.ok ? 200 : 502, result);
+    }
+
+    if (url.startsWith("/api/koblds-vault/quote") && method === "GET") {
+      const reqUrl = new URL(req.url ?? "/", "http://localhost");
+      const inputToken = reqUrl.searchParams.get("inputToken") ?? "";
+      const inputAmount = reqUrl.searchParams.get("inputAmount") ?? "";
+      const outputToken = reqUrl.searchParams.get("outputToken") ?? undefined;
+      const result = await kobldsVault.getQuote(inputToken, inputAmount, outputToken);
+      return json(res, result.ok ? 200 : 400, result);
+    }
+
+    if (url === "/api/koblds-vault/token-info" && method === "GET") {
+      return json(res, 200, kobldsVault.getTokenInfo());
+    }
+
+    if (url.startsWith("/api/koblds-vault/balance") && method === "GET") {
+      const reqUrl = new URL(req.url ?? "/", "http://localhost");
+      const wallet = reqUrl.searchParams.get("wallet") ?? "";
+      const result = await kobldsVault.getBalance(wallet);
+      return json(res, result.ok ? 200 : 400, result);
     }
 
     // ── REST API: A2A messaging ──────────────────────────────────
@@ -1027,6 +1056,31 @@ async function handleCommand(
         return { ok: true, data: await r.json() };
       } catch (err) { return { ok: false, error: String(err) }; }
     }
+
+    // ── $KOBLDS Vault IPC commands ─────────────────────────────
+    case "koblds-price":
+      return kobldsVault.getPrice();
+
+    case "koblds-quote": {
+      const a = args as { inputToken?: string; inputAmount?: string; outputToken?: string };
+      if (!a?.inputToken || !a?.inputAmount) throw new Error("inputToken and inputAmount required");
+      return kobldsVault.getQuote(a.inputToken, a.inputAmount, a.outputToken);
+    }
+
+    case "koblds-swap": {
+      const a = args as { inputToken?: string; inputAmount?: string; outputToken?: string };
+      if (!a?.inputToken || !a?.inputAmount) throw new Error("inputToken and inputAmount required");
+      return kobldsVault.getQuote(a.inputToken, a.inputAmount, a.outputToken);
+    }
+
+    case "koblds-balance": {
+      const a = args as { wallet?: string };
+      if (!a?.wallet) throw new Error("wallet address required");
+      return kobldsVault.getBalance(a.wallet);
+    }
+
+    case "koblds-token-info":
+      return kobldsVault.getTokenInfo();
 
     // ── A2A IPC commands ─────────────────────────────────────
     case "agent-message": {

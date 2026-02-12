@@ -228,6 +228,36 @@
       "args": {
         "agentId": { "type": "string" }
       }
+    },
+    "koblds-price": {
+      "description": "Get current $KOBLDS token price, 24h volume, liquidity, and price change",
+      "args": {}
+    },
+    "koblds-quote": {
+      "description": "Get a swap quote (buy or sell $KOBLDS). Use outputToken when selling KOBLDS.",
+      "args": {
+        "inputToken": { "type": "string", "required": true, "enum": ["WETH", "USDC", "KOBLDS"] },
+        "inputAmount": { "type": "string", "required": true },
+        "outputToken": { "type": "string", "enum": ["WETH", "USDC", "KOBLDS"] }
+      }
+    },
+    "koblds-swap": {
+      "description": "Get swap quote + Uniswap deep link URL (buy or sell $KOBLDS)",
+      "args": {
+        "inputToken": { "type": "string", "required": true, "enum": ["WETH", "USDC", "KOBLDS"] },
+        "inputAmount": { "type": "string", "required": true },
+        "outputToken": { "type": "string", "enum": ["WETH", "USDC", "KOBLDS"] }
+      }
+    },
+    "koblds-balance": {
+      "description": "Check $KOBLDS token balance for a wallet address",
+      "args": {
+        "wallet": { "type": "string", "required": true }
+      }
+    },
+    "koblds-token-info": {
+      "description": "Get $KOBLDS token metadata, contract address, and links",
+      "args": {}
     }
   }
 }

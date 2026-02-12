@@ -98,6 +98,19 @@ export function createBuildings(scene: THREE.Scene): {
   });
   obstacles.push({ x: 0, z: 30, radius: 5 });
 
+  // ── $KOBLDS Vault ────────────────────────────────────────
+  const kobldsVault = createKobldsVault();
+  kobldsVault.position.set(35, 0, 0);
+  scene.add(kobldsVault);
+  buildings.push({
+    id: "koblds-vault",
+    name: "$KOBLDS Vault",
+    position: new THREE.Vector3(35, 0, 0),
+    obstacleRadius: 5,
+    mesh: kobldsVault,
+  });
+  obstacles.push({ x: 35, z: 0, radius: 5 });
+
   // Add floating labels above each building
   const labelHeights: Record<string, number> = {
     moltbook: 6,
@@ -105,6 +118,7 @@ export function createBuildings(scene: THREE.Scene): {
     "worlds-portal": 9,
     moltx: 12,
     moltlaunch: 10,
+    "koblds-vault": 5,
   };
   for (const b of buildings) {
     const el = document.createElement("div");
@@ -724,6 +738,150 @@ function createMoltlaunchHouse(): THREE.Group {
   // Mark all meshes as interactable
   group.traverse((child) => {
     child.userData.buildingId = "moltlaunch";
+  });
+
+  return group;
+}
+
+function createKobldsVault(): THREE.Group {
+  const group = new THREE.Group();
+  group.name = "building_koblds_vault";
+  group.userData.buildingId = "koblds-vault";
+
+  const stoneMat = new THREE.MeshStandardMaterial({ color: 0x3e3e3e, roughness: 0.8 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.4 });
+  const darkGoldMat = new THREE.MeshStandardMaterial({ color: 0xb8860b, roughness: 0.5 });
+  const glowGoldMat = new THREE.MeshStandardMaterial({
+    color: 0xffd700,
+    emissive: 0xdaa520,
+    emissiveIntensity: 0.6,
+  });
+
+  // Stone platform base (octagonal)
+  const platform = new THREE.Mesh(
+    new THREE.CylinderGeometry(4.5, 5, 0.4, 8),
+    stoneMat
+  );
+  platform.position.set(0, 0.2, 0);
+  platform.receiveShadow = true;
+  group.add(platform);
+
+  // Sunken vault walls (half underground)
+  const vaultWalls = new THREE.Mesh(
+    new THREE.BoxGeometry(7, 2, 7),
+    goldMat
+  );
+  vaultWalls.position.set(0, -0.5, 0);
+  vaultWalls.castShadow = true;
+  vaultWalls.receiveShadow = true;
+  group.add(vaultWalls);
+
+  // Staircase — 5 descending steps
+  for (let i = 0; i < 5; i++) {
+    const step = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 0.25, 0.8),
+      darkGoldMat
+    );
+    step.position.set(0, -i * 0.3, 3.5 + i * 0.6);
+    step.castShadow = true;
+    group.add(step);
+  }
+
+  // Vault door frame (archway)
+  const doorFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(2.5, 3, 0.3),
+    darkGoldMat
+  );
+  doorFrame.position.set(0, 1, 3.5);
+  doorFrame.castShadow = true;
+  group.add(doorFrame);
+
+  // Vault door
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 2.5, 0.15),
+    goldMat
+  );
+  door.position.set(0, 0.8, 3.55);
+  group.add(door);
+
+  // Door handle (circular torus)
+  const handle = new THREE.Mesh(
+    new THREE.TorusGeometry(0.25, 0.05, 8, 16),
+    darkGoldMat
+  );
+  handle.position.set(0.5, 0.8, 3.65);
+  group.add(handle);
+
+  // Corner pillars (4x) with glowing caps
+  const pillarPositions = [
+    [-3, -3], [3, -3], [-3, 3], [3, 3],
+  ];
+  for (const [px, pz] of pillarPositions) {
+    const pillar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.35, 3, 8),
+      darkGoldMat
+    );
+    pillar.position.set(px, 1.5, pz);
+    pillar.castShadow = true;
+    group.add(pillar);
+
+    // Glowing cap
+    const cap = new THREE.Mesh(
+      new THREE.SphereGeometry(0.3, 12, 8),
+      glowGoldMat
+    );
+    cap.position.set(px, 3.1, pz);
+    group.add(cap);
+  }
+
+  // $KOBLDS coin symbols (2x) flanking entrance
+  for (const side of [-1, 1]) {
+    const coin = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.6, 0.6, 0.1, 16),
+      glowGoldMat
+    );
+    coin.position.set(side * 1.8, 2.2, 3.5);
+    coin.rotation.x = Math.PI / 2;
+    group.add(coin);
+  }
+
+  // Low perimeter wall around the sunken area
+  const wallSegments = [
+    { pos: [0, 0.3, -3.6] as const, size: [7.2, 0.6, 0.2] as const },
+    { pos: [0, 0.3, 3.0] as const, size: [7.2, 0.6, 0.2] as const },
+    { pos: [-3.6, 0.3, 0] as const, size: [0.2, 0.6, 7.2] as const },
+    { pos: [3.6, 0.3, 0] as const, size: [0.2, 0.6, 7.2] as const },
+  ];
+  for (const seg of wallSegments) {
+    const wall = new THREE.Mesh(
+      new THREE.BoxGeometry(seg.size[0], seg.size[1], seg.size[2]),
+      stoneMat
+    );
+    wall.position.set(seg.pos[0], seg.pos[1], seg.pos[2]);
+    group.add(wall);
+  }
+
+  // "Vault" sign above door
+  const sign = new THREE.Mesh(
+    new THREE.BoxGeometry(2.2, 0.5, 0.08),
+    glowGoldMat
+  );
+  sign.position.set(0, 2.8, 3.55);
+  group.add(sign);
+
+  // Decorative gold bars visible through grate (3x small boxes)
+  for (let i = 0; i < 3; i++) {
+    const bar = new THREE.Mesh(
+      new THREE.BoxGeometry(0.15, 0.6, 0.15),
+      goldMat
+    );
+    bar.position.set(-0.5 + i * 0.5, 0.1, -2.5);
+    group.add(bar);
+  }
+
+  // Mark all meshes as interactable
+  group.traverse((child) => {
+    child.userData.buildingId = "koblds-vault";
   });
 
   return group;
