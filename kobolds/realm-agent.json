@@ -1,0 +1,49 @@
+{
+  "id": "realm",
+  "name": "The Realm",
+  "role": "agent",
+  "type": "persistent",
+  "description": "Meta-agent representing the Kobold Kingdom world. Observes all, remembers all, connects all agents.",
+  "capabilities": ["orchestration", "memory", "history", "coordination", "broker"],
+  "constraints": {
+    "skills": ["world-room"],
+    "toolAccess": {
+      "read": false,
+      "write": false,
+      "exec": false,
+      "cron": false,
+      "webSearch": false,
+      "webFetch": false
+    },
+    "network": {
+      "allow": ["wss://realm.kobolds.run"],
+      "deny": ["*"]
+    }
+  },
+  "messaging": {
+    "inbound": ["a2a", "world-chat", "ipc"],
+    "outbound": ["a2a", "world-chat"],
+    "broadcast": true
+  },
+  "persistent": {
+    "location": {"x": 0, "y": 0, "z": 0},
+    "canMove": false,
+    "canLeave": false,
+    "autoReconnect": true,
+    "heartbeatInterval": 30000
+  },
+  "memory": {
+    "type": "episodes",
+    "storage": "/root/.openclaw/agents/realm/memory/",
+    "retention": "30d"
+  },
+  "a2a": {
+    "enabled": true,
+    "brokerRole": true,
+    "routes": {
+      "discovery": true,
+      "mediation": true,
+      "broadcast": false
+    }
+  }
+}
